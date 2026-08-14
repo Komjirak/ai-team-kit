@@ -24,7 +24,10 @@ ai-team-kit/
 │       └── DEBUGGING_PRINCIPLES.md← 사고에서 뽑은 디버깅 원칙
 └── .claude/
     ├── agents/                ← 역할별 서브에이전트 정의 + 하네스
-    │   ├── pd.md              ← Product Designer (PRD·UX·디자인 시스템·라이팅)
+    │   ├── bd.md              ← Business Development (시장·사업성·BM·착수 판정)
+    │   ├── pm.md              ← Product Management (PRD·범위·일정·품질 기준)
+    │   ├── brand.md           ← Brand Design (브랜드 아이덴티티·컨셉 디자인)
+    │   ├── pd.md              ← Product Design (화면·UX·디자인 시스템·라이팅)
     │   ├── app-dev.md         ← App Developer (RN/Expo — iOS/AOS/Web/Extension)
     │   ├── be-dev.md          ← Backend Developer (서버·데이터·결제·admin)
     │   ├── qa.md              ← QA (검증·회귀·커밋 게이트)
@@ -40,8 +43,9 @@ ai-team-kit/
 
 1. **이 킷 전체를 새 저장소 루트에 복사한다.** (`.claude/`, `docs/`, 루트 md 전부)
 2. `docs/HARNESS.md`의 `<서비스명>`·플레이스홀더를 채운다 — "지금 상태"는 비어 있는 게 정상이다.
-3. 첫 세션을 열고 PO가 서비스 아이디어를 말한다 → 오케스트레이터가 `/kickoff`로 시작해
-   PD에게 PRD를 위임하는 것이 첫 사이클이다.
+3. 첫 세션을 열고 PO가 서비스 아이디어를 말한다 → 오케스트레이터가 `/kickoff`로 시작한다.
+   새 제품의 첫 사이클은 **BD(착수 판정) → PM(PRD) → BRAND(브랜드) → PD(화면·카피)** 순이다.
+   기존 제품의 기능 추가라면 BD·BRAND를 건너뛴다 — **역할이 9개라고 매번 9번 위임하지 않는다.**
 4. 검증 스크립트(`npm run verify` 상당)가 생기기 전까지는 QA 게이트가 typecheck만으로
    시작해도 된다 — 단, **게이트 없이 커밋하는 습관을 처음부터 만들지 않는다.**
 
