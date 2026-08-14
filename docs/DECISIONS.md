@@ -38,8 +38,9 @@ PO가 내린 결정을 번호·날짜와 함께 기록한다. **결정은 여기
   `.claude/agents/{bd,pm,brand}.md` 신설, `.claude/agents/pd.md` 개정,
   `.claude/commands/kickoff.md`, `README.md`, `docs/HARNESS.md`.
   신설 문서 2종 등록: `docs/ROADMAP.md`(PM), `<제품>/docs/BRAND.md`(BRAND).
-- **상태**: 반영 완료. **단, 위 파생 결정 3건은 PO 확인 대기** — 뒤집으려면
-  이 항목과 `TEAM.md` §1~3만 고치면 된다.
+- **상태**: **PO 승인 완료 (2026-08-14) — 확정.** 파생 결정 3건(PRD 소유권 ·
+  PM 위임권한 없음 · BRAND 우선)이 승인됐다. 이제 조직 경계는 확정 사실이며,
+  바꾸려면 새 결정 번호로 대체한다 (이 항목을 고쳐 덮지 않는다).
 
 ## #2 (2026-08-14) 역할 하네스 개편 — Role Definition 도입 + 협업 관행 반영
 
