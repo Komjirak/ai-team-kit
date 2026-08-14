@@ -130,7 +130,8 @@ BD·BRAND를 건너뛴다 (TEAM.md §3).
   origin/main`으로 시작한다.
 - 지형: `Komjirak/ai-team-kit`. 팀 하네스는 저장소 루트(`TEAM.md`·`docs/`·`.claude/`),
   **제품 소스는 `apps/lectio/` 아래로 분리**한다. 둘을 섞지 않는다.
-- 현재 작업 브랜치: `claude/agent-role-harness-improve-w57ipn`
+- 진행 중인 작업 브랜치: **없음** (하네스 개편 브랜치는 main에 병합됨). 새 작업은
+  위 방식대로 `main`에서 새 브랜치를 따서 시작한다 — 옛 브랜치를 이어 쓰지 않는다.
 
 ## 확정된 결정
 
