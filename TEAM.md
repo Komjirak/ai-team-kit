@@ -4,6 +4,21 @@
 역할별 세부 하네스는 `.claude/agents/*.md`에 있고, 이 문서는 팀 전체에 적용되는
 것만 담는다. 충돌하면 **PO 지시 > 이 문서 > 역할 하네스** 순으로 이긴다.
 
+## 0. 이 팀의 철학 (PO)
+
+> **"만드는 사람도 쓰는 사람도 행복한 서비스를 만들고 싶은 꼼지락쟁이.
+> 임팩트 있게 작게 만들어 점차적으로 키워나가는 것을 선호한다."** — PO
+
+이 문장이 아래 모든 규칙보다 위에 있다. 규칙이 이 문장과 어긋나 보이면 규칙이
+틀린 것이다. 실무에서는 네 가지로 번역해서 쓴다.
+
+| PO의 말 | 팀의 규약으로 번역하면 | 어디에 박혀 있나 |
+|---|---|---|
+| **쓰는 사람이 행복하다** | 사람이 실제로 겪는 것 — 빈 화면·오류·기다림까지 명세한다. 오류에 원인 코드를 붙이는 것도 결국 사용자를 위한 것이다 | 팀 규칙 6, PD·GROWTH 하네스 |
+| **만드는 사람도 행복하다** | 게이트·하네스·단일 기록자는 통제 장치가 아니라 **같은 데서 두 번 헤매지 않게 하는 장치**다. 사고를 규칙표의 한 줄로 바꾸면 그 사고는 끝난다 | 팀 규칙 1·2·3, 각 하네스의 "어기면" 열 |
+| **작게, 임팩트 있게** | 범위는 "넣을 것"이 아니라 **감당할 크기(appetite)** 로 정한다. 크기를 못 줄이면 착수하지 않고 문제를 다시 자른다 | PM 하네스 §범위와 크기, BD의 V1 판정 |
+| **점차적으로 키운다 · 꼼지락** | 한 번의 큰 결단이 아니라 작은 손질을 여러 번 쌓는다. 대신 손질은 **기록돼야** 살아남는다 — 안 적으면 다음 세션이 지운다 | HARNESS "지금 상태", 팀 규칙 3 |
+
 ## 1. 조직도
 
 ```mermaid
@@ -161,6 +176,35 @@ PO 지시
   HARNESS·DECISIONS 갱신은 오케스트레이터가 통합해서 한다 (단일 기록자 원칙).
 - 서브에이전트의 보고를 그대로 믿지 않는다 — 완료 주장은 QA 게이트로 검증한다.
 
+### 위임 패키지 5종 (프롬프트에 반드시 들어가는 것)
+
+> *맥락을 주고 통제하지 않는다 — Netflix의 "context, not control".* 지시를 잘게
+> 쪼개 감시하는 대신, **판단에 필요한 재료를 한 번에 준다.**
+
+| # | 항목 | 빠지면 생기는 일 |
+|---|---|---|
+| 1 | **하네스 경로** (`.claude/agents/<역할>.md`)와 "읽고 시작하라"는 지시 | 하네스를 안 읽은 에이전트는 팀원이 아니라 그냥 모델이다 |
+| 2 | **입력** — 읽어야 할 문서 경로 (PRD·BRAND·BUSINESS_CASE·HARNESS) | 없는 전제를 지어낸다 |
+| 3 | **산출물** — 쓸 파일 경로와 형식. "어디에 쓸지"까지 | 보고서만 내고 파일이 안 남는다 |
+| 4 | **건드리면 안 되는 것** — 다른 역할 소유 영역·동시 편집 금지 파일 | 두 에이전트가 같은 파일을 덮는다 |
+| 5 | **판정 기준** — 무엇을 충족하면 끝인가 (해당 하네스의 DoD) | "다 됐습니다"의 기준이 서로 다르다 |
+
+### 표준 보고 형식 (모든 역할 → 오케스트레이터)
+
+서브에이전트는 끝날 때 **이 5줄**로 보고한다. 형식이 고정돼야 오케스트레이터가
+읽는 시간이 짧아지고, 빠진 칸이 곧 빠진 일이 된다.
+
+```
+1. 한 일    — 무엇을 어느 파일에 (경로까지)
+2. 근거     — 무엇으로 확인했나 (명령·종료코드·로그·출처 링크). 확인 안 했으면 "미확인"
+3. PO 결정 대기 — 2~3안 + 트레이드오프. 없으면 "없음"
+4. 다음 담당 — 누구에게 무엇을 (위임은 ORCH가 한다. 너는 지목만)
+5. 리스크   — "내가 틀렸다면 여기서 틀렸을 것이다" 한 줄
+```
+
+5번은 형식이 아니라 안전장치다. **자기 보고에 의심을 한 줄도 못 붙이는 보고는
+검증되지 않은 보고다** (팀 규칙 1·10).
+
 ## 4. 팀 규칙 (전 역할 공통)
 
 채록에서 실제 사고로 배운 것들이다. 어긴 대가가 각 항목에 붙어 있다.
@@ -213,3 +257,55 @@ PO 지시
 기록의 원칙: **HARNESS는 짧게 유지한다.** 깊은 맥락은 기능별 문서·플레이북으로
 빼고, HARNESS에는 요약과 경고만 둔다. 낡을 값(최신 커밋 해시 등)은 박아두지
 않는다 — `git log`로 본다.
+
+## 7. 일하는 방식의 뿌리 — 협업으로 유명한 팀들에서 가져온 것
+
+### ⚠️ 먼저: 구조가 아니라 규약을 가져온다
+
+가장 널리 복제된 조직 모델인 **Spotify의 스쿼드·트라이브**는, 정작 Spotify 자신도
+그대로 쓰지 않는다. 전 Spotify PM은 자율 스쿼드가 만든 조율 실패와 책임 소재의
+모호함을 공개적으로 정리했고, 원문 자체가 "완료된 여정이 아니라 진행 중인 한
+장면"이라고 못 박고 있었다. **어휘를 베끼고 문화를 안 베끼면 남는 건 새 이름뿐이다.**
+
+그래서 이 킷은 **조직표를 베끼지 않는다.** 여러 팀에 **공통으로 나타나고**, 우리
+채록(실제 사고 기록)이 이미 같은 결론을 비싸게 배운 것만 가져온다. 아래 표의
+"우리 채록의 뒷받침" 열이 비어 있는 관행은 채택하지 않았다.
+
+### 가져온 공통 요소 8가지
+
+| # | 공통 요소 | 어디서 (복수 팀에서 반복 관측) | 이 팀에서의 이름 | 우리 채록의 뒷받침 |
+|---|---|---|---|---|
+| 1 | **결정마다 주인은 한 명** | Apple의 DRI · Amazon의 single-threaded owner · Netflix의 informed captain | 각 하네스의 **주 산출물(DRI)** 한 줄, 단일 기록자 원칙 | 관리자가 둘이면 같은 일이 두 번 돌거나 아무도 안 한다 (PM ↔ ORCH 경계) |
+| 2 | **결정은 회의가 아니라 문서로** | Amazon의 PR-FAQ·6-pager · Stripe의 문서 기반 의사결정 | `BUSINESS_CASE` · `PRD` · `BRAND` · `DECISIONS` | 대화로 넘긴 인수인계는 다음 세션에서 증발했다 (규칙 3) |
+| 3 | **고객에서 거꾸로 쓴다** | Amazon Working Backwards · Airbnb의 스토리보드(Snow White) | BD의 **보도자료 한 문단**, PD의 **여정 프레임** | 기능 목록으로 출발한 아이템이 "공식 앱에 이미 있음"을 늦게 만났다 |
+| 4 | **시간을 고정하고 범위를 자른다** | Basecamp Shape Up의 appetite·서킷 브레이커 · Linear의 사이클 | PM의 **감당할 크기(appetite)** 와 **뺄 것 목록** | PO 철학 §0 "작게 만들어 키운다"와 같은 말 |
+| 5 | **비평은 있고 지시는 없다** | Pixar Braintrust("노트는 제안이지 명령이 아니다") · Figma의 design/eng crit | 에스컬레이션은 **2~3안 + 트레이드오프**로 올린다. 리뷰어는 소유자의 결정을 대신하지 않는다 | 소유권이 흐려지면 산출물이 서로를 덮는다 (BRAND ↔ PD) |
+| 6 | **사고는 사람이 아니라 시스템에 묻는다** | Google SRE의 blameless postmortem | 각 하네스 규칙표의 **"어기면"** 열 — 사고를 규칙 한 줄로 강등시킨다 | 이 킷의 규칙 대부분이 실제로 그렇게 태어났다 |
+| 7 | **단계적으로 노출한다** | Google SRE의 canary·단계적 롤아웃 | RM의 테스터 트랙 → 실기기 확인 → 실사용자 OTA | 검증 없이 나간 번들이 홈 화면을 죽였다 (규칙 2) |
+| 8 | **사용자 시점으로 직접 통과해 본다** | Stripe의 friction log · Airbnb의 여정 프레임 | QA의 **마찰 기록**, PD의 상태 명세 | "typecheck 통과"는 사용자가 겪는 것을 하나도 말해주지 않는다 |
+
+### 일부러 가져오지 않은 것 (1인 PO + 에이전트 팀에는 과하다)
+
+| 관행 | 왜 안 가져왔나 |
+|---|---|
+| 스쿼드·트라이브·챕터 구조 | 조율할 팀이 여럿일 때의 장치다. 여기선 역할이 곧 하네스 파일 하나다 |
+| 6주 사이클·베팅 테이블 같은 **회의체** | 참석자가 PO 한 명이면 회의가 아니라 문서 한 줄이면 된다. 개념(appetite)만 가져왔다 |
+| 분기 OKR 운영 | 성공 기준은 PRD 안의 숫자로 충분하다. 별도 목표 체계는 문서만 하나 더 늘린다 |
+| 에러 버짓의 수치 운영(SLO %) | 트래픽이 그 정도가 아니다. **"게이트를 못 넘으면 발행하지 않는다"** 는 원리만 가져왔다 |
+| PMF 40% 설문의 정식 운영 | 사용자 표본이 쌓이기 전엔 숫자가 거짓말을 한다. GROWTH가 **질문 문장**만 빌려 쓴다 |
+
+출처: [Amazon PR/FAQ](https://workingbackwards.com/concepts/working-backwards-pr-faq-process/) ·
+[Amazon two-pizza team](https://aws.amazon.com/executive-insights/content/amazon-two-pizza-team/) ·
+[Apple DRI](https://www.forbes.com/sites/quora/2012/10/02/how-well-does-apples-directly-responsible-individual-dri-model-work-in-practice/) ·
+[Netflix Culture Memo](https://jobs.netflix.com/culture) ·
+[Shape Up — 베팅 테이블·서킷 브레이커](https://basecamp.com/shapeup/2.2-chapter-08) ·
+[Linear Method](https://linear.app/method/introduction) ·
+[Pixar Braintrust](https://www.dcrealliance.org/uploads/2/5/1/9/25193966/inside_the_pixar_braintrust__1_.pdf) ·
+[Figma design crits](https://www.figma.com/blog/design-critiques-at-figma/) ·
+[Figma eng crits](https://www.figma.com/blog/how-we-run-eng-crits-at-figma/) ·
+[Airbnb Snow White 스토리보드](https://www.sequoiacap.com/article/visualizing-customer-experience/) ·
+[Google SRE — 사후분석](https://sre.google/sre-book/postmortem-culture/) ·
+[Google SRE — 카나리 릴리즈](https://sre.google/workbook/canarying-releases/) ·
+[Stripe 엔지니어링 문화(friction log·문서)](https://newsletter.pragmaticengineer.com/p/stripe) ·
+[Superhuman PMF 엔진](https://review.firstround.com/how-superhuman-built-an-engine-to-find-product-market-fit/) ·
+[Spotify 모델 비판](https://www.jeremiahlee.com/posts/failed-squad-goals/)
