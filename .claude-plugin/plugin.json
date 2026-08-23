@@ -1,0 +1,10 @@
+{
+  "name": "komjirak",
+  "description": "프로덕트 아이디어 한 줄로 팀장(오케스트레이터)이 프로덕트 빌드팀(PO·PM·디자인·엔지니어·QA·릴리즈·그로스)을 편성해 검토 통과본까지 굴린다. /komjirak 진입 + 14개 역할을 개별 에이전트로 어디서나 호출.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Komjirak Studio"
+  },
+  "homepage": "https://github.com/Komjirak/ai-team-kit",
+  "keywords": ["product-team", "orchestrator", "agents", "komjirak"]
+}
