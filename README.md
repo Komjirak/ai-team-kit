@@ -8,6 +8,61 @@
 
 ---
 
+## 설치 · 호출 (Claude Code 전역)
+
+이 킷은 **꼼지락 스튜디오 프로덕트 빌드팀**으로 패키징돼 있어, 어느 폴더에서든
+`/komjirak` 한 번으로 팀장(오케스트레이터)을 부를 수 있습니다. 목표 한 줄만 주면
+팀장이 **기존 서비스(개선·성장)인지 신규 아이디어(0→1 착수)인지 먼저 판정**해
+팀 구성과 프로세스를 정한 뒤, 필요한 역할만 실제 서브에이전트로 이어 돌립니다.
+
+설치 방법은 두 가지입니다. 목적에 맞는 하나만 고르세요.
+
+### A. 개인 전역 설치 — 로컬 어디서나 (권장, 이 맥에서 바로)
+
+`~/.claude/`에 스킬·명령·역할 에이전트를 깝니다. 모든 로컬 폴더에서 동작합니다.
+
+```bash
+git clone https://github.com/Komjirak/ai-team-kit.git
+cd ai-team-kit
+bash scripts/sync-personal.sh      # 이미 클론돼 있으면 이 줄만
+```
+
+설치되는 것:
+- 슬래시 명령 `/komjirak`(진입) · `/komjirak-handoff`(세션 마감) · `/komjirak-release-check`(릴리즈 게이트)
+- 스킬 `komjirak` — "만들어줘 · 팀 꾸려줘" 같은 자연어에서도 자동 발동
+- 역할 에이전트 14종 — `komjirak-pm` `komjirak-pd` `komjirak-backend` 등 개별 호출
+- 교리(`TEAM.md` · 플레이북 · 템플릿)는 `~/.claude/skills/komjirak/`에 번들
+
+설치 후 **Claude Code를 재시작**하면 잡힙니다. **갱신**은 저장소를 당긴 뒤 스크립트를
+다시 돌립니다: `git pull && bash scripts/sync-personal.sh`.
+
+### B. 플러그인 마켓플레이스 — 클라우드·다른 기기·독립 CLI
+
+git 기반으로 설치·업데이트합니다. 독립 실행 `claude` 터미널이나 클라우드 세션에서:
+
+```
+/plugin marketplace add Komjirak/ai-team-kit
+/plugin install komjirak@komjirak-studio
+```
+
+**갱신**: `/plugin marketplace update komjirak-studio` → `/plugin update komjirak`.
+
+> ℹ️ `/plugin`은 대화형 `claude` CLI(터미널)에서 동작합니다. 일부 앱 환경에서는
+> `/komjirak` 타이핑이 막힐 수 있는데, 그때는 자연어로 요청하면 스킬이 자동 발동합니다.
+
+### 호출 예시
+
+```
+/komjirak 현재 앱스토어 1.0.0 서비스 중인데 이후 활성화·개선 방향을 팀으로 분석해줘
+/komjirak 이런 신규 서비스 아이디어를 사업성부터 검토해 팀으로 만들어줘
+```
+
+개별 역할만 쓰려면 서브에이전트를 직접 지목합니다 — 예: `komjirak-pm`에게 PRD,
+`komjirak-data`에게 지표 분석. 저장소 안(`.claude/`)에서 일할 때는 기존 `/kickoff`
+프로젝트 스코프 방식도 그대로 쓸 수 있습니다.
+
+---
+
 ## 이 팀의 철학
 
 > **"만드는 사람도 쓰는 사람도 행복한 서비스를 만들고 싶은 꼼지락쟁이.
@@ -175,10 +230,16 @@ PO 지시 → 📋 PM (범위·성공 기준) → 🎨 PD (화면·카피) ─�
 
 ```
 ai-team-kit/
-├── README.md                  ← 이 문서 (팀 소개 · 킷 사용법)
+├── README.md                  ← 이 문서 (팀 소개 · 킷 사용법 · 설치)
 ├── TEAM.md                    ← 조직도 · 일하는 방식 · 팀 규칙 10조 (헌법)
 ├── AGENTS.md                  ← 세션 부트스트랩 (Claude가 자동으로 읽는 지시)
 ├── CLAUDE.md                  ← AGENTS.md 참조 링크
+├── .claude-plugin/            ← 플러그인 매니페스트 (marketplace.json · plugin.json)
+├── commands/                  ← 전역 슬래시 명령 (/komjirak · handoff · release-check)
+├── agents/                    ← 전역 역할 에이전트 14종 (komjirak-*.md)
+├── templates/                 ← 새 프로젝트용 상태파일 골격 (HARNESS · DECISIONS)
+├── scripts/
+│   └── sync-personal.sh       ← 개인 전역 설치/갱신 스크립트 (방법 A)
 ├── docs/
 │   ├── HARNESS.md             ← 프로젝트 상태 하네스 (세션 간 인수인계의 축)
 │   ├── DECISIONS.md           ← PO 결정 로그
