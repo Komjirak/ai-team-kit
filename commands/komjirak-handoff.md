@@ -1,5 +1,5 @@
 ---
-description: 콤지락 팀 세션 마감 — 검증, HARNESS 갱신, 커밋까지
+description: 꼼지락 팀 세션 마감 — 검증, HARNESS 갱신, 커밋까지
 ---
 
 이 세션을 마감한다. 다음을 빠짐없이 수행하라:

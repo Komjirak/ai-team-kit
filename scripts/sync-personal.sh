@@ -48,13 +48,15 @@ for f in "$SRC/agents/"komjirak-*.md; do
   n=$((n+1))
 done
 
-# 4) 보조 명령(선택) — CLI에서 /komjirak-handoff, /komjirak-release-check ----
+# 4) 슬래시 명령 — /komjirak(진입) + /komjirak-handoff + /komjirak-release-check ---
+#    commands/ 에 두면 이 앱에서 /komjirak 을 직접 타이핑해 호출할 수 있다.
+#    (스킬 komjirak 은 "만들어줘" 등 자연어 자동 발동용으로 병행 유지)
 mkdir -p "$CLAUDE_HOME/commands"
-for c in komjirak-handoff komjirak-release-check; do
+for c in komjirak komjirak-handoff komjirak-release-check; do
   sed "s#\${CLAUDE_PLUGIN_ROOT}#$SKILL#g" "$SRC/commands/$c.md" > "$CLAUDE_HOME/commands/$c.md"
 done
 
-echo "완료: 스킬 1(komjirak) + 역할 에이전트 ${n}종 + 보조 명령 2 설치됨."
+echo "완료: 스킬 1(komjirak) + 슬래시 명령 3(/komjirak·handoff·release-check) + 역할 에이전트 ${n}종 설치됨."
 echo "남은 \${CLAUDE_PLUGIN_ROOT} 잔여 검사:"
 if grep -rl 'CLAUDE_PLUGIN_ROOT' "$SKILL" "$AGENTS/komjirak-"*.md "$CLAUDE_HOME/commands/komjirak-"*.md 2>/dev/null; then
   echo "  ⚠️ 위 파일에 토큰이 남아 있음"; else echo "  ✅ 없음"; fi

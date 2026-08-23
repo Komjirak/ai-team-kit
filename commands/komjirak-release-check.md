@@ -1,5 +1,5 @@
 ---
-description: 콤지락 릴리즈 게이트 — 배포/제출 전 점검 체크리스트 실행
+description: 꼼지락 릴리즈 게이트 — 배포/제출 전 점검 체크리스트 실행
 ---
 
 릴리즈 게이트를 실행한다. RM 하네스(`${CLAUDE_PLUGIN_ROOT}/agents/komjirak-release.md`)와
