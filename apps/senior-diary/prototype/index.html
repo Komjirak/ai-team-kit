@@ -1,0 +1,839 @@
+<title>하루 한 질문 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* ============ 토큰 (PRD §9-6 잠정 — BRAND 착수 후 교체) ============ */
+:root{
+  --paper:#FBF7EF; --ink:#2A241C; --card:#FFFFFF; --accent:#B4542C;
+  --accent-soft:#F4E3D8; --muted:#857A6A; --line:#E8DFD0;
+  --ok:#3E7A4E; --wait:#8A6D3B; --wait-bg:#F5EBD6; --ok-bg:#E4EFE6;
+  --danger:#9C3B2E; --danger-bg:#F6E2DD;
+  --demo:#5A6B8C; --demo-bg:#E8EDF6;
+  --stage:#EFE7D8; --bezel:#3A322A;
+  --serif:'Gowun Batang','AppleMyungjo',serif;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#211C16; --ink:#EFE8DC; --card:#2B251D; --accent:#E08A5C;
+    --accent-soft:#3D2C21; --muted:#A79B89; --line:#3B342A;
+    --ok:#7FB58D; --wait:#C9A86A; --wait-bg:#332C1E; --ok-bg:#243228;
+    --danger:#E09182; --danger-bg:#3B2620;
+    --demo:#9FB0D6; --demo-bg:#272E3C;
+    --stage:#171310; --bezel:#0D0B09;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#211C16; --ink:#EFE8DC; --card:#2B251D; --accent:#E08A5C;
+  --accent-soft:#3D2C21; --muted:#A79B89; --line:#3B342A;
+  --ok:#7FB58D; --wait:#C9A86A; --wait-bg:#332C1E; --ok-bg:#243228;
+  --danger:#E09182; --danger-bg:#3B2620;
+  --demo:#9FB0D6; --demo-bg:#272E3C;
+  --stage:#171310; --bezel:#0D0B09;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--stage); color:var(--ink); font-family:var(--sans);
+  display:flex; flex-direction:column; align-items:center;
+  min-height:100vh;
+}
+button{font-family:var(--sans); cursor:pointer; border:none; background:none; color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* ============ 데모 스캐폴드 ============ */
+.demobar{
+  width:100%; max-width:520px; padding:14px 16px 10px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.demobar .title{font-size:13px; color:var(--muted); letter-spacing:.04em; display:flex; justify-content:space-between; align-items:baseline}
+.demobar .title b{color:var(--ink); font-weight:700; font-size:14px}
+.tabs{display:flex; gap:6px}
+.tab{
+  flex:1; padding:10px 4px; border-radius:10px; font-size:14px; font-weight:500;
+  background:var(--card); color:var(--muted); border:1px solid var(--line);
+}
+.tab.on{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
+.tab:not(.on):hover{color:var(--ink)}
+.reset{font-size:12px; color:var(--muted); text-decoration:underline; text-underline-offset:3px}
+.demobar .note{font-size:11.5px; color:var(--muted); line-height:1.5}
+
+/* ============ 폰 프레임 ============ */
+.phone-wrap{width:100%; display:flex; justify-content:center; padding:0 0 28px; flex:1}
+.phone{
+  width:390px; max-width:100%; height:780px; max-height:calc(100vh - 130px);
+  background:var(--paper); border-radius:34px; overflow:hidden; position:relative;
+  border:10px solid var(--bezel); box-shadow:0 18px 50px rgba(0,0,0,.22);
+  display:flex; flex-direction:column;
+}
+@media (max-width:520px){
+  .phone{border-radius:0; border:none; height:auto; max-height:none; min-height:70vh; box-shadow:none}
+  .phone-wrap{padding-bottom:0}
+}
+.part{display:none; flex:1; overflow-y:auto; overflow-x:hidden; position:relative; scroll-behavior:smooth}
+.part.on{display:block}
+.screen{display:none; min-height:100%; padding:26px 22px 40px}
+.screen.on{display:block}
+
+/* ============ 공용 컴포넌트 ============ */
+.eyebrow{font-size:12.5px; letter-spacing:.14em; color:var(--accent); font-weight:700; text-transform:uppercase}
+.q-serif{font-family:var(--serif)}
+.btn{
+  display:block; width:100%; padding:16px; border-radius:14px; text-align:center;
+  font-size:17px; font-weight:700; background:var(--accent); color:#fff; min-height:52px;
+}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent; color:var(--accent); border:1.5px solid var(--accent)}
+.btn.quiet{background:var(--card); color:var(--ink); border:1px solid var(--line); font-weight:500}
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px}
+.chip-demo{
+  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  padding:9px 14px; border-radius:999px; font-size:13px; color:var(--demo);
+  background:var(--demo-bg); border:1.5px dashed var(--demo);
+}
+.chip-demo::before{content:"데모"; font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  border:1px solid currentColor; border-radius:4px; padding:1px 4px}
+.push{
+  background:var(--card); border:1px solid var(--line); border-radius:16px;
+  padding:13px 15px; box-shadow:0 8px 24px rgba(0,0,0,.14);
+  display:flex; gap:11px; align-items:flex-start; text-align:left;
+}
+.push .app-ic{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.push .t{font-size:13px; font-weight:700}
+.push .b{font-size:13px; color:var(--muted); line-height:1.5; margin-top:2px}
+.push .meta{font-size:10.5px; color:var(--muted); margin-top:4px}
+.banner{
+  border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.55; margin-top:12px;
+}
+.banner.err{background:var(--danger-bg); color:var(--danger)}
+.banner.wait{background:var(--wait-bg); color:var(--wait)}
+.banner.ok{background:var(--ok-bg); color:var(--ok)}
+.code{font-family:ui-monospace,monospace; font-size:11.5px; opacity:.75}
+.toast{
+  position:absolute; left:50%; bottom:30px; transform:translateX(-50%) translateY(8px);
+  background:var(--ink); color:var(--paper); font-size:14px; padding:11px 18px;
+  border-radius:999px; opacity:0; pointer-events:none; transition:.25s; white-space:nowrap; z-index:40;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.notif-layer{
+  position:absolute; top:12px; left:12px; right:12px; z-index:30;
+  transform:translateY(-130%); transition:transform .35s ease; cursor:pointer;
+}
+.notif-layer.show{transform:translateY(0)}
+input[type=text],input[type=tel]{
+  width:100%; padding:14px; border-radius:12px; border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink); font-size:16px; font-family:var(--sans);
+}
+input::placeholder{color:var(--muted)}
+label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); margin:14px 0 6px}
+.divider{height:1px; background:var(--line); margin:22px 0}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+
+/* ============ 랜딩 ============ */
+.landing{padding:34px 24px 48px}
+.landing h1{
+  font-family:var(--serif); font-size:34px; line-height:1.32; font-weight:700;
+  margin-top:12px; text-wrap:balance;
+}
+.landing .sub{font-size:15.5px; line-height:1.65; color:var(--muted); margin-top:14px}
+.ab{margin-top:10px; font-size:12px; color:var(--demo); text-decoration:underline; text-underline-offset:3px}
+.sampleq{
+  margin-top:26px; background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:24px 20px; position:relative;
+}
+.sampleq .tag{font-size:11.5px; letter-spacing:.1em; color:var(--muted); font-weight:700}
+.sampleq .q{font-family:var(--serif); font-size:21px; line-height:1.5; margin-top:10px}
+.steps{margin-top:30px; display:flex; flex-direction:column; gap:0}
+.step{display:flex; gap:14px; padding:13px 0}
+.step .n{
+  flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent-soft);
+  color:var(--accent); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;
+}
+.step .tx b{font-size:15.5px}
+.step .tx p{font-size:13.5px; color:var(--muted); line-height:1.55; margin-top:3px}
+.emo{
+  margin-top:26px; font-family:var(--serif); font-size:16.5px; line-height:1.85;
+  border-left:3px solid var(--accent); padding-left:16px;
+}
+.reserve{margin-top:30px}
+.reserve h2{font-size:18px}
+.reserve p.d{font-size:13.5px; color:var(--muted); margin-top:6px; line-height:1.6}
+.tail{font-size:12px; color:var(--muted); line-height:1.7; margin-top:16px}
+
+/* ============ 자녀 앱 ============ */
+.c-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px}
+.c-top .logo{font-family:var(--serif); font-weight:700; font-size:17px}
+.c-nav{
+  position:sticky; bottom:0; margin:26px -22px -40px; padding:10px 22px 18px;
+  background:var(--paper); border-top:1px solid var(--line); display:flex; gap:8px;
+}
+.c-nav button{flex:1; padding:11px; border-radius:10px; font-size:14px; color:var(--muted); min-height:44px}
+.c-nav button.on{background:var(--card); color:var(--accent); font-weight:700; border:1px solid var(--line)}
+.story-q{font-family:var(--serif); font-size:20px; line-height:1.5; margin-top:8px}
+.story-body{font-family:var(--serif); font-size:16.5px; line-height:1.9; margin-top:16px; white-space:pre-line}
+.audio{
+  margin-top:18px; display:flex; align-items:center; gap:12px; background:var(--accent-soft);
+  border-radius:14px; padding:13px 15px;
+}
+.audio .play{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;flex:none}
+.audio .bar{flex:1; height:4px; border-radius:2px; background:var(--line); position:relative; overflow:hidden}
+.audio .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);transition:width .3s linear}
+.audio .len{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.cheer{margin-top:24px}
+.cheer h3{font-size:15px}
+.heart{
+  width:64px;height:64px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);
+  font-size:26px; display:flex;align-items:center;justify-content:center; transition:.15s;
+}
+.heart.on{background:var(--danger-bg); border-color:var(--danger); transform:scale(1.06)}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+.chips button{
+  padding:9px 13px; border-radius:999px; border:1px solid var(--line); background:var(--card);
+  font-size:13.5px; color:var(--ink); min-height:38px;
+}
+.chips button.on{border-color:var(--accent); color:var(--accent); background:var(--accent-soft); font-weight:700}
+.progress-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px}
+.progress-card .big{font-family:var(--serif); font-size:26px; font-weight:700}
+.progress-card .big small{font-size:15px; color:var(--muted); font-weight:400}
+.pbar{height:8px; border-radius:4px; background:var(--line); margin-top:14px; overflow:hidden}
+.pbar i{display:block; height:100%; background:var(--accent); border-radius:4px}
+.arch-item{padding:15px 2px; border-bottom:1px solid var(--line)}
+.arch-item .d{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.arch-item .q{font-size:15px; font-weight:700; margin-top:3px}
+.arch-item .s{font-family:var(--serif); font-size:13.5px; color:var(--muted); margin-top:4px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.month-div{font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.08em; margin:20px 0 4px}
+.empty{
+  text-align:center; padding:44px 18px; color:var(--muted); font-size:14.5px; line-height:1.7;
+}
+.empty .ic{font-size:34px; margin-bottom:10px}
+.statuses{display:flex; gap:6px; margin-top:10px}
+.dot{width:26px;height:26px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;
+  background:var(--line); color:var(--muted); font-variant-numeric:tabular-nums}
+.dot.on{background:var(--ok-bg); color:var(--ok); font-weight:700}
+
+/* ============ 부모 앱 (시니어 접근성 — §9-5 수치 그대로) ============ */
+.p-screen{padding:30px 24px 44px; font-size:20px; line-height:1.6}
+.p-date{font-size:17px; color:var(--muted)}
+.p-q{
+  font-family:var(--serif); font-size:30px; line-height:1.55; font-weight:700;
+  margin-top:22px; text-wrap:balance;
+}
+.p-big-btn{
+  margin:34px auto 0; width:150px; height:150px; border-radius:50%;
+  background:var(--accent); color:#fff; display:flex; flex-direction:column; gap:6px;
+  align-items:center; justify-content:center; box-shadow:0 10px 26px rgba(180,84,44,.35);
+}
+.p-big-btn .mic{font-size:40px}
+.p-big-btn .lb{font-size:16px; font-weight:700}
+.p-btn-cap{font-size:22px; font-weight:700; text-align:center; margin-top:16px}
+.p-link{
+  display:block; text-align:center; margin-top:30px; font-size:20px; color:var(--accent);
+  text-decoration:underline; text-underline-offset:4px; padding:12px; min-height:64px;
+}
+.p-btn{
+  display:block; width:100%; min-height:72px; padding:20px; border-radius:18px;
+  font-size:22px; font-weight:700; background:var(--accent); color:#fff; text-align:center;
+}
+.p-btn.quiet{background:var(--card); color:var(--ink); border:1.5px solid var(--line)}
+.p-card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px; margin-top:20px}
+.p-cheer-banner{
+  margin-top:18px; background:var(--accent-soft); border-radius:16px; padding:16px 18px;
+  font-size:19px; font-weight:700; color:var(--accent); width:100%; text-align:left; min-height:64px;
+}
+.rec-circle{
+  width:170px; height:170px; border-radius:50%; margin:30px auto;
+  background:var(--accent-soft); display:flex; align-items:center; justify-content:center;
+  animation:breathe 2.6s ease-in-out infinite;
+}
+.rec-circle .inner{width:110px;height:110px;border-radius:50%;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:44px}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.rec-time{text-align:center; font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:6px}
+.rec-hint{text-align:center; font-size:19px; color:var(--muted); line-height:1.7; margin-top:14px}
+.p-story{font-family:var(--serif); font-size:22px; line-height:1.9; margin-top:16px; white-space:pre-line}
+.p-audio-btn{
+  display:flex; align-items:center; gap:14px; width:100%; margin-top:22px; min-height:72px;
+  background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:16px 20px;
+  font-size:20px; font-weight:700; text-align:left;
+}
+.p-audio-btn .ic{width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.p-item{padding:20px 2px; border-bottom:1px solid var(--line); width:100%; text-align:left; min-height:72px}
+.p-item .d{font-size:16px; color:var(--muted)}
+.p-item .q{font-family:var(--serif); font-size:21px; font-weight:700; margin-top:4px; line-height:1.5}
+.p-item .st{font-size:16px; margin-top:6px}
+.p-item .st.wait{color:var(--wait)}
+.p-item .st.ok{color:var(--ok)}
+.p-back{font-size:19px; color:var(--accent); font-weight:700; padding:10px 0; min-height:44px}
+</style>
+
+<div class="demobar">
+  <div class="title">
+    <span><b>하루 한 질문</b> · MVP 프로토타입 (가제 senior-diary)</span>
+    <button class="reset" onclick="location.reload()">처음부터</button>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab on" id="tab-landing" onclick="showPart('landing')">G1 랜딩</button>
+    <button class="tab" id="tab-child" onclick="showPart('child')">자녀 앱</button>
+    <button class="tab" id="tab-parent" onclick="showPart('parent')">부모 앱</button>
+  </div>
+  <div class="note">각 탭은 독립 시연이며 모든 인물·이야기는 시연용 가상 데이터입니다. 점선 버튼은 제품이 아니라 데모 진행 장치입니다. 기준 문서: PRD §9.</div>
+</div>
+
+<div class="phone-wrap">
+<div class="phone">
+
+  <!-- ================= G1 랜딩 ================= -->
+  <div class="part on" id="part-landing">
+    <div class="landing">
+      <div class="eyebrow">사전예약</div>
+      <h1 id="headline">더 늦기 전에<br>물어보세요</h1>
+      <p class="sub">부모님 휴대폰으로 매일 아침 질문 하나가 갑니다.
+      부모님은 말로 답하고, 이야기는 차곡차곡 글이 됩니다.</p>
+      <button class="ab" onclick="toggleAB()">A/B 상대안 헤드라인 보기 (데모)</button>
+
+      <div class="sampleq">
+        <div class="tag">오늘의 질문 · 예시</div>
+        <div class="q">“처음 서울에 올라오던 날,<br>기억나세요?”</div>
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="n">1</div><div class="tx">
+          <b>매일 아침, 질문 하나</b>
+          <p>부모님 휴대폰으로 그날의 질문이 도착해요.</p></div></div>
+        <div class="step"><div class="n">2</div><div class="tx">
+          <b>부모님은 말로 답해요</b>
+          <p>타자 없이, 버튼 하나 누르고 이야기하면 끝. 밤사이 글로 정리해 드려요.</p></div></div>
+        <div class="step"><div class="n">3</div><div class="tx">
+          <b>1년 뒤, 한 권의 책</b>
+          <p>365개의 이야기가 부모님의 목소리와 함께 남아요.</p></div></div>
+      </div>
+
+      <p class="emo">명절에 물어보려다 매번 놓친 이야기,
+      언젠가 여쭤봐야지 하다가 영영 못 물을 뻔한 이야기들.
+      책을 선물한 사람이, 사실은 선물을 받는 쪽입니다.</p>
+
+      <div class="reserve" id="reserve-box">
+        <h2>오픈 소식을 가장 먼저 받아보세요</h2>
+        <p class="d">지금은 사전예약만 받고 있어요.</p>
+        <label class="f" for="rsv">휴대폰 번호</label>
+        <input type="tel" id="rsv" placeholder="010-0000-0000" autocomplete="off">
+        <div id="rsv-err"></div>
+        <button class="btn" style="margin-top:14px" onclick="reserve()">사전예약 하기</button>
+        <p class="tail">가격은 정식 오픈 때 알려드려요 · 남겨주신 연락처는 오픈 안내 외에는 쓰지 않아요</p>
+      </div>
+      <div class="reserve" id="reserve-done" style="display:none">
+        <div class="banner ok">신청이 완료됐어요. 오픈 소식을 가장 먼저 보내드릴게요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 자녀 앱 ================= -->
+  <div class="part" id="part-child">
+
+    <!-- C1 시작·신청 -->
+    <div class="screen on" id="c-start">
+      <div class="c-top"><span class="logo">하루 한 질문</span><span style="font-size:12px;color:var(--muted)">베타</span></div>
+      <div class="eyebrow">시작하기</div>
+      <h2 class="q-serif" style="font-size:24px;line-height:1.45;margin-top:10px">매일 한 질문,<br>부모님의 이야기가 쌓여요</h2>
+      <p style="font-size:14px;color:var(--muted);line-height:1.65;margin-top:12px">
+        신청하면 부모님께 보낼 초대장이 만들어져요.<br>부모님은 회원가입 없이 링크 한 번으로 시작해요.</p>
+      <label class="f">누구의 이야기를 남길까요?</label>
+      <div class="chips" style="margin-top:4px">
+        <button class="on" id="rel-m" onclick="pickRel('m')">어머니</button>
+        <button id="rel-f" onclick="pickRel('f')">아버지</button>
+      </div>
+      <label class="f" for="pname">부모님 성함</label>
+      <input type="text" id="pname" value="김순자">
+      <label class="f" for="myname">내 이름</label>
+      <input type="text" id="myname" value="이지혜">
+      <button class="btn" style="margin-top:22px" onclick="go('child','c-invite')">초대장 만들기</button>
+    </div>
+
+    <!-- C2 초대 보내기·대기 -->
+    <div class="screen" id="c-invite">
+      <div class="c-top"><span class="logo">하루 한 질문</span></div>
+      <div class="eyebrow">초대 보내기</div>
+      <h2 style="font-size:20px;margin-top:10px">어머니께 초대장을 보내세요</h2>
+      <div class="card" style="margin-top:16px">
+        <div style="font-size:12px;color:var(--muted)">어머니가 받게 될 링크</div>
+        <div style="font-family:ui-monospace,monospace;font-size:13.5px;margin-top:6px;word-break:break-all">haru.app/i/sunja-0826</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6">
+          어머니 화면에는 이렇게 보여요 —<br>“따님 지혜님이 어머니의 이야기를 기다리고 있어요” + <b>시작하기</b> 버튼 하나.</div>
+      </div>
+      <button class="btn" style="margin-top:16px" onclick="sendInvite()">카카오톡으로 보내기</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="toast('링크를 복사했어요')">링크 복사</button>
+
+      <div id="invite-wait" style="display:none">
+        <div class="banner wait">📮 초대장을 보냈어요. 어머니가 링크를 여시면 바로 알려드릴게요.</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px">
+          잘 안 되시면 전화로 도와드리세요 — 링크를 누르고 <b>시작하기</b> 한 번이면 끝나요.
+          링크가 오래되면 아래에서 새로 보낼 수 있어요.</p>
+        <button class="btn quiet" style="margin-top:12px;font-size:14px" onclick="toast('새 초대장을 만들었어요')">초대장 새로 보내기</button>
+        <button class="chip-demo" onclick="momActivated()">엄마가 링크를 열었어요 →</button>
+      </div>
+      <div id="invite-done" style="display:none">
+        <div class="banner ok">🌱 어머니가 시작하셨어요! 내일 아침부터 매일 질문이 갑니다.</div>
+        <button class="chip-demo" onclick="firstStory()">엄마의 첫 답변이 도착하면 →</button>
+      </div>
+    </div>
+
+    <!-- C3 홈 -->
+    <div class="screen" id="c-home">
+      <div class="c-top"><span class="logo">하루 한 질문</span><span style="font-size:13px;color:var(--muted)">순자님의 이야기</span></div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted)">오늘의 질문 · 8월 26일</div>
+        <div class="story-q">“처음 서울에 올라오던 날, 기억나세요?”</div>
+        <div class="banner ok" id="c-home-status">어머니가 오늘 이야기를 남기셨어요</div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <b style="font-size:14.5px">이번 주</b>
+          <span style="font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums">3/7</span>
+        </div>
+        <div class="statuses">
+          <span class="dot on">월</span><span class="dot on">화</span><span class="dot">수</span>
+          <span class="dot on">목</span><span class="dot">금</span><span class="dot">토</span><span class="dot">일</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div style="font-size:12px;color:var(--muted)">최근 이야기</div>
+        <button style="text-align:left;width:100%;padding:6px 0" onclick="go('child','c-story')">
+          <div style="font-size:15px;font-weight:700;margin-top:4px">“처음 서울에 올라오던 날…” <span style="color:var(--accent)">읽기 →</span></div>
+        </button>
+      </div>
+      <div class="c-nav">
+        <button class="on">홈</button>
+        <button onclick="go('child','c-archive')">모아보기</button>
+      </div>
+    </div>
+
+    <!-- C4 이야기 읽기·응원 -->
+    <div class="screen" id="c-story">
+      <button class="p-back" style="font-size:14px" onclick="go('child', childHomeReady ? 'c-home' : 'c-invite')">← 뒤로</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">8월 26일 · 스물세 번째 이야기</div>
+      <div class="story-q">“처음 서울에 올라오던 날, 기억나세요?”</div>
+
+      <!-- 밤사이 대기 상태 (STT 배치 전제 — 원문+대기) -->
+      <div id="story-pending">
+        <div class="banner wait">🌙 어머니가 오늘 이야기를 남기셨어요.<br>밤사이 글로 정리해 아침에 보여드릴게요. 목소리는 지금 들으실 수 있어요.</div>
+        <div class="audio" role="group" aria-label="어머니 목소리 듣기">
+          <button class="play" onclick="playAudio(this)" aria-label="재생">▶</button>
+          <div class="bar"><i></i></div><span class="len">2:41</span>
+        </div>
+        <button class="chip-demo" onclick="storyMorning()">다음 날 아침이 되면 →</button>
+      </div>
+
+      <!-- 정리본 도착 상태 -->
+      <div id="story-ready" style="display:none">
+        <div class="story-body">스무 살 봄이었지. 대전역에서 완행열차를 탔는데, 어머니가 싸 주신 미숫가루 봉지를 꼭 쥐고 있었어. 창밖으로 논이 끝없이 지나가는데 그게 그렇게 서럽더라.
+
+서울역에 내리니까 사람이 어찌나 많은지, 다들 어디로 가는지 알고 걷는 것 같은데 나만 모르는 것 같았어. 그때 언니가 마중을 나와서 손을 흔드는데, 그 손 하나 보고 서울살이를 시작한 거야.
+
+지금도 서울역을 지나면 그 봄 냄새가 나. 무섭고, 설레고, 그랬지.</div>
+        <div class="audio" role="group" aria-label="어머니 목소리 듣기">
+          <button class="play" onclick="playAudio(this)" aria-label="재생">▶</button>
+          <div class="bar"><i></i></div><span class="len">2:41</span>
+        </div>
+
+        <div class="cheer" id="cheer-box">
+          <div class="divider"></div>
+          <h3>어머니께 응원을 보내세요</h3>
+          <div style="display:flex;gap:14px;align-items:center;margin-top:12px">
+            <button class="heart" id="heart" onclick="toggleHeart()" aria-label="하트 보내기">🤍</button>
+            <span style="font-size:13px;color:var(--muted)">하트는 바로 전해져요</span>
+          </div>
+          <div class="chips">
+            <button onclick="pickChip(this)">엄마, 이 얘기 처음 들었어요</button>
+            <button onclick="pickChip(this)">목소리 들으니 좋다</button>
+            <button onclick="pickChip(this)">내일 이야기도 기다릴게요</button>
+          </div>
+          <input type="text" id="cheer-input" placeholder="한마디 쓰기 (선택)" style="margin-top:12px">
+          <button class="btn" style="margin-top:12px" onclick="sendCheer()">응원 보내기</button>
+        </div>
+        <div id="cheer-sent" style="display:none">
+          <div class="banner ok">응원을 보냈어요 💛 어머니 화면에 그대로 전해져요.</div>
+          <button class="chip-demo" onclick="fillArchive();go('child','c-archive')">3주가 쌓이면 — 모아보기 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- C5 모아보기 -->
+    <div class="screen" id="c-archive">
+      <div class="c-top"><span class="logo">모아보기</span></div>
+
+      <div class="progress-card">
+        <div style="font-size:12px;color:var(--muted)">순자님의 책이 되어가는 중</div>
+        <div class="big" id="arch-count">0 <small>/ 365 번째 이야기</small></div>
+        <div class="pbar"><i id="arch-bar" style="width:0%"></i></div>
+      </div>
+
+      <!-- 빈 상태 -->
+      <div class="empty" id="arch-empty">
+        <div class="ic">📖</div>
+        아직 도착한 이야기가 없어요.<br>
+        어머니의 첫 이야기가 오면 여기부터 채워져요.
+      </div>
+
+      <!-- 채워진 상태 -->
+      <div id="arch-list" style="display:none">
+        <div class="month-div">8월</div>
+        <button class="arch-item" style="width:100%;text-align:left" onclick="go('child','c-story')">
+          <div class="d">8월 26일 · 23번째</div>
+          <div class="q">처음 서울에 올라오던 날, 기억나세요?</div>
+          <div class="s">스무 살 봄이었지. 대전역에서 완행열차를 탔는데…</div>
+        </button>
+        <div class="arch-item">
+          <div class="d">8월 25일 · 22번째</div>
+          <div class="q">어릴 적 살던 집 마당은 어떤 모습이었어요?</div>
+          <div class="s">마당 한켠에 감나무가 있었어. 가을이면 홍시가…</div>
+        </div>
+        <div class="arch-item">
+          <div class="d">8월 24일 · 21번째</div>
+          <div class="q">평생 못 잊는 밥상이 있다면요?</div>
+          <div class="s">시집와서 처음 차린 제사상. 손이 벌벌 떨려서…</div>
+        </div>
+        <div class="arch-item">
+          <div class="d">8월 23일 · 20번째 <span style="color:var(--wait)">· 🌙 밤사이 정리 중</span></div>
+          <div class="q">아버지를 처음 만난 날 이야기를 들려주세요</div>
+          <div class="s">목소리로 남아 있어요 — 정리되면 글로 보여드려요</div>
+        </div>
+        <div class="month-div">이전</div>
+        <div class="arch-item">
+          <div class="d">8월 19일 · 16번째</div>
+          <div class="q">제일 좋아하는 계절은 언제예요?</div>
+          <div class="s">가을이지. 추수 끝나고 나면 마음이 그렇게 넉넉했어…</div>
+        </div>
+        <div class="arch-item" style="border-bottom:none">
+          <div class="d">8월 4일 · 1번째</div>
+          <div class="q">요즘 하루 중 가장 좋아하는 시간은 언제예요?</div>
+          <div class="s">새벽에 마당 쓸 때. 아무도 없고 조용하니 좋아…</div>
+        </div>
+      </div>
+
+      <div class="c-nav">
+        <button onclick="go('child', childHomeReady ? 'c-home' : 'c-invite')">홈</button>
+        <button class="on">모아보기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 부모 앱 ================= -->
+  <div class="part" id="part-parent">
+
+    <!-- 진입 데모: 카톡으로 온 초대 -->
+    <div class="screen on" id="p-kakao">
+      <div class="eyebrow">데모 · 어머니의 카카오톡</div>
+      <div class="card" style="margin-top:16px">
+        <div style="font-size:13px;color:var(--muted)">딸 지혜 💛</div>
+        <div style="font-size:16px;line-height:1.65;margin-top:8px">
+          엄마~ 내가 엄마 이야기 남기는 선물 하나 신청했어!
+          아래 누르고 <b>시작하기</b>만 눌러줘 😊</div>
+        <button class="btn quiet" style="margin-top:12px;font-size:15px" onclick="go('parent','p-invite')">
+          🔗 haru.app/i/sunja-0826</button>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:14px">
+        부모는 회원가입·비밀번호 없이 이 링크 하나로 시작해요 (PRD §3-2 B안).</p>
+    </div>
+
+    <!-- P0 초대 진입 -->
+    <div class="screen p-screen" id="p-invite">
+      <div style="text-align:center;padding-top:36px">
+        <div style="font-size:44px">💌</div>
+        <div class="q-serif" style="font-size:28px;line-height:1.55;font-weight:700;margin-top:20px;text-wrap:balance">
+          따님 지혜님이<br>어머니의 이야기를<br>기다리고 있어요</div>
+        <p style="font-size:19px;color:var(--muted);margin-top:18px;line-height:1.7">
+          매일 아침 질문을 하나 드릴게요.<br>말씀만 하시면 돼요.</p>
+      </div>
+      <button class="p-btn" style="margin-top:40px" onclick="go('parent','p-today')">시작하기</button>
+    </div>
+
+    <!-- P1 오늘 -->
+    <div class="screen p-screen" id="p-today">
+      <div class="p-date" id="p-date">8월 26일 화요일 · 스물세 번째 질문</div>
+
+      <button class="p-cheer-banner" id="p-cheer-banner" style="display:none" onclick="openCheer()">
+        💛 지혜님이 응원을 보냈어요 — 눌러서 보기</button>
+      <div class="p-card" id="p-cheer-detail" style="display:none">
+        <div style="font-size:16px;color:var(--muted)">어제 이야기에 · 지혜</div>
+        <div class="q-serif" style="font-size:22px;line-height:1.7;margin-top:8px">❤️ “엄마, 이 얘기 처음 들었어요.<br>목소리 들으니까 너무 좋다.”</div>
+      </div>
+
+      <!-- 답변 전 -->
+      <div id="p-before">
+        <div class="p-q" id="p-question">“처음 서울에<br>올라오던 날,<br>기억나세요?”</div>
+        <button class="p-big-btn" onclick="startRecord()" aria-label="눌러서 이야기해 주세요">
+          <span class="mic">🎙️</span><span class="lb">눌러서</span>
+        </button>
+        <div class="p-btn-cap">눌러서 이야기해 주세요</div>
+        <button class="chip-demo" style="display:flex;margin:26px auto 0" onclick="showReminder()">저녁까지 답을 안 하면? (리마인드 미리보기)</button>
+      </div>
+
+      <!-- 답변 후 -->
+      <div id="p-after" style="display:none">
+        <div class="p-card">
+          <div style="font-size:17px;color:var(--muted)">오늘의 질문</div>
+          <div class="q-serif" style="font-size:23px;line-height:1.6;margin-top:6px">“처음 서울에 올라오던 날, 기억나세요?”</div>
+          <div class="banner ok" style="font-size:18px">오늘 이야기를 남기셨어요 ✓<br>밤사이 글로 정리해 드릴게요.</div>
+        </div>
+        <button class="chip-demo" style="display:flex;margin:24px auto 0" onclick="nextMorning()">🌙 다음 날 아침 →</button>
+      </div>
+
+      <!-- 다음 날 아침: 정리본 도착 -->
+      <div id="p-morning" style="display:none">
+        <div class="p-card">
+          <div style="font-size:16px;color:var(--muted)">어제 하신 말씀을 글로 정리해 뒀어요</div>
+          <div class="p-story" style="font-size:20px">스무 살 봄이었지. 대전역에서 완행열차를 탔는데, 어머니가 싸 주신 미숫가루 봉지를 꼭 쥐고 있었어. 창밖으로 논이 끝없이 지나가는데 그게 그렇게 서럽더라. …</div>
+          <button class="p-audio-btn" onclick="toast('내 목소리를 재생해요 (데모)')">
+            <span class="ic">▶</span> 내 목소리 들어보기 <span style="color:var(--muted);font-weight:400;margin-left:auto">2:41</span>
+          </button>
+        </div>
+        <div class="p-q" style="font-size:26px;margin-top:30px">오늘의 질문 —<br>“아버지를 처음 만난 날<br>이야기를 들려주세요”</div>
+        <button class="p-big-btn" style="width:120px;height:120px" onclick="toast('오늘도 같은 흐름이에요 (데모)')" aria-label="눌러서 이야기해 주세요">
+          <span class="mic" style="font-size:32px">🎙️</span>
+        </button>
+        <div class="p-btn-cap" style="font-size:20px">눌러서 이야기해 주세요</div>
+      </div>
+
+      <button class="p-link" id="p-archive-link" onclick="go('parent','p-archive')">지난 이야기 보기</button>
+    </div>
+
+    <!-- P2 녹음 오버레이 -->
+    <div class="screen p-screen" id="p-record">
+      <div id="rec-live">
+        <div class="q-serif" style="font-size:23px;line-height:1.6;color:var(--muted)">“처음 서울에 올라오던 날, 기억나세요?”</div>
+        <div class="rec-circle"><div class="inner">🎙️</div></div>
+        <div class="rec-time" id="rec-time">0:00</div>
+        <div class="rec-hint">천천히, 편하게 말씀하세요.<br>쉬어가도 녹음은 이어져요.</div>
+        <button class="p-btn" style="margin-top:34px" onclick="stopRecord()">다 했어요</button>
+      </div>
+
+      <div id="rec-done" style="display:none">
+        <div style="text-align:center;padding-top:30px">
+          <div style="font-size:44px">🌙</div>
+          <div class="q-serif" style="font-size:28px;font-weight:700;margin-top:18px">잘 들었어요.</div>
+          <p style="font-size:21px;line-height:1.7;margin-top:12px">밤사이 글로 정리해서<br>내일 아침에 보여드릴게요.</p>
+        </div>
+        <button class="p-audio-btn" onclick="toast('방금 하신 말씀을 재생해요 (데모)')">
+          <span class="ic">▶</span> 방금 하신 말씀 들어보기 <span style="color:var(--muted);font-weight:400;margin-left:auto" id="rec-len">2:41</span>
+        </button>
+        <div id="upload-err" style="display:none">
+          <div class="banner err" style="font-size:17px">이야기는 폰에 잘 저장됐어요.<br>인터넷이 연결되면 자동으로 보내드려요.<br><span class="code">answer.upload_failed (offline)</span></div>
+          <button class="p-btn quiet" style="margin-top:12px;min-height:64px;font-size:19px" onclick="retryUpload()">지금 다시 보내기</button>
+        </div>
+        <button class="p-btn" style="margin-top:24px" onclick="finishToday()">오늘은 여기까지</button>
+        <button class="chip-demo" style="display:flex;margin:18px auto 0" onclick="showUploadErr()">전송이 실패하면? (상태 데모)</button>
+      </div>
+    </div>
+
+    <!-- P3 지난 이야기 -->
+    <div class="screen p-screen" id="p-archive">
+      <button class="p-back" onclick="go('parent','p-today')">← 오늘 질문으로</button>
+      <h2 class="q-serif" style="font-size:26px;margin-top:14px">지난 이야기</h2>
+
+      <div class="empty" id="p-arch-empty" style="font-size:18px;line-height:1.8;display:none">
+        <div class="ic">🌱</div>
+        첫 이야기를 남기면<br>여기에 차곡차곡 쌓여요.
+      </div>
+
+      <div id="p-arch-list">
+        <div class="p-item">
+          <div class="d">8월 26일</div>
+          <div class="q">처음 서울에 올라오던 날, 기억나세요?</div>
+          <div class="st wait">🌙 밤사이 글로 정리 중이에요</div>
+        </div>
+        <div class="p-item">
+          <div class="d">8월 25일</div>
+          <div class="q">어릴 적 살던 집 마당은 어떤 모습이었어요?</div>
+          <div class="st ok">글로 정리됐어요 · 지혜님의 응원 💛</div>
+        </div>
+        <div class="p-item" style="border-bottom:none">
+          <div class="d">8월 24일</div>
+          <div class="q">평생 못 잊는 밥상이 있다면요?</div>
+          <div class="st ok">글로 정리됐어요</div>
+        </div>
+      </div>
+      <button class="chip-demo" style="display:flex;margin:22px auto 0" onclick="toggleParentEmpty()">첫날이라면? (빈 상태 보기)</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="notif-layer" id="notif" onclick="notifTap()">
+    <div class="push">
+      <div class="app-ic">📖</div>
+      <div><div class="t" id="notif-t"></div><div class="b" id="notif-b"></div><div class="meta" id="notif-m"></div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ---------- 공용 ---------- */
+var childHomeReady=false, notifAction=null, recTimer=null, recSec=0;
+
+function showPart(p){
+  ['landing','child','parent'].forEach(function(k){
+    document.getElementById('part-'+k).classList.toggle('on',k===p);
+    document.getElementById('tab-'+k).classList.toggle('on',k===p);
+  });
+  hideNotif();
+}
+function go(part,id){
+  var scr=document.querySelectorAll('#part-'+part+' .screen');
+  scr.forEach(function(s){s.classList.toggle('on',s.id===id);});
+  document.getElementById('part-'+part).scrollTop=0;
+  hideNotif();
+}
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2200);
+}
+function notify(title,body,meta,action){
+  var n=document.getElementById('notif');
+  document.getElementById('notif-t').textContent=title;
+  document.getElementById('notif-b').textContent=body;
+  document.getElementById('notif-m').textContent=meta||'';
+  notifAction=action||null;
+  n.classList.add('show');
+  clearTimeout(n._h); n._h=setTimeout(hideNotif, action?9000:6000);
+}
+function hideNotif(){document.getElementById('notif').classList.remove('show');}
+function notifTap(){hideNotif(); if(notifAction){notifAction(); notifAction=null;}}
+
+/* ---------- 랜딩 ---------- */
+var abOn=false;
+function toggleAB(){
+  abOn=!abOn;
+  document.getElementById('headline').innerHTML=
+    abOn?'매일 한 질문,<br>1년 뒤 한 권':'더 늦기 전에<br>물어보세요';
+  toast(abOn?'상대안 (습관·완성 소구)':'메인 (승인 카피)');
+}
+function reserve(){
+  var v=document.getElementById('rsv').value.replace(/[^0-9]/g,'');
+  var err=document.getElementById('rsv-err');
+  if(v.length<10){
+    err.innerHTML='<div class="banner err">번호를 확인해 주세요. 계속 안 되면 잠시 후 다시 시도해 주세요. <span class="code">reserve.submit_failed</span></div>';
+    return;
+  }
+  err.innerHTML='';
+  document.getElementById('reserve-box').style.display='none';
+  document.getElementById('reserve-done').style.display='block';
+}
+
+/* ---------- 자녀 앱 ---------- */
+function pickRel(k){
+  document.getElementById('rel-m').classList.toggle('on',k==='m');
+  document.getElementById('rel-f').classList.toggle('on',k==='f');
+}
+function sendInvite(){
+  toast('카카오톡으로 보냈어요');
+  document.getElementById('invite-wait').style.display='block';
+}
+function momActivated(){
+  document.getElementById('invite-wait').style.display='none';
+  document.getElementById('invite-done').style.display='block';
+  notify('하루 한 질문','어머니가 시작하셨어요 🌱','방금');
+}
+function firstStory(){
+  childHomeReady=true;
+  notify('하루 한 질문','어머니의 이야기가 도착했어요 — “처음 서울에 올라오던 날, 기억나세요?”','오후 3:12 · 눌러서 열기',
+    function(){go('child','c-story');});
+}
+function playAudio(btn){
+  var bar=btn.parentElement.querySelector('.bar i');
+  if(btn._playing){btn._playing=false;btn.textContent='▶';bar.style.width='0';return;}
+  btn._playing=true; btn.textContent='⏸'; bar.style.width='100%';
+  bar.style.transition='width 6s linear';
+  toast('어머니 목소리를 재생해요 (데모)');
+  setTimeout(function(){if(btn._playing){btn._playing=false;btn.textContent='▶';bar.style.transition='width .3s';bar.style.width='0';}},6200);
+}
+function storyMorning(){
+  document.getElementById('story-pending').style.display='none';
+  document.getElementById('story-ready').style.display='block';
+  document.getElementById('c-home-status').textContent='밤사이 글로 정리됐어요 — 읽어보세요';
+  toast('🌅 아침 — 글로 정리됐어요');
+}
+var heartOn=false;
+function toggleHeart(){
+  heartOn=!heartOn;
+  var h=document.getElementById('heart');
+  h.classList.toggle('on',heartOn); h.textContent=heartOn?'❤️':'🤍';
+}
+function pickChip(el){
+  el.parentElement.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('cheer-input').value=el.textContent;
+}
+function sendCheer(){
+  if(!heartOn && !document.getElementById('cheer-input').value){toggleHeart();}
+  document.getElementById('cheer-box').style.display='none';
+  document.getElementById('cheer-sent').style.display='block';
+}
+function fillArchive(){
+  document.getElementById('arch-empty').style.display='none';
+  document.getElementById('arch-list').style.display='block';
+  document.getElementById('arch-count').innerHTML='23 <small>/ 365 번째 이야기</small>';
+  document.getElementById('arch-bar').style.width=(23/365*100)+'%';
+}
+
+/* ---------- 부모 앱 ---------- */
+function startRecord(){
+  go('parent','p-record');
+  document.getElementById('rec-live').style.display='block';
+  document.getElementById('rec-done').style.display='none';
+  recSec=0; tick();
+  recTimer=setInterval(tick,1000);
+}
+function tick(){
+  document.getElementById('rec-time').textContent=
+    Math.floor(recSec/60)+':'+('0'+recSec%60).slice(-2);
+  recSec++;
+}
+function stopRecord(){
+  clearInterval(recTimer);
+  document.getElementById('rec-len').textContent=
+    Math.floor((recSec-1)/60)+':'+('0'+(recSec-1)%60).slice(-2);
+  document.getElementById('rec-live').style.display='none';
+  document.getElementById('rec-done').style.display='block';
+}
+function showUploadErr(){document.getElementById('upload-err').style.display='block';}
+function retryUpload(){
+  document.getElementById('upload-err').style.display='none';
+  toast('보냈어요 ✓');
+}
+function finishToday(){
+  go('parent','p-today');
+  document.getElementById('p-before').style.display='none';
+  document.getElementById('p-after').style.display='block';
+}
+function toggleParentEmpty(){
+  var e=document.getElementById('p-arch-empty'), l=document.getElementById('p-arch-list');
+  var empty=e.style.display==='none';
+  e.style.display=empty?'block':'none';
+  l.style.display=empty?'none':'block';
+  toast(empty?'답변 0건일 때의 빈 상태 (§9-4 P3)':'다시 채워진 상태로');
+}
+function nextMorning(){
+  document.getElementById('p-after').style.display='none';
+  document.getElementById('p-morning').style.display='block';
+  document.getElementById('p-date').textContent='8월 27일 수요일 · 스물네 번째 질문';
+  document.getElementById('p-cheer-banner').style.display='block';
+  notify('하루 한 질문','지혜님이 응원을 보냈어요 💛','오전 8:00');
+}
+function openCheer(){
+  var d=document.getElementById('p-cheer-detail');
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+function showReminder(){
+  notify('하루 한 질문','오늘의 질문이 기다리고 있어요. 편하실 때 들려주세요 — “처음 서울에 올라오던 날, 기억나세요?”','오후 7:00 · 하루 1회만');
+  toast('잔소리 없이 — 질문을 다시 보여주는 것까지만 (§9-4)');
+}
+</script>
