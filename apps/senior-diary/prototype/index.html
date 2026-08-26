@@ -216,6 +216,79 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
   background:var(--line); color:var(--muted); font-variant-numeric:tabular-nums}
 .dot.on{background:var(--ok-bg); color:var(--ok); font-weight:700}
 
+/* ============ 프로필·스위치 (C1b) ============ */
+.sw-row{display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:13px 0; border-bottom:1px solid var(--line)}
+.sw-row:last-child{border-bottom:none}
+.sw-row .lb{font-size:14.5px}
+.sw-row .sub{font-size:12px; color:var(--muted); margin-top:2px}
+.sw{width:52px; height:30px; border-radius:15px; background:var(--line); position:relative;
+  flex:none; transition:.2s}
+.sw::after{content:""; position:absolute; top:3px; left:3px; width:24px; height:24px;
+  border-radius:50%; background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.25); transition:.2s}
+.sw.on{background:var(--ok)}
+.sw.on::after{left:25px}
+.branch-note{
+  margin-top:12px; border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.6;
+  background:var(--accent-soft); color:var(--ink);
+}
+.branch-note .swap{display:flex; flex-direction:column; gap:4px; margin-top:8px; font-family:var(--serif)}
+.branch-note .old{color:var(--muted); text-decoration:line-through}
+.branch-note .new{color:var(--accent); font-weight:700}
+
+/* ============ 스킵 (P1 I8) ============ */
+.p-skip{
+  display:block; margin:22px auto 0; font-size:19px; color:var(--muted);
+  text-decoration:underline; text-underline-offset:4px; padding:14px; min-height:64px;
+}
+.skip-line{font-size:19px; color:var(--wait); margin-top:16px; line-height:1.6}
+.rest-card{text-align:center; padding:40px 10px; font-size:22px; line-height:1.8}
+
+/* ============ 책 미리보기 (C6 I9) ============ */
+:root{--cover-bg:#5B3A28; --cover-fg:#F3E4C9; --cover-line:#C9A874}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--cover-bg:#4A2F20; --cover-fg:#EBD9BC; --cover-line:#B79763}
+}
+:root[data-theme="dark"]{--cover-bg:#4A2F20; --cover-fg:#EBD9BC; --cover-line:#B79763}
+.book-label{text-align:center; font-size:12px; color:var(--muted); letter-spacing:.05em; margin:6px 0 16px}
+.cover{
+  background:var(--cover-bg); color:var(--cover-fg); border-radius:6px 14px 14px 6px;
+  padding:16px; box-shadow:0 14px 34px rgba(0,0,0,.28), inset 6px 0 10px -6px rgba(0,0,0,.45);
+  margin:0 18px;
+}
+.cover .frame{border:1px solid var(--cover-line); outline:1px solid var(--cover-line); outline-offset:-6px;
+  padding:44px 18px; text-align:center}
+.cover .orn{font-size:14px; letter-spacing:.5em; color:var(--cover-line)}
+.cover h2{font-family:var(--serif); font-size:30px; font-weight:700; margin-top:18px; line-height:1.4}
+.cover .sub{font-family:var(--serif); font-size:13.5px; margin-top:14px; color:var(--cover-line); line-height:1.7}
+.cover .yr{font-size:12px; letter-spacing:.3em; margin-top:30px; color:var(--cover-line)}
+.toc{margin:26px 4px 0}
+.toc h3{font-family:var(--serif); font-size:19px; text-align:center; letter-spacing:.3em}
+.toc-row{display:flex; align-items:baseline; gap:8px; padding:10px 2px; font-size:14.5px}
+.toc-row .no{font-family:var(--serif); color:var(--muted); flex:none; width:58px}
+.toc-row .nm{font-family:var(--serif); font-weight:700; flex:none}
+.toc-row .dots{flex:1; border-bottom:1.5px dotted var(--line); transform:translateY(-4px)}
+.toc-row .ct{color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; flex:none}
+.spread{
+  background:var(--card); border:1px solid var(--line); border-radius:4px 12px 12px 4px;
+  padding:26px 20px 22px; margin-top:26px; position:relative;
+  box-shadow:0 10px 26px rgba(0,0,0,.14), inset 5px 0 8px -6px rgba(0,0,0,.22);
+}
+.spread .run{font-size:11.5px; letter-spacing:.22em; color:var(--muted); text-align:center;
+  border-bottom:1px solid var(--line); padding-bottom:12px}
+.spread .ep-date{font-size:12px; color:var(--muted); margin-top:20px}
+.spread .ep-q{font-family:var(--serif); font-size:19px; font-weight:700; line-height:1.55; margin-top:6px}
+.spread .ep-body{font-family:var(--serif); font-size:15.5px; line-height:1.95; margin-top:12px; white-space:pre-line}
+.qr-box{display:flex; align-items:center; gap:14px; margin-top:18px; padding:12px;
+  border:1px dashed var(--line); border-radius:10px}
+.qr-box svg{flex:none; display:block}
+.qr-box .qt{font-size:13px; font-weight:700}
+.qr-box .qs{font-size:11.5px; color:var(--muted); line-height:1.5; margin-top:2px}
+.spread .more{position:relative; max-height:120px; overflow:hidden; margin-top:26px}
+.spread .more::after{content:""; position:absolute; inset:0; background:linear-gradient(transparent 30%, var(--card))}
+.book-tail{text-align:center; font-size:14.5px; color:var(--muted); line-height:1.8; margin-top:26px}
+.book-tail b{color:var(--ink)}
+
 /* ============ 부모 앱 (시니어 접근성 — §9-5 수치 그대로) ============ */
 .p-screen{padding:30px 24px 44px; font-size:20px; line-height:1.6}
 .p-date{font-size:17px; color:var(--muted)}
@@ -352,7 +425,65 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
       <input type="text" id="pname" value="김순자">
       <label class="f" for="myname">내 이름</label>
       <input type="text" id="myname" value="이지혜">
-      <button class="btn" style="margin-top:22px" onclick="go('child','c-invite')">초대장 만들기</button>
+      <button class="btn" style="margin-top:22px" onclick="go('child','c-profile')">다음 — 질문 맞추기</button>
+    </div>
+
+    <!-- C1b 프로필 + 민감 주제 (결정 #4) -->
+    <div class="screen" id="c-profile">
+      <button class="p-back" style="font-size:14px" onclick="go('child','c-start')">← 뒤로</button>
+      <div class="eyebrow" style="margin-top:10px">질문 맞추기 · 선택</div>
+      <h2 style="font-size:19px;margin-top:8px;line-height:1.5">어머니에 대해 알려주실수록<br>질문이 인생에 더 잘 맞아져요</h2>
+
+      <label class="f">고향</label>
+      <div class="chips" style="margin-top:2px">
+        <button class="on" id="ht-daejeon" onclick="pickHometown(this,'daejeon')">대전</button>
+        <button id="ht-seoul" onclick="pickHometown(this,'seoul')">서울</button>
+        <button id="ht-etc" onclick="pickHometown(this,'etc')">그 외</button>
+      </div>
+      <div class="branch-note" id="branch-note" style="display:none">
+        서울을 고르셨어요 — 질문이 이렇게 바뀌어요:
+        <div class="swap">
+          <span class="old">“처음 서울에 올라오던 날, 기억나세요?”</span>
+          <span class="new">“어릴 적 살던 동네는 어떤 곳이었어요?”</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">부모 앱 탭에서 오늘의 질문이 바뀐 걸 확인해 보세요 (데모)</div>
+      </div>
+
+      <label class="f">결혼</label>
+      <div class="chips" style="margin-top:2px">
+        <button class="on" onclick="pickOne(this)">결혼</button>
+        <button onclick="pickOne(this)">사별</button>
+        <button onclick="pickOne(this)">이혼</button>
+      </div>
+
+      <label class="f" for="pf-sib">형제 구성</label>
+      <input type="text" id="pf-sib" value="2남 3녀 중 둘째">
+      <label class="f" for="pf-kids">자녀 구성</label>
+      <input type="text" id="pf-kids" value="1남 1녀">
+      <label class="f" for="pf-work">주로 하신 일</label>
+      <input type="text" id="pf-work" value="시장에서 반찬 가게">
+
+      <div class="divider"></div>
+      <b style="font-size:15px">여쭙지 않을 이야기</b>
+      <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:4px">
+        가족마다 꺼내기 어려운 이야기가 있어요. 여기서 빼두면 여쭙지 않아요.</p>
+      <div style="margin-top:6px">
+        <div class="sw-row">
+          <div><div class="lb">배우자 이야기</div><div class="sub" id="sw-spouse-sub" style="display:none">‘배우자를 만나다’ 장은 다른 장으로 대체돼요</div></div>
+          <button class="sw on" id="sw-spouse" onclick="toggleSw(this,'spouse')" aria-label="배우자 이야기 여쭙기"></button>
+        </div>
+        <div class="sw-row">
+          <div><div class="lb">투병·건강</div></div>
+          <button class="sw on" onclick="toggleSw(this)" aria-label="투병·건강 여쭙기"></button>
+        </div>
+        <div class="sw-row">
+          <div><div class="lb">돈·재산</div></div>
+          <button class="sw on" onclick="toggleSw(this)" aria-label="돈·재산 여쭙기"></button>
+        </div>
+      </div>
+
+      <button class="btn" style="margin-top:20px" onclick="go('child','c-invite')">초대장 만들기</button>
+      <button class="btn quiet" style="margin-top:8px;font-size:14px" onclick="go('child','c-invite')">나중에 채울게요 — 건너뛰기</button>
     </div>
 
     <!-- C2 초대 보내기·대기 -->
@@ -471,6 +602,7 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
         <div style="font-size:12px;color:var(--muted)">순자님의 책이 되어가는 중</div>
         <div class="big" id="arch-count">0 <small>/ 365 번째 이야기</small></div>
         <div class="pbar"><i id="arch-bar" style="width:0%"></i></div>
+        <button class="btn ghost" style="margin-top:16px;font-size:15px" onclick="openBook()">📖 책으로 미리보기</button>
       </div>
 
       <!-- 빈 상태 -->
@@ -521,6 +653,87 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
         <button class="on">모아보기</button>
       </div>
     </div>
+
+    <!-- C6 책 미리보기 (I9 — 결정 #4) -->
+    <div class="screen" id="c-book" style="padding:20px 18px 44px">
+      <button class="p-back" style="font-size:14px" onclick="go('child','c-archive')">← 모아보기로</button>
+      <div class="book-label">미리보기 — 지금까지 담긴 이야기로 미리 엮어봤어요</div>
+
+      <!-- 표지 (B1) -->
+      <div class="cover">
+        <div class="frame">
+          <div class="orn">✼ ✼ ✼</div>
+          <h2>김순자 이야기</h2>
+          <div class="sub">딸 지혜가 묻고,<br>김순자가 답하다</div>
+          <div class="yr">2 0 2 6</div>
+        </div>
+      </div>
+
+      <!-- 빈 상태 -->
+      <div class="empty" id="book-empty">
+        <div class="ic">🌱</div>
+        첫 이야기가 담기면<br>여기서 책이 시작돼요.
+      </div>
+
+      <!-- 채워진 상태 -->
+      <div id="book-full" style="display:none">
+        <!-- 차례 (B2) -->
+        <div class="toc">
+          <h3>차 례</h3>
+          <div style="margin-top:14px">
+            <div class="toc-row"><span class="no">첫째 장</span><span class="nm">어린 시절</span><span class="dots"></span><span class="ct">7편</span></div>
+            <div class="toc-row"><span class="no">둘째 장</span><span class="nm">고향과 가족</span><span class="dots"></span><span class="ct">6편</span></div>
+            <div class="toc-row"><span class="no">셋째 장</span><span class="nm">배우자를 만나다</span><span class="dots"></span><span class="ct">4편</span></div>
+            <div class="toc-row"><span class="no">넷째 장</span><span class="nm">일과 살림</span><span class="dots"></span><span class="ct">3편</span></div>
+            <div class="toc-row"><span class="no">다섯째 장</span><span class="nm">아이들</span><span class="dots"></span><span class="ct">2편</span></div>
+            <div class="toc-row"><span class="no">여섯째 장</span><span class="nm">지금의 나날</span><span class="dots"></span><span class="ct">1편</span></div>
+            <div class="toc-row"><span class="no">일곱째 장</span><span class="nm">전하고 싶은 말</span><span class="dots"></span><span class="ct">—</span></div>
+          </div>
+        </div>
+
+        <!-- 본문 펼침면 (B3) -->
+        <div class="spread">
+          <div class="run">둘째 장 · 고향과 가족</div>
+          <div class="ep-date">스물두 번째 이야기 · 8월 25일</div>
+          <div class="ep-q">어릴 적 살던 집 마당은 어떤 모습이었어요?</div>
+          <div class="ep-body">마당 한켠에 감나무가 있었어. 가을이면 홍시가 뚝뚝 떨어져서, 새벽에 일어난 사람이 임자였지. 동생들이랑 누가 먼저 줍나 내기를 했는데, 막내가 늘 제일 빨랐어.
+
+수돗가 옆엔 장독대가 있었고, 어머니가 거기서 된장을 푸실 때면 온 마당에 그 냄새가 돌았어. 지금도 된장 냄새를 맡으면 그 마당부터 생각나.
+
+겨울엔 마당에 눈이 쌓이면 아버지가 싸리비로 길을 내주셨어. 그 길이 꼭 우리 식구 다니라고 낸 길 같아서 좋았지.</div>
+          <div class="qr-box">
+            <svg width="52" height="52" viewBox="0 0 21 21" role="img" aria-label="QR — 목소리로 듣기">
+              <rect x="0" y="0" width="21" height="21" fill="var(--card)"/>
+              <rect x="0" y="0" width="7" height="7" fill="var(--ink)"/><rect x="1" y="1" width="5" height="5" fill="var(--card)"/><rect x="2" y="2" width="3" height="3" fill="var(--ink)"/>
+              <rect x="14" y="0" width="7" height="7" fill="var(--ink)"/><rect x="15" y="1" width="5" height="5" fill="var(--card)"/><rect x="16" y="2" width="3" height="3" fill="var(--ink)"/>
+              <rect x="0" y="14" width="7" height="7" fill="var(--ink)"/><rect x="1" y="15" width="5" height="5" fill="var(--card)"/><rect x="2" y="16" width="3" height="3" fill="var(--ink)"/>
+              <rect x="9" y="1" width="2" height="2" fill="var(--ink)"/><rect x="12" y="3" width="2" height="2" fill="var(--ink)"/>
+              <rect x="9" y="5" width="2" height="2" fill="var(--ink)"/><rect x="4" y="9" width="2" height="2" fill="var(--ink)"/>
+              <rect x="8" y="9" width="3" height="2" fill="var(--ink)"/><rect x="13" y="9" width="2" height="2" fill="var(--ink)"/>
+              <rect x="17" y="9" width="2" height="3" fill="var(--ink)"/><rect x="9" y="12" width="2" height="3" fill="var(--ink)"/>
+              <rect x="13" y="13" width="3" height="2" fill="var(--ink)"/><rect x="9" y="17" width="2" height="2" fill="var(--ink)"/>
+              <rect x="13" y="17" width="2" height="2" fill="var(--ink)"/><rect x="17" y="14" width="2" height="2" fill="var(--ink)"/>
+              <rect x="16" y="18" width="3" height="2" fill="var(--ink)"/>
+            </svg>
+            <div>
+              <div class="qt">🔊 목소리로 듣기 · 2:07</div>
+              <div class="qs">실물 책에서는 이 QR로 어머니 목소리를<br>그대로 들을 수 있어요. 앱에서는 눌러서 재생.</div>
+            </div>
+          </div>
+
+          <div class="more">
+            <div class="ep-date">스물한 번째 이야기 · 8월 24일</div>
+            <div class="ep-q">평생 못 잊는 밥상이 있다면요?</div>
+            <div class="ep-body">시집와서 처음 차린 제사상. 손이 벌벌 떨려서 탕국을 두 번이나 엎었는데, 시어머니가 아무 말 없이 행주를 건네주셨어…</div>
+          </div>
+        </div>
+
+        <!-- 진행 꼬리 (B4) -->
+        <div class="book-tail">
+          지금까지 <b>23개의 이야기</b>가 담겼어요.<br>이야기가 쌓일수록 책이 두꺼워져요.
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ================= 부모 앱 ================= -->
@@ -566,19 +779,29 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
 
       <!-- 답변 전 -->
       <div id="p-before">
+        <div class="skip-line" id="skip-line" style="display:none">그럴 수 있어요.<br>다른 이야기를 여쭤볼게요.</div>
         <div class="p-q" id="p-question">“처음 서울에<br>올라오던 날,<br>기억나세요?”</div>
         <button class="p-big-btn" onclick="startRecord()" aria-label="눌러서 이야기해 주세요">
           <span class="mic">🎙️</span><span class="lb">눌러서</span>
         </button>
         <div class="p-btn-cap">눌러서 이야기해 주세요</div>
-        <button class="chip-demo" style="display:flex;margin:26px auto 0" onclick="showReminder()">저녁까지 답을 안 하면? (리마인드 미리보기)</button>
+        <button class="p-skip" onclick="skipQuestion()">이 이야기는 넘어갈게요</button>
+        <button class="chip-demo" style="display:flex;margin:14px auto 0" onclick="showReminder()">저녁까지 답을 안 하면? (리마인드 미리보기)</button>
+      </div>
+
+      <!-- 재스킵 후 휴식 상태 (I8 규칙 2) -->
+      <div id="p-rest" style="display:none">
+        <div class="rest-card">
+          🌾<br><br>오늘은 쉬어가도 돼요.<br>내일 새 질문으로 찾아올게요.
+        </div>
+        <button class="chip-demo" style="display:flex;margin:10px auto 0" onclick="restTomorrow()">🌅 다음 날 아침 →</button>
       </div>
 
       <!-- 답변 후 -->
       <div id="p-after" style="display:none">
         <div class="p-card">
           <div style="font-size:17px;color:var(--muted)">오늘의 질문</div>
-          <div class="q-serif" style="font-size:23px;line-height:1.6;margin-top:6px">“처음 서울에 올라오던 날, 기억나세요?”</div>
+          <div class="q-serif" id="p-after-q" style="font-size:23px;line-height:1.6;margin-top:6px">“처음 서울에 올라오던 날, 기억나세요?”</div>
           <div class="banner ok" style="font-size:18px">오늘 이야기를 남기셨어요 ✓<br>밤사이 글로 정리해 드릴게요.</div>
         </div>
         <button class="chip-demo" style="display:flex;margin:24px auto 0" onclick="nextMorning()">🌙 다음 날 아침 →</button>
@@ -588,7 +811,7 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
       <div id="p-morning" style="display:none">
         <div class="p-card">
           <div style="font-size:16px;color:var(--muted)">어제 하신 말씀을 글로 정리해 뒀어요</div>
-          <div class="p-story" style="font-size:20px">스무 살 봄이었지. 대전역에서 완행열차를 탔는데, 어머니가 싸 주신 미숫가루 봉지를 꼭 쥐고 있었어. 창밖으로 논이 끝없이 지나가는데 그게 그렇게 서럽더라. …</div>
+          <div class="p-story" id="p-morning-story" style="font-size:20px">스무 살 봄이었지. 대전역에서 완행열차를 탔는데, 어머니가 싸 주신 미숫가루 봉지를 꼭 쥐고 있었어. 창밖으로 논이 끝없이 지나가는데 그게 그렇게 서럽더라. …</div>
           <button class="p-audio-btn" onclick="toast('내 목소리를 재생해요 (데모)')">
             <span class="ic">▶</span> 내 목소리 들어보기 <span style="color:var(--muted);font-weight:400;margin-left:auto">2:41</span>
           </button>
@@ -606,7 +829,7 @@ label.f{display:block; font-size:13px; font-weight:700; color:var(--muted); marg
     <!-- P2 녹음 오버레이 -->
     <div class="screen p-screen" id="p-record">
       <div id="rec-live">
-        <div class="q-serif" style="font-size:23px;line-height:1.6;color:var(--muted)">“처음 서울에 올라오던 날, 기억나세요?”</div>
+        <div class="q-serif" id="rec-q" style="font-size:23px;line-height:1.6;color:var(--muted)">“처음 서울에 올라오던 날, 기억나세요?”</div>
         <div class="rec-circle"><div class="inner">🎙️</div></div>
         <div class="rec-time" id="rec-time">0:00</div>
         <div class="rec-hint">천천히, 편하게 말씀하세요.<br>쉬어가도 녹음은 이어져요.</div>
@@ -733,6 +956,49 @@ function pickRel(k){
   document.getElementById('rel-m').classList.toggle('on',k==='m');
   document.getElementById('rel-f').classList.toggle('on',k==='f');
 }
+
+/* 질문 분기 데이터 (I2 룰 분기 데모) — 부모 화면과 동기화 */
+var QA={
+  daejeon:{q:'“처음 서울에<br>올라오던 날,<br>기억나세요?”', s:'“처음 서울에 올라오던 날, 기억나세요?”',
+    story:'스무 살 봄이었지. 대전역에서 완행열차를 탔는데, 어머니가 싸 주신 미숫가루 봉지를 꼭 쥐고 있었어. 창밖으로 논이 끝없이 지나가는데 그게 그렇게 서럽더라. …'},
+  seoul:{q:'“어릴 적 살던 동네는<br>어떤 곳이었어요?”', s:'“어릴 적 살던 동네는 어떤 곳이었어요?”',
+    story:'정릉 골목 안집이었어. 아침이면 두부 장수 종소리에 온 동네가 깼지. 골목 끝 평상이 우리들 차지였는데, 여름밤엔 온 식구가 거기서 수박을 먹었어. …'},
+  skip1:{q:'“평생 못 잊는<br>밥상이 있다면요?”', s:'“평생 못 잊는 밥상이 있다면요?”',
+    story:'시집와서 처음 차린 제사상이지. 손이 벌벌 떨려서 탕국을 두 번이나 엎었는데, 시어머니가 아무 말 없이 행주를 건네주셨어. …'},
+  tomorrow:{q:'“어릴 적 제일 좋아하던<br>놀이는 뭐였어요?”', s:'“어릴 적 제일 좋아하던 놀이는 뭐였어요?”',
+    story:'고무줄놀이지. 치마가 찢어지도록 뛰었어. …'}
+};
+var currentQ=QA.daejeon, skipCount=0, archiveFilled=false;
+function applyQ(){
+  document.getElementById('p-question').innerHTML=currentQ.q;
+  document.getElementById('rec-q').textContent=currentQ.s;
+  document.getElementById('p-after-q').textContent=currentQ.s;
+  document.getElementById('p-morning-story').textContent=currentQ.story;
+}
+function pickHometown(el,key){
+  el.parentElement.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('branch-note').style.display=(key==='seoul')?'block':'none';
+  currentQ=QA[key==='seoul'?'seoul':'daejeon'];
+  skipCount=0; document.getElementById('skip-line').style.display='none';
+  applyQ();
+  if(key==='etc'){toast('데모에서는 대전 기준으로 보여드려요');}
+}
+function pickOne(el){
+  el.parentElement.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+}
+function toggleSw(el,key){
+  el.classList.toggle('on');
+  if(key==='spouse'){
+    document.getElementById('sw-spouse-sub').style.display=el.classList.contains('on')?'none':'block';
+  }
+}
+function openBook(){
+  go('child','c-book');
+  document.getElementById('book-empty').style.display=archiveFilled?'none':'block';
+  document.getElementById('book-full').style.display=archiveFilled?'block':'none';
+}
 function sendInvite(){
   toast('카카오톡으로 보냈어요');
   document.getElementById('invite-wait').style.display='block';
@@ -778,6 +1044,7 @@ function sendCheer(){
   document.getElementById('cheer-sent').style.display='block';
 }
 function fillArchive(){
+  archiveFilled=true;
   document.getElementById('arch-empty').style.display='none';
   document.getElementById('arch-list').style.display='block';
   document.getElementById('arch-count').innerHTML='23 <small>/ 365 번째 이야기</small>';
@@ -785,6 +1052,26 @@ function fillArchive(){
 }
 
 /* ---------- 부모 앱 ---------- */
+function skipQuestion(){
+  skipCount++;
+  if(skipCount===1){
+    currentQ=QA.skip1; applyQ();
+    document.getElementById('skip-line').style.display='block';
+    document.getElementById('part-parent').scrollTop=0;
+  }else{
+    document.getElementById('p-before').style.display='none';
+    document.getElementById('p-rest').style.display='block';
+  }
+}
+function restTomorrow(){
+  skipCount=0;
+  currentQ=QA.tomorrow; applyQ();
+  document.getElementById('skip-line').style.display='none';
+  document.getElementById('p-rest').style.display='none';
+  document.getElementById('p-before').style.display='block';
+  document.getElementById('p-date').textContent='8월 27일 수요일 · 스물네 번째 질문';
+  toast('새 질문으로 찾아왔어요 — 어제 일은 묻지 않아요');
+}
 function startRecord(){
   go('parent','p-record');
   document.getElementById('rec-live').style.display='block';
