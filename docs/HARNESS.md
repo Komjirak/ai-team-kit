@@ -32,11 +32,21 @@ Tactile Minimalism, 크림+주황+먹 토큰, Source Serif 4/Noto Sans, 탭 64px
 DESIGN_CONCEPT와 정합 확인. **APP 구현 착수** — §3-2 B안(RN/Expo), 첫 슬라이스는
 부모 핵심 루프 P1→P2(디자인 토큰 기반, 목 데이터).
 
-**다음 세션이 챙길 것(구현)** — ⑲ APP: Expo 앱 스캐폴드 + 디자인 토큰 모듈
-(DESIGN_SYSTEM.md 파생) + P1·P2 실제 구현(목 데이터, 검증: typecheck/export 종료코드
-0, 실행법 문서화). Expo 설치가 이 컨테이너에서 막히면 정직히 보고 + 폴백(토큰 모듈 +
-핵심 화면 러너블 빌드 + Expo 셋업 절차). ⑳ BE 연동·나머지 화면(C1·C4·C5·C6·P3·
-G1)은 후속. 잔여 미결(D2·D3·D5·D8·이름 정식 승격)은 프론트 슬라이스와 독립.
+✅ APP 첫 슬라이스 완료 — `apps/senior-diary/app/` (Expo SDK 57 managed + Expo Router
++ TS). 디자인 토큰 모듈(DESIGN_SYSTEM 라이트 + BRAND §4 다크)·공통 컴포넌트·부모
+핵심 루프 **P1(오늘)↔P2(녹음)** 실제 구현. P2는 expo-audio 실녹음 + 권한거부·미지원
+목 폴백. P3·자녀 C*는 stub. EAS 프로파일 3종·app.config.ts 구조만(빌드 미실행).
+**검증(종료코드 0): tsc --noEmit · expo export ios/android/web.** node_modules는
+.gitignore로 제외.
+
+**다음 세션이 챙길 것(구현)** — ⑲ **실기기 미검증 3건**(dev build 필요): ⓐ 실제
+마이크 녹음/재생 ⓑ **한글 명조 렌더 — Source Serif 4에 한글 글리프 없음 → 시스템
+세리프 폴백**(정본 한국어 명조 온디맨드 후속, 리스크) ⓒ OTA(expo-updates 미도입,
+현재 빌드 전용). ⑳ 첫 배포는 **네이티브 빌드 필요**(expo-audio 네이티브 모듈 — OTA
+불가) → EAS 빌드는 RM/PO 승인. ㉑ 의도적 스택 조정 3건(README): expo-av→expo-audio
+(SDK57), reanimated→내장 Animated(표면 축소), 폰트는 Source Serif 4만 번들. ㉒ BE
+계약(`// TODO(BE)`): 질문 시퀀스·밤사이 정리 상태·응원 수신. ㉓ 나머지 화면(C1·C4·
+C5·C6·P3·G1)·BE 연동 후속. 잔여 미결(D2·D3·D5·D8·이름 정식 승격)은 독립.
 
 ---
 
