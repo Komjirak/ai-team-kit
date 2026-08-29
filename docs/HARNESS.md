@@ -25,6 +25,23 @@
 공통 스타일 프리앰블(한/영) + **화면 8종 Google Stitch 프롬프트**(P1·P2·P3·C1·C4·C5·
 C6·G1, 한/영 병기). PO가 Stitch에 투입해 컨셉 시안 제작 예정.
 
+📤 **2026-08-29 (6차)** — **senior-diary → 별도 저장소 `harudam` 분리 준비 완료 + 플랫폼 확정.**
+결정 #10: 플랫폼 = **비대칭 하이브리드 + 카카오 알림톡** 확정(올 네이티브 반려 —
+자녀 앱 리더 자격이 응원·선물로 위협). 결정 #9: 기능 4건 확정(타자 선택·인터뷰형·
+중간읽기 최소형·가격 서사).
+
+PO 지시로 **harudam을 별도 git으로 분리** 준비: `harudam-migration/`(빌드 스크립트 +
+harudam용 README·AGENTS·HARNESS + SETUP). ⚠️ 오케스트레이터는 **저장소 생성 권한
+없음(GitHub 403)** — PO가 빈 `Komjirak/harudam` 생성 후 스크립트/번들로 푸시(SETUP.md).
+분리 후 harudam은 단일 제품 저장소(docs/·design/·prototype/·app/ + 팀 프레임워크).
+
+**다음 세션이 챙길 것** — harudam 저장소가 생기면 거기서 실구현 착수(하이브리드
+재설계: BRAND 화자규칙 → PM 정본 PRD·IA에 하이브리드 경계+확정 4건 병합 → PD → BE/APP).
+ai-team-kit의 `apps/senior-diary/`는 아카이브(히스토리 원본)로 남김 — 정리는 PO 판단.
+선행 게이트(법무·G4·알림톡 심사·Firebase)·PO 결정(D2·D5·D7·D8·이름 상표)은 harudam으로 이관.
+
+---
+
 🤔 **2026-08-29 (5차)** — **senior-diary: PO 발의 4아이디어 — 개발 전 평가 완료, PO 결정 대기.**
 PO가 PRD 보다 낸 4건을 BD·PM·BE가 평가(구현 아님·정본 미수정). 종합:
 [`DECISION_BRIEF_v2.md`](../apps/senior-diary/docs/DECISION_BRIEF_v2.md). 팀 권고:
