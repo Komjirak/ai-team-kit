@@ -6,6 +6,7 @@ import { AppText } from '@/components/AppText';
 import { RecordButton } from '@/components/RecordButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { StoryCard } from '@/components/StoryCard';
+import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useDiary } from '@/state/DiaryContext';
 import { useRecorder, formatElapsed, type FinishResult } from '@/features/recording/useRecorder';
@@ -13,9 +14,8 @@ import { useRecorder, formatElapsed, type FinishResult } from '@/features/record
 type Phase = 'recording' | 'confirm-short' | 'done';
 
 /**
- * P2 — 녹음 (부모, 전체 화면 오버레이). ⭐ 반복 장면.
- * 레퍼런스: design/stitch/P2-record.html + PRD §9-4 P2.
- * 질문이 계속 보이고(말하다 잊지 않게), 경과 시간만(카운트다운 없음), 숨쉬는 원(reduced-motion 존중).
+ * P2 — 녹음 (부모, 전체 화면 오버레이). ⭐ 반복 장면. 레퍼런스: stitch/P2-record + PRD §9-4 P2.
+ * 질문이 계속 보이고, 경과 시간만(카운트다운 없음), 숨쉬는 원(reduced-motion 존중).
  * 실제 마이크는 expo-audio, 권한 거부·미지원 시 목 녹음(타이머만)으로 폴백.
  */
 export default function RecordScreen() {
@@ -26,7 +26,6 @@ export default function RecordScreen() {
   const [finished, setFinished] = useState<FinishResult | null>(null);
   const started = useRef(false);
 
-  // 진입 즉시 1회 녹음 시작(녹음은 로컬 — 시작 지연 없음).
   useEffect(() => {
     if (!started.current) {
       started.current = true;
@@ -37,7 +36,6 @@ export default function RecordScreen() {
   async function onDone() {
     const res = await rec.finish();
     setFinished(res);
-    // 3초 미만은 실수 탭 방어(§9-4 P2 빈 상태).
     if (res.durationSec < 3) {
       setPhase('confirm-short');
       return;
@@ -47,27 +45,22 @@ export default function RecordScreen() {
 
   function restart() {
     rec.reset();
-    started.current = false;
     setFinished(null);
     setPhase('recording');
-    started.current = true;
     void rec.start();
   }
 
   function leaveToToday() {
     markAnswered();
-    if (router.canGoBack()) router.back();
-    else router.replace('/');
+    router.replace('/parent/today');
   }
 
   function cancel() {
-    if (router.canGoBack()) router.back();
-    else router.replace('/');
+    router.replace('/parent/today');
   }
 
   return (
     <ScreenContainer scroll justify="space-between">
-      {/* ── 상단: 뒤로 + 하루담 ── */}
       <View style={styles.topBar}>
         <Pressable
           onPress={cancel}
@@ -79,9 +72,7 @@ export default function RecordScreen() {
             ← 뒤로
           </AppText>
         </Pressable>
-        <AppText token="headlineLgMobile" color="primary" style={styles.brand}>
-          하루담
-        </AppText>
+        <Logo size="sm" />
         <View style={{ width: 64 }} />
       </View>
 
@@ -89,7 +80,6 @@ export default function RecordScreen() {
         <DonePanel mock={finished?.mock ?? false} onLeave={leaveToToday} />
       ) : (
         <>
-          {/* ── 질문 유지 ── */}
           <View style={styles.prompt}>
             <AppText token="headlineLgMobile" color="onSurface" style={styles.promptText} accessibilityRole="header">
               “{firstLine(question.text)}…”
@@ -97,7 +87,6 @@ export default function RecordScreen() {
             <View style={[styles.rule, { backgroundColor: colors.outlineVariant }]} />
           </View>
 
-          {/* ── 숨쉬는 원 + 경과 시간 ── */}
           <View style={styles.recorder}>
             <RecordButton active={phase === 'recording'} onPress={() => {}} />
             <AppText token="headlineLg" color="onSurface" style={styles.timer}>
@@ -111,7 +100,6 @@ export default function RecordScreen() {
             )}
           </View>
 
-          {/* ── 안내 문구 ── */}
           <View style={styles.helper}>
             <AppText token="storyBody" color="onSurfaceVariant" style={styles.helperText}>
               천천히, 편하게 말씀하세요.
@@ -121,7 +109,6 @@ export default function RecordScreen() {
             </AppText>
           </View>
 
-          {/* ── 하단 행동 ── */}
           <View style={styles.footer}>
             {phase === 'confirm-short' ? (
               <View style={styles.confirm}>
@@ -145,11 +132,10 @@ export default function RecordScreen() {
   );
 }
 
-/** 종료 화면: STT 배치를 약속의 언어로 + 원음 재생 자리. */
 function DonePanel({ mock, onLeave }: { mock: boolean; onLeave: () => void }) {
   return (
     <View style={styles.doneWrap}>
-      <StoryCard tone="raised" style={styles.doneCard}>
+      <StoryCard tone="raised">
         <AppText token="headlineLgMobile" color="onBackground" style={styles.doneTitle}>
           잘 들었어요.
         </AppText>
@@ -158,9 +144,7 @@ function DonePanel({ mock, onLeave }: { mock: boolean; onLeave: () => void }) {
         </AppText>
       </StoryCard>
 
-      {/* 원음 즉시 재생(정리본은 없어도 원음은 있다).
-          TODO(BE/APP): 실제 재생은 expo-audio useAudioPlayer(uri)로 연결. 이 슬라이스는 자리 표시 —
-          녹음/재생 모두 실기기 검증 영역이라 목에서는 비활성으로 표시(미검증). */}
+      {/* 원음 즉시 재생. TODO(BE/APP): 실제 재생은 expo-audio useAudioPlayer(uri). 목/미검증 시 비활성 표시. */}
       <View style={[styles.playRow, { opacity: mock ? 0.5 : 1 }]}>
         <AppText token="labelLg" color="primary">
           ▶ 방금 하신 말씀 들어보기
@@ -183,12 +167,7 @@ function MicDeniedNote() {
       <AppText token="parentBody" color="onBackground" style={styles.deniedText}>
         말씀을 담으려면 마이크 허락이 필요해요.
       </AppText>
-      <Pressable
-        onPress={() => void Linking.openSettings()}
-        accessibilityRole="button"
-        accessibilityLabel="마이크 허락하러 가기"
-        style={styles.deniedBtn}
-      >
+      <Pressable onPress={() => void Linking.openSettings()} accessibilityRole="button" accessibilityLabel="마이크 허락하러 가기" style={styles.deniedBtn}>
         <AppText token="labelLg" color="primary">
           허락하러 가기 →
         </AppText>
@@ -201,13 +180,12 @@ function MicDeniedNote() {
 }
 
 function firstLine(text: string): string {
-  return text.split('\n')[0].replace(/[?？]$/, '');
+  return text.split('\n').join(' ').replace(/[?？]$/, '');
 }
 
 const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
   backBtn: { justifyContent: 'center', paddingRight: 8 },
-  brand: { textAlign: 'center' },
   prompt: { alignItems: 'center', gap: 16, marginTop: 8 },
   promptText: { textAlign: 'center' },
   rule: { height: StyleSheet.hairlineWidth * 2, width: 96, opacity: 0.6 },
@@ -221,7 +199,6 @@ const styles = StyleSheet.create({
   confirmText: { textAlign: 'center' },
   secondary: { minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   doneWrap: { flexGrow: 1, justifyContent: 'center', gap: 28, width: '100%' },
-  doneCard: {},
   doneTitle: { textAlign: 'center', marginBottom: 8 },
   doneBody: { textAlign: 'center' },
   playRow: { alignItems: 'center', gap: 6 },

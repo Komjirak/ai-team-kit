@@ -1,52 +1,54 @@
 import { useFonts } from 'expo-font';
 import { Platform } from 'react-native';
-import { SourceSerif4_400Regular } from '@expo-google-fonts/source-serif-4/400Regular';
-import { SourceSerif4_600SemiBold } from '@expo-google-fonts/source-serif-4/600SemiBold';
+import { GowunBatang_400Regular } from '@expo-google-fonts/gowun-batang/400Regular';
+import { GowunBatang_700Bold } from '@expo-google-fonts/gowun-batang/700Bold';
+import { NotoSansKR_400Regular } from '@expo-google-fonts/noto-sans-kr/400Regular';
+import { NotoSansKR_700Bold } from '@expo-google-fonts/noto-sans-kr/700Bold';
 import type { FontRole } from './tokens';
 
 /**
- * 폰트 로딩·해석.
+ * 폰트 로딩·해석 — BRAND §4-2가 지정한 정본 서체.
  *
- * 하네스 규칙("폰트·대용량 에셋은 번들 금지, 온디맨드 다운로드") 준수 방식:
- * - Source Serif 4(라틴 세리프)만 번들한다 — 가볍고, "이야기의 목소리"(명조)의 의도를 세운다.
- * - Noto Sans KR / 한국어 명조(고운바탕·Noto Serif KR)는 수 MB라 번들하지 않는다.
- *   · UI(sans)의 한글은 시스템 폰트가 완벽히 렌더한다(iOS Apple SD Gothic Neo / Android Noto Sans CJK).
- *   · 질문·본문(serif)의 한글 명조 렌더는 이번 슬라이스에서 시스템 세리프 폴백으로 둔다.
- *     TODO(BRAND/PD): 정본 한국어 명조는 온디맨드 다운로드로 붙인다(하네스 규칙). 미검증 항목.
+ * - 이야기의 목소리(serif) = **고운바탕(Gowun Batang)** — 질문·이야기·로고·책.
+ * - 손잡이(sans)         = **Noto Sans KR** — 버튼·내비·상태·자녀 UI.
+ * 이제 한글이 시스템 폴백이 아니라 두 정본 서체로 렌더된다(코드상).
  *
- * ⚠️ 미검증: Source Serif 4에는 한글 글리프가 없어, 한글 질문은 실기기에서 시스템 세리프로
- *   글리프 단위 폴백된다. iOS는 글리프 폴백이 매끄럽지만 Android 기기별 편차는 실기기 확인 대상.
+ * ⚖️ 번들 용량 (하네스 규칙: 대용량 폰트 번들 경계):
+ *   고운바탕 400/700(≈16MB) + Noto Sans KR 400/700(≈12MB) = 4종만 번들한다.
+ *   지시된 5종(serif 400/700 + sans 400/500/700, ≈34MB)에서 **sans 500(Medium)을 뺐다** —
+ *   500은 400으로 매핑(라벨 두께 차이는 미미, 34MB→28MB). 더 줄이려면 sans를 시스템 폰트로
+ *   되돌리면 ≈12MB 절감(off-switch, README 참고). 정본 감성의 핵심인 serif는 유지.
+ *
+ * ⚠️ 미검증: 고운바탕 한글 글리프의 실제 표시·자간·행간은 실기기(dev build)에서만 육안 확인 가능.
  */
 
+export const APP_FONT_FACES = {
+  GowunBatang_400Regular,
+  GowunBatang_700Bold,
+  NotoSansKR_400Regular,
+  NotoSansKR_700Bold,
+};
+
 export function useAppFonts(): { loaded: boolean; error: Error | null } {
-  const [loaded, error] = useFonts({
-    SourceSerif4_400Regular,
-    SourceSerif4_600SemiBold,
-  });
+  const [loaded, error] = useFonts(APP_FONT_FACES);
   return { loaded, error: error ?? null };
 }
 
-// 시스템 세리프 폴백(폰트 미로딩/한글 글리프 폴백용)
+// 폰트 미로딩 시 폴백(시스템). serif는 한글 명조가 시스템에 없을 수 있어 시스템 세리프.
 const systemSerif = Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' });
 
 /**
  * 타이포 role + weight → 실제 fontFamily 이름.
- * loaded=false면 세리프도 시스템 폴백으로 내린다(레이아웃 파손 없이 계속 동작).
- * sans는 항상 undefined = 시스템 UI 폰트(한글 완전 지원).
+ * loaded면 명명된 웨이트 페이스를 반환(폰트가 두께를 담고 있으므로 fontWeight는 typography에서 생략).
+ * 미로딩이면 undefined/systemSerif(시스템 폴백) — 이때만 fontWeight를 적용한다.
  */
 export function resolveFontFamily(
   role: FontRole,
   weight: '400' | '500' | '600' | '700',
   loaded: boolean,
 ): string | undefined {
-  if (role === 'sans') {
-    // 시스템 폰트에 맡긴다. weight는 style의 fontWeight로 처리(별도 파일 불필요).
-    return undefined;
-  }
-  // serif
-  if (!loaded) return systemSerif;
-  // Source Serif 4는 400/600만 로드. 600/700 요청은 SemiBold로 매핑.
-  return weight === '400' || weight === '500'
-    ? 'SourceSerif4_400Regular'
-    : 'SourceSerif4_600SemiBold';
+  if (!loaded) return role === 'serif' ? systemSerif : undefined;
+  const bold = weight === '600' || weight === '700';
+  if (role === 'serif') return bold ? 'GowunBatang_700Bold' : 'GowunBatang_400Regular';
+  return bold ? 'NotoSansKR_700Bold' : 'NotoSansKR_400Regular';
 }

@@ -9,12 +9,15 @@ import { resolveFontFamily } from './fonts';
  */
 export function typography(name: TypeName, fontsLoaded: boolean): TextStyle {
   const t: TypeToken = type[name];
+  const fontFamily = resolveFontFamily(t.family, t.fontWeight, fontsLoaded);
   const style: TextStyle = {
     fontSize: t.fontSize,
     lineHeight: Math.round(t.fontSize * t.lineHeightRatio),
-    fontWeight: t.fontWeight,
-    fontFamily: resolveFontFamily(t.family, t.fontWeight, fontsLoaded),
+    fontFamily,
   };
+  // 명명된 웨이트 페이스가 로드된 경우 폰트가 두께를 담으므로 fontWeight를 생략한다
+  // (RN에서 굵기 이중 적용/합성 볼드를 피함). 폴백일 때만 fontWeight로 두께를 준다.
+  if (!fontsLoaded) style.fontWeight = t.fontWeight;
   if (t.letterSpacing !== undefined) style.letterSpacing = t.letterSpacing;
   return style;
 }

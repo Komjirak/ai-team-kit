@@ -1,135 +1,116 @@
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { Link, type Href } from 'expo-router';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { AppText } from '@/components/AppText';
-import { RecordButton } from '@/components/RecordButton';
-import { CheerBanner } from '@/components/CheerBanner';
-import { StoryCard } from '@/components/StoryCard';
+import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useDiary } from '@/state/DiaryContext';
-import { todayLabel } from '@/data/mock';
 
 /**
- * P1 — 오늘 (부모 홈). ⭐ 반복 장면.
- * 레퍼런스: design/stitch/P1-today.html + PRD §9-4 P1.
- * 화면당 주 행동 1개(녹음) + 보조 최대 2개(스킵·지난 이야기). 탭만, 숨은 제스처 없음(§9-5).
+ * 둘러보기(점검용) — ⚠️ 개발/점검 전용 인덱스.
+ * IA상 프로덕션 진입은 역할=진입경로(P0 초대링크 / C1 신청)라 이런 역할선택 화면은 없다.
+ * 이 화면은 "폰에서 모든 화면을 둘러볼 수 있게" 하는 점검용 표면이며, 프로덕션 진입 흐름과 별개다.
  */
-export default function TodayScreen() {
-  const { colors, spacing } = useTheme();
-  const { question, answerState, skipNotice, cheer, hasPastStories, skip, dismissCheer } = useDiary();
 
-  const label = `${todayLabel()} · ${numberToOrdinalKo(question.ordinal)} 질문`;
+type Row = { href: string; code: string; label: string };
 
+const PARENT: Row[] = [
+  { href: '/parent/invite', code: 'P0', label: '초대 진입' },
+  { href: '/parent/today', code: 'P1', label: '오늘 (홈) ★' },
+  { href: '/parent/archive', code: 'P3', label: '지난 이야기' },
+];
+const CHILD: Row[] = [
+  { href: '/child/profile', code: 'C1', label: '신청·프로필 (2단계)' },
+  { href: '/child/invite-wait', code: 'C2', label: '초대 보내기·대기' },
+  { href: '/child/home', code: 'C3', label: '홈 ★' },
+  { href: '/child/story', code: 'C4', label: '이야기 읽기·응원 ★' },
+  { href: '/child/library', code: 'C5', label: '모아보기 (서재)' },
+  { href: '/child/book', code: 'C6', label: '책 미리보기' },
+];
+const COMMON: Row[] = [{ href: '/landing', code: 'G1', label: '랜딩·사전예약' }];
+
+export default function InspectIndex() {
   return (
-    <ScreenContainer scroll justify="space-between">
-      {/* ── 헤더: 날짜·순번 + 응원 배너 ── */}
-      <View style={styles.header}>
-        <AppText token="labelMd" color="onSurfaceVariant" style={styles.dateLabel}>
-          {label}
+    <ScreenContainer scroll justify="flex-start">
+      <View style={styles.head}>
+        <Logo size="lg" />
+        <AppText token="storyBody" color="onSurfaceVariant" style={styles.tagline}>
+          매일 한 질문, 1년 뒤 한 권
         </AppText>
-        {cheer && (
-          <Pressable onPress={dismissCheer} accessibilityRole="button" accessibilityLabel={`응원 배너 닫기: ${cheer.message}`}>
-            <CheerBanner message={cheer.message} />
-          </Pressable>
-        )}
+        <DevBadge />
       </View>
 
-      {/* ── 본문: 질문 또는 상태 카드 ── */}
-      <View style={styles.canvas}>
-        {skipNotice && (
-          <AppText token="labelMd" color="onSurfaceVariant" style={styles.notice}>
-            {skipNotice}
-          </AppText>
-        )}
+      <Section title="부모 세계" subtitle="P1↔P2↔P3 · 상시 3화면" rows={PARENT} />
+      <Section title="자녀 세계" subtitle="C1→C2→C3→C4↔C5→C6" rows={CHILD} />
+      <Section title="공용" subtitle="역할 배정 전" rows={COMMON} />
 
-        {answerState === 'unanswered' && (
-          <AppText token="headlineLgMobile" color="onBackground" style={styles.question} accessibilityRole="header">
-            {question.text}
-          </AppText>
-        )}
-
-        {answerState === 'organizing' && (
-          <StoryCard tone="raised">
-            <AppText token="headlineLgMobile" color="onBackground" style={styles.cardTitle}>
-              오늘 이야기를 남기셨어요 ✓
-            </AppText>
-            <AppText token="parentBody" color="onSurfaceVariant" style={styles.cardBody}>
-              밤사이 글로 정리해 드릴게요.
-            </AppText>
-          </StoryCard>
-        )}
-
-        {answerState === 'resting' && (
-          <StoryCard tone="raised">
-            <AppText token="headlineLgMobile" color="onBackground" style={styles.cardTitle}>
-              오늘은 쉬어가도 돼요
-            </AppText>
-            <AppText token="parentBody" color="onSurfaceVariant" style={styles.cardBody}>
-              내일 새 질문으로 찾아올게요.
-            </AppText>
-          </StoryCard>
-        )}
-      </View>
-
-      {/* ── 행동: 녹음 버튼(주) + 스킵·지난 이야기(보조) ── */}
-      <View style={styles.actions}>
-        {answerState === 'unanswered' && (
-          <>
-            <RecordButton label="눌러서 이야기해 주세요" onPress={() => router.push('/record')} />
-            <View style={{ height: spacing.gutterBlock }} />
-            <Pressable
-              onPress={skip}
-              accessibilityRole="button"
-              accessibilityLabel="이 이야기는 넘어갈게요"
-              accessibilityHint="다른 이야기로 바꿔서 여쭤봐요"
-              style={styles.skip}
-            >
-              <AppText token="labelMd" color="onSurfaceVariant" style={styles.skipText}>
-                이 이야기는 넘어갈게요
-              </AppText>
-            </Pressable>
-          </>
-        )}
-
-        {hasPastStories && (
-          <Pressable
-            onPress={() => router.push('/archive')}
-            accessibilityRole="button"
-            accessibilityLabel="지난 이야기 보기"
-            style={[styles.archiveLink, { minHeight: spacing.tapTargetMin }]}
-          >
-            <AppText token="labelLg" color="primary">
-              지난 이야기 보기 →
-            </AppText>
-          </Pressable>
-        )}
-      </View>
+      <AppText token="helper" color="onSurfaceVariant" style={styles.footer}>
+        실제 플로우 전이(예: P1의 녹음 버튼 → P2)는 각 화면 안에서도 이어집니다.
+      </AppText>
     </ScreenContainer>
   );
 }
 
-/** 순번을 한국어 서수로("스물세 번째"). 목 범위(1~99)만 처리 — TODO(BE): 서버 시퀀스 값 사용. */
-function numberToOrdinalKo(n: number): string {
-  const tens = ['', '열', '스물', '서른', '마흔', '쉰', '예순', '일흔', '여든', '아흔'];
-  const unitOrdinal = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'];
-  if (n <= 0 || n >= 100) return `${n} 번째`;
-  const t = Math.floor(n / 10);
-  const u = n % 10;
-  const word = `${tens[t]}${u === 0 ? '' : unitOrdinal[u]}`;
-  return `${word} 번째`;
+function DevBadge() {
+  const { colors, radius } = useTheme();
+  return (
+    <View style={[styles.badge, { borderColor: colors.outlineVariant, borderRadius: radius.full }]}>
+      <AppText token="helper" color="onSurfaceVariant">
+        점검용 화면 · 프로덕션 진입 흐름과 별개
+      </AppText>
+    </View>
+  );
+}
+
+function Section({ title, subtitle, rows }: { title: string; subtitle: string; rows: Row[] }) {
+  const { colors, radius, spacing } = useTheme();
+  return (
+    <View style={{ marginTop: spacing.gutterBlock }}>
+      <AppText token="labelLg" color="onSurface">
+        {title}
+      </AppText>
+      <AppText token="helper" color="onSurfaceVariant" style={{ marginBottom: 8 }}>
+        {subtitle}
+      </AppText>
+      <View style={{ gap: 8 }}>
+        {rows.map((r) => (
+          <Link key={r.href} href={r.href as Href} asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${r.code} ${r.label}`}
+              style={({ pressed }) => [
+                styles.row,
+                {
+                  borderRadius: radius.lg,
+                  borderColor: colors.outlineVariant,
+                  backgroundColor: pressed ? colors.surfaceContainer : colors.surface,
+                },
+              ]}
+            >
+              <View style={[styles.codeChip, { backgroundColor: colors.primaryContainer, borderRadius: radius.base }]}>
+                <AppText token="labelMd" color="onPrimary">
+                  {r.code}
+                </AppText>
+              </View>
+              <AppText token="parentBody" color="onSurface" style={{ flex: 1 }}>
+                {r.label}
+              </AppText>
+              <AppText token="labelLg" color="primary">
+                →
+              </AppText>
+            </Pressable>
+          </Link>
+        ))}
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', gap: 16 },
-  dateLabel: { textAlign: 'center', letterSpacing: 0.3 },
-  canvas: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 20, width: '100%' },
-  notice: { textAlign: 'center' },
-  question: { textAlign: 'center' },
-  cardTitle: { textAlign: 'center', marginBottom: 8 },
-  cardBody: { textAlign: 'center' },
-  actions: { alignItems: 'center', width: '100%', gap: 8 },
-  skip: { alignItems: 'center', justifyContent: 'center', minHeight: 48, paddingHorizontal: 16 },
-  skipText: { textDecorationLine: 'underline', textAlign: 'center' },
-  archiveLink: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16, marginTop: 8 },
+  head: { alignItems: 'center', gap: 10, marginBottom: 8 },
+  tagline: { textAlign: 'center' },
+  badge: { borderWidth: StyleSheet.hairlineWidth * 2, paddingVertical: 6, paddingHorizontal: 14, marginTop: 4 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingHorizontal: 16, borderWidth: StyleSheet.hairlineWidth * 2 },
+  codeChip: { minWidth: 40, paddingVertical: 4, paddingHorizontal: 8, alignItems: 'center' },
+  footer: { textAlign: 'center', marginTop: 24 },
 });

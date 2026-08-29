@@ -12,7 +12,8 @@
     "export:native": "expo export --platform ios --platform android"
   },
   "dependencies": {
-    "@expo-google-fonts/source-serif-4": "^0.4.1",
+    "@expo-google-fonts/gowun-batang": "^0.4.1",
+    "@expo-google-fonts/noto-sans-kr": "^0.4.3",
     "@expo/metro-runtime": "~57.0.14",
     "expo": "~57.0.18",
     "expo-audio": "~57.0.4",
