@@ -25,6 +25,23 @@
 공통 스타일 프리앰블(한/영) + **화면 8종 Google Stitch 프롬프트**(P1·P2·P3·C1·C4·C5·
 C6·G1, 한/영 병기). PO가 Stitch에 투입해 컨셉 시안 제작 예정.
 
+🤔 **2026-08-29 (5차)** — **senior-diary: PO 발의 4아이디어 — 개발 전 평가 완료, PO 결정 대기.**
+PO가 PRD 보다 낸 4건을 BD·PM·BE가 평가(구현 아님·정본 미수정). 종합:
+[`DECISION_BRIEF_v2.md`](../apps/senior-diary/docs/DECISION_BRIEF_v2.md). 팀 권고:
+①입력 방식(타자 선택=MVP / 실시간 자막=V1.x, 오인식 노출 충돌) ②자녀 이름 인터뷰형
+=MVP(BRAND 화자규칙 선행) ③중간 읽기(최소 뷰어 MVP검토 / 완성형·가격재편 — 가격표
+무변경·"1년 서프라이즈"→인쇄 add-on 이관) ④플랫폼=**비대칭 하이브리드**(부모 네이티브
+녹음 / 자녀 웹 결제·읽기 / 알림톡 V1.5 보조 — web 약점이 전부 부모측, 자녀 웹결제
+PG 3.5% vs 앱 IAP 15~30%). 근거 문서: PRD_PROPOSALS·SPIKE_REALTIME_STT_WEB·
+PLATFORM_BM_ANALYSIS.
+
+**다음 세션이 챙길 것** — PO 결정 5건(D-신1~5, BRIEF 말미). **선행 게이트(결정 흔듦)**:
+앱스토어 웹결제 스티어링 규정(RM/법무 — D-신4 전제) · iOS 카톡 인앱 녹음 실기기 매트릭스 ·
+RTZR/클로바 스트리밍 단가 원문 · 알림톡 반복발송 심사 · G4 고령자 STT 실측(전부 미확인).
+승인 시 반영 순서: BRAND(화자규칙) → PM(PRD §3-1·IA) → PD(화면) → BE/APP(플랫폼 확정 후).
+
+---
+
 📦 **2026-08-29 (4차)** — **senior-diary: MVP 산출물 8종 최종화 — 실구현 컨셉 문서 세트 완성.**
 PO 요청으로 전 역할이 산출물을 최종화: ①BD BUSINESS_CASE §0.5 경쟁·차별화 요약
 ②PM PRD §0-1/§3-7/§3-8 + BACKLOG.md(에픽 E0~E8) ③BRAND 슬로건 체계·UX Writing·
