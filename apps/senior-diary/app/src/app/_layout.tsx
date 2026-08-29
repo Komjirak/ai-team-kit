@@ -4,7 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAppFonts } from '@/theme/fonts';
 import { ThemeProvider } from '@/theme/ThemeProvider';
-import { DiaryProvider } from '@/state/DiaryContext';
+import { StoreProvider } from '@/state/StoreProvider';
 
 // 폰트(고운바탕·Noto Sans KR)가 준비될 때까지 네이티브 스플래시(크림+심볼) 유지.
 void SplashScreen.preventAutoHideAsync();
@@ -22,14 +22,14 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider fontsLoaded={loaded}>
-        <DiaryProvider>
+        <StoreProvider>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="landing" />
             <Stack.Screen name="parent" />
             <Stack.Screen name="child" />
           </Stack>
-        </DiaryProvider>
+        </StoreProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

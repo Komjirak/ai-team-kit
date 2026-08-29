@@ -7,7 +7,7 @@ import { BackBar } from '@/components/BackBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { StoryCard } from '@/components/StoryCard';
 import { useTheme } from '@/theme/ThemeProvider';
-import { family } from '@/data/mock';
+import { useFamily, useInviteActions } from '@/state/StoreProvider';
 
 /**
  * C2 — 초대 보내기·대기 (자녀). 레퍼런스: PRD §9-4 C2. 🔥 마찰 장면.
@@ -15,6 +15,8 @@ import { family } from '@/data/mock';
  */
 export default function InviteWaitScreen() {
   const { colors, radius } = useTheme();
+  const family = useFamily();
+  const { activateFamily, reissueInvite } = useInviteActions();
 
   return (
     <ScreenContainer scroll justify="flex-start">
@@ -54,7 +56,7 @@ export default function InviteWaitScreen() {
           </AppText>
         </View>
 
-        <Pressable style={styles.reissue} accessibilityRole="button" accessibilityLabel="초대장 다시 만들기">
+        <Pressable onPress={reissueInvite} style={styles.reissue} accessibilityRole="button" accessibilityLabel="초대장 다시 만들기">
           <AppText token="labelMd" color="onSurfaceVariant" style={{ textDecorationLine: 'underline' }}>
             초대장 다시 만들기
           </AppText>
@@ -62,7 +64,10 @@ export default function InviteWaitScreen() {
 
         {/* 점검용: 부모 활성화 시뮬레이트 → C3 */}
         <Pressable
-          onPress={() => router.replace('/child/home')}
+          onPress={() => {
+            activateFamily();
+            router.replace('/child/home');
+          }}
           style={[styles.devJump, { borderColor: colors.outlineVariant, borderRadius: radius.full }]}
           accessibilityRole="button"
         >

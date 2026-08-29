@@ -7,7 +7,7 @@ import { Logo } from '@/components/Logo';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ChildBottomNav } from '@/components/ChildBottomNav';
 import { useTheme } from '@/theme/ThemeProvider';
-import { pastStories, libraryProgress } from '@/data/mock';
+import { useLibrary } from '@/state/StoreProvider';
 
 /**
  * C5 — 모아보기 (자녀, I5 진행감). 레퍼런스: stitch/C5-library + PRD §9-4 C5.
@@ -15,7 +15,8 @@ import { pastStories, libraryProgress } from '@/data/mock';
  */
 export default function LibraryScreen() {
   const { colors, radius } = useTheme();
-  const { count, total } = libraryProgress;
+  const { progress, stories } = useLibrary();
+  const { count, total } = progress;
 
   return (
     <ScreenContainer scroll justify="flex-start" footer={<ChildBottomNav active="library" />}>
@@ -58,7 +59,7 @@ export default function LibraryScreen() {
       </View>
 
       <View>
-        {pastStories.map((s) => (
+        {stories.map((s) => (
           <Pressable
             key={s.id}
             onPress={() => router.push('/child/story')}

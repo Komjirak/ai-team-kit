@@ -6,7 +6,7 @@ import { AppText } from '@/components/AppText';
 import { BackBar } from '@/components/BackBar';
 import { StatusPill } from '@/components/StatusPill';
 import { useTheme } from '@/theme/ThemeProvider';
-import { pastStories } from '@/data/mock';
+import { useStories } from '@/state/StoreProvider';
 
 /**
  * P3 — 지난 이야기 (부모). 레퍼런스: stitch/P3-archive + PRD §9-4 P3.
@@ -15,7 +15,7 @@ import { pastStories } from '@/data/mock';
  */
 export default function ArchiveScreen() {
   const { colors, radius, spacing } = useTheme();
-  const stories = pastStories;
+  const stories = useStories();
 
   return (
     <ScreenContainer scroll justify="flex-start">

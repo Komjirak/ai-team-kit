@@ -15,6 +15,7 @@
     "@expo-google-fonts/gowun-batang": "^0.4.1",
     "@expo-google-fonts/noto-sans-kr": "^0.4.3",
     "@expo/metro-runtime": "~57.0.14",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.18",
     "expo-audio": "~57.0.4",
     "expo-constants": "~57.0.16",

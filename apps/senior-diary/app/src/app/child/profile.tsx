@@ -9,7 +9,8 @@ import { StoryCard } from '@/components/StoryCard';
 import { Toggle } from '@/components/Toggle';
 import { useTheme } from '@/theme/ThemeProvider';
 import { typography } from '@/theme/typography';
-import { sensitiveTopics } from '@/data/mock';
+import type { SensitiveTopicId } from '@/domain/types';
+import { useSensitiveTopics, useSaveProfile } from '@/state/StoreProvider';
 
 /**
  * C1 — 신청·프로필 (자녀, 2단계). 레퍼런스: stitch/C1-profile + PRD §9-4 C1.
@@ -19,6 +20,8 @@ type Step = 'a' | 'b';
 
 export default function ProfileScreen() {
   const { colors, fontsLoaded } = useTheme();
+  const sensitiveTopics = useSensitiveTopics();
+  const saveProfile = useSaveProfile();
   const [step, setStep] = useState<Step>('a');
 
   const [parentTitle, setParentTitle] = useState<'어머니' | '아버지'>('어머니');
@@ -31,6 +34,19 @@ export default function ProfileScreen() {
     Object.fromEntries(sensitiveTopics.map((t) => [t.id, true])),
   );
 
+  function submit() {
+    // 자녀가 입력한 프로필 저장 → 분기 룰이 오늘의 질문에 반영된다(예: 고향=서울 치환).
+    saveProfile({
+      parentTitle,
+      parentName,
+      childName: myName,
+      hometown,
+      occupation,
+      ask: ask as Record<SensitiveTopicId, boolean>,
+    });
+    router.replace('/child/invite-wait');
+  }
+
   const ruled = [
     typography('storyBody', fontsLoaded),
     styles.ruled,
@@ -42,7 +58,7 @@ export default function ProfileScreen() {
       {step === 'a' ? (
         <PrimaryButton label="다음 — 질문 맞추기" onPress={() => setStep('b')} />
       ) : (
-        <PrimaryButton label="초대장 만들기" onPress={() => router.replace('/child/invite-wait')} />
+        <PrimaryButton label="초대장 만들기" onPress={submit} />
       )}
     </FixedFooter>
   );
@@ -161,7 +177,7 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-          <Pressable onPress={() => router.replace('/child/invite-wait')} style={styles.laterLink} accessibilityRole="button">
+          <Pressable onPress={submit} style={styles.laterLink} accessibilityRole="button">
             <AppText token="labelMd" color="onSurfaceVariant" style={{ textDecorationLine: 'underline' }}>
               나중에 채울게요
             </AppText>

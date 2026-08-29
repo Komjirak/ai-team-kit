@@ -25,6 +25,30 @@
 공통 스타일 프리앰블(한/영) + **화면 8종 Google Stitch 프롬프트**(P1·P2·P3·C1·C4·C5·
 C6·G1, 한/영 병기). PO가 Stitch에 투입해 컨셉 시안 제작 예정.
 
+🔧 **2026-08-29 (3차)** — **senior-diary: BE 통합 — 체험 가능한 local-first MVP.**
+BE가 `apps/senior-diary/app/` 안에 서버 없는 local-first 백엔드를 넣어 **전체 루프
+실동작**(녹음→모의STT→밤사이 정리→자녀 읽기·응원→부모 반영). 구조: 도메인
+(`src/domain/`)·저장소 인터페이스(`src/services/repository.ts`)·구현 2종
+(local=AsyncStorage / firebase=**미배선 스텁**)·**교체 지점 `src/services/index.ts` 한 줄**·
+파이프라인(branching 분기엔진·stt·nightly 멱등·book 조립)·시드(32문항 7챕터 분기룰).
+목데이터(mock.ts) 제거, 15화면 서비스 배선(JSX 불변), 데모 도구(수동 정리·초기화).
+문서 `app/docs/BE_CONTRACT.md`(멱등·실패모드·Firebase 이관)·README(체험 시나리오).
+검증 종료코드 0: tsc · expo export ios/android/web. 순수 로직 헤드리스 22/22.
+
+**체험 순서**: 둘러보기 인덱스 → P1 녹음→다했어요 → 데모도구 🌙지금 정리하기 →
+C4 읽고 응원 보내기 → P1 응원 배너(루프 완성). 분기: C1에서 고향 "서울"→P1 질문 치환.
+
+**다음 세션이 챙길 것** — ㉘ **실 Firebase 프로비저닝**(프로젝트·키·콘솔·과금)은
+PO 영역 — 스텁까지만, 배선 시 `BE_CONTRACT.md §6`이 계약(웹훅 순서역전 가드는
+단일기기라 아직 미발동). ㉙ QA 실기기 육안(미검증): AsyncStorage 실영속·재실행 유지 ·
+자동 정리 5s 타이머 · 실마이크 캡처/재생 · 고운바탕 한글 글리프 · 키보드 회피. ㉚ APP
+협의: 실 원음 재생 배선(`useAudioPlayer`)·이름 교정 UI(IA O-2). ㉛ 폰트 28MB 서브셋팅.
+
+**다음 세션이 챙길 것(이전 미결)** — QA 게이트 검수 · RM 빌드 예산(EAS, 미실행) ·
+잔여 PO 결정(D2 G1집행·D5 가격·D8 놓친하루·이름 정식 승격[상표]).
+
+---
+
 🔧 **2026-08-29 (2차)** — **senior-diary: 프론트엔드 전면 완성 — 전 화면·로고·스플래시·한글 명조.**
 APP이 `apps/senior-diary/app/`를 점검 가능한 완성본으로: ① **한글 정본 폰트** —
 고운바탕(질문·이야기·로고)+Noto Sans KR(UI) 번들, 토큰 연결 ② **브랜드 자산** —

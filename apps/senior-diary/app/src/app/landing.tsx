@@ -8,7 +8,7 @@ import { StoryCard } from '@/components/StoryCard';
 import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/ThemeProvider';
 import { typography } from '@/theme/typography';
-import { landingSampleQuestion } from '@/data/mock';
+import { LANDING_SAMPLE_QUESTION } from '@/data/seed/content';
 
 /**
  * G1 — 랜딩·사전예약 (공용). 레퍼런스: PRD §9-2(레이아웃·슬롯). 카피 문안은 GROWTH 소유.
@@ -49,7 +49,7 @@ export default function LandingScreen() {
           이런 걸 여쭤봐요
         </AppText>
         <AppText token="headlineLgMobile" color="onBackground">
-          “{landingSampleQuestion}”
+          “{LANDING_SAMPLE_QUESTION}”
         </AppText>
       </StoryCard>
 

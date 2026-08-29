@@ -7,7 +7,7 @@ import { BackBar } from '@/components/BackBar';
 import { ProgressBar } from '@/components/ProgressBar';
 import { useTheme } from '@/theme/ThemeProvider';
 import { typography } from '@/theme/typography';
-import { pastStories, family } from '@/data/mock';
+import { useLatestStory, useFamily, useSendCheer } from '@/state/StoreProvider';
 
 /**
  * C4 — 이야기 읽기·응원 (자녀). 레퍼런스: stitch/C4-read-cheer + PRD §9-4 C4. ⭐ 반복 장면.
@@ -18,10 +18,13 @@ const CHIPS = ['엄마, 이 얘기 처음 들었어', '오늘도 고마워요', 
 
 export default function StoryScreen() {
   const { colors, radius, fontsLoaded } = useTheme();
-  const story = pastStories.find((s) => s.id === 's-0823')!;
-  const organizing = story.status === 'organizing';
+  const story = useLatestStory();
+  const family = useFamily();
+  const sendCheer = useSendCheer();
   const [draft, setDraft] = useState('');
   const [sent, setSent] = useState(false);
+  if (!story) return null;
+  const organizing = story.status === 'organizing';
 
   const footer = (
     <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.outlineVariant }]}>
@@ -61,7 +64,7 @@ export default function StoryScreen() {
               ]}
             />
             <Pressable
-              onPress={() => { setSent(true); setDraft(''); }}
+              onPress={() => { sendCheer(story.answerId, draft); setSent(true); setDraft(''); }}
               accessibilityRole="button"
               accessibilityLabel="응원 보내기"
               style={[styles.send, { backgroundColor: colors.primaryContainer, borderRadius: radius.md }]}

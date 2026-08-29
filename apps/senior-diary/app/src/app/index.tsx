@@ -5,6 +5,7 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { AppText } from '@/components/AppText';
 import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useDemoTools } from '@/state/StoreProvider';
 
 /**
  * 둘러보기(점검용) — ⚠️ 개발/점검 전용 인덱스.
@@ -43,6 +44,7 @@ export default function InspectIndex() {
       <Section title="부모 세계" subtitle="P1↔P2↔P3 · 상시 3화면" rows={PARENT} />
       <Section title="자녀 세계" subtitle="C1→C2→C3→C4↔C5→C6" rows={CHILD} />
       <Section title="공용" subtitle="역할 배정 전" rows={COMMON} />
+      <DemoTools />
 
       <AppText token="helper" color="onSurfaceVariant" style={styles.footer}>
         실제 플로우 전이(예: P1의 녹음 버튼 → P2)는 각 화면 안에서도 이어집니다.
@@ -58,6 +60,47 @@ function DevBadge() {
       <AppText token="helper" color="onSurfaceVariant">
         점검용 화면 · 프로덕션 진입 흐름과 별개
       </AppText>
+    </View>
+  );
+}
+
+function DemoTools() {
+  const { colors, radius, spacing } = useTheme();
+  const { runNightlyNow, reset } = useDemoTools();
+  const rows: { label: string; onPress: () => void; a11y: string }[] = [
+    { label: '🌙 지금 정리하기 (밤사이 배치 실행)', onPress: runNightlyNow, a11y: '밤사이 정리 지금 실행' },
+    { label: '↺ 데이터 초기화 (시드로 되돌리기)', onPress: reset, a11y: '데이터 초기화' },
+  ];
+  return (
+    <View style={{ marginTop: spacing.gutterBlock }}>
+      <AppText token="labelLg" color="onSurface">
+        데모 도구
+      </AppText>
+      <AppText token="helper" color="onSurfaceVariant" style={{ marginBottom: 8 }}>
+        서버 없이 파이프라인을 손으로 돌려봐요 · 점검 전용
+      </AppText>
+      <View style={{ gap: 8 }}>
+        {rows.map((r) => (
+          <Pressable
+            key={r.a11y}
+            onPress={r.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={r.a11y}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                borderRadius: radius.lg,
+                borderColor: colors.outlineVariant,
+                backgroundColor: pressed ? colors.surfaceContainer : colors.surface,
+              },
+            ]}
+          >
+            <AppText token="parentBody" color="onSurface" style={{ flex: 1 }}>
+              {r.label}
+            </AppText>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }

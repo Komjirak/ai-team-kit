@@ -8,7 +8,7 @@ import { StoryCard } from '@/components/StoryCard';
 import { StatusPill } from '@/components/StatusPill';
 import { ChildBottomNav } from '@/components/ChildBottomNav';
 import { useTheme } from '@/theme/ThemeProvider';
-import { childHome, pastStories, family } from '@/data/mock';
+import { useChildHome, useFamily } from '@/state/StoreProvider';
 
 /**
  * C3 — 홈 (자녀). 레퍼런스: PRD §9-4 C3.
@@ -16,14 +16,16 @@ import { childHome, pastStories, family } from '@/data/mock';
  */
 export default function ChildHomeScreen() {
   const { colors, radius } = useTheme();
-  const recent = pastStories[0];
+  const home = useChildHome();
+  const family = useFamily();
+  const recent = home.recent;
 
   return (
     <ScreenContainer scroll justify="flex-start" footer={<ChildBottomNav active="home" />}>
       <View style={styles.top}>
         <Logo size="sm" />
         <AppText token="helper" color="onSurfaceVariant">
-          이번 주 {childHome.weekAnswered}/{childHome.weekTotal}
+          이번 주 {home.weekAnswered}/{home.weekTotal}
         </AppText>
       </View>
 
@@ -34,10 +36,10 @@ export default function ChildHomeScreen() {
             오늘의 질문
           </AppText>
           <AppText token="storyBody" color="onSurface">
-            {childHome.todayQuestion}
+            {home.todayQuestion}
           </AppText>
           <View style={[styles.divider, { backgroundColor: colors.outlineVariant }]} />
-          {childHome.parentAnsweredToday ? (
+          {home.parentAnsweredToday ? (
             <View style={styles.statusRow}>
               <StatusPill tone="organizing" />
               <AppText token="helper" color="onSurfaceVariant" style={{ flex: 1 }}>
@@ -56,25 +58,27 @@ export default function ChildHomeScreen() {
           <AppText token="labelLg" color="onSurface">
             최근 이야기
           </AppText>
-          <Pressable
-            onPress={() => router.push('/child/story')}
-            accessibilityRole="button"
-            accessibilityLabel={`${recent.dateLabel} ${recent.question} 읽기`}
-            style={({ pressed }) => [
-              styles.recent,
-              { borderColor: colors.outlineVariant, borderRadius: radius.lg, backgroundColor: pressed ? colors.surfaceContainer : colors.surfaceContainerLowest },
-            ]}
-          >
-            <AppText token="helper" color="onSurfaceVariant">
-              {recent.dateLabel}
-            </AppText>
-            <AppText token="storyBody" color="onSurface" style={{ marginVertical: 6 }}>
-              {recent.question}
-            </AppText>
-            <AppText token="labelMd" color="onSurfaceVariant" numberOfLines={2}>
-              {recent.excerpt}
-            </AppText>
-          </Pressable>
+          {recent && (
+            <Pressable
+              onPress={() => router.push('/child/story')}
+              accessibilityRole="button"
+              accessibilityLabel={`${recent.dateLabel} ${recent.question} 읽기`}
+              style={({ pressed }) => [
+                styles.recent,
+                { borderColor: colors.outlineVariant, borderRadius: radius.lg, backgroundColor: pressed ? colors.surfaceContainer : colors.surfaceContainerLowest },
+              ]}
+            >
+              <AppText token="helper" color="onSurfaceVariant">
+                {recent.dateLabel}
+              </AppText>
+              <AppText token="storyBody" color="onSurface" style={{ marginVertical: 6 }}>
+                {recent.question}
+              </AppText>
+              <AppText token="labelMd" color="onSurfaceVariant" numberOfLines={2}>
+                {recent.excerpt}
+              </AppText>
+            </Pressable>
+          )}
         </View>
       </View>
     </ScreenContainer>

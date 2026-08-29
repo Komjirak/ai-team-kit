@@ -8,7 +8,7 @@ import { CheerBanner } from '@/components/CheerBanner';
 import { StoryCard } from '@/components/StoryCard';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useDiary } from '@/state/DiaryContext';
-import { todayLabel } from '@/data/mock';
+import { todayLabel } from '@/domain/views';
 
 /**
  * P1 — 오늘 (부모 홈). ⭐ 반복 장면. 레퍼런스: stitch/P1-today + PRD §9-4 P1.

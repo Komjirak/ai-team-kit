@@ -5,13 +5,14 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { AppText } from '@/components/AppText';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Logo } from '@/components/Logo';
-import { family } from '@/data/mock';
+import { useFamily } from '@/state/StoreProvider';
 
 /**
  * P0 — 초대 진입 (부모, 1회). PRD §9-4 P0.
  * 화면의 유일한 버튼은 "시작하기". 스피너 금지. 초대한 자녀의 호칭·이름을 보여준다.
  */
 export default function InviteEntryScreen() {
+  const family = useFamily();
   return (
     <ScreenContainer justify="space-between">
       <View style={styles.top}>

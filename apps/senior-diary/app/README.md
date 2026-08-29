@@ -1,8 +1,10 @@
 # 하루담 (Harudam) — 앱
 
 시니어 하루 한 질문 자서전. RN + Expo(SDK 57, managed) + Expo Router + TypeScript.
-**점검 가능한 프론트엔드 완성본** — 모든 화면이 라우트로 렌더되고 서로 이어져 폰에서
-전체를 둘러볼 수 있다. BE 연동은 목 데이터(§3-0).
+**서버 없이 폰 한 대에서 전체 플로우가 실동작하는 체험형 MVP.** 모든 화면이 라우트로
+렌더되고, 데이터는 **local-first**(온디바이스 영속화)로 흐른다 — 부모가 녹음하면 저장되고,
+모의 STT가 텍스트로 정리하고, 자녀가 읽고 응원하면 부모 화면에 반영된다. 나중에 실서버
+(Firebase)를 **같은 인터페이스로** 끼울 수 있게 설계했다(`docs/BE_CONTRACT.md`).
 
 > 이 디렉터리(`apps/senior-diary/app/`)만 클라이언트 코드다. 설계 원본은 상위
 > `design/`·`docs/`(읽기 전용). 토큰·화면 명세가 어긋나면 그 문서가 이긴다.
@@ -34,6 +36,71 @@
 (P0 초대링크 / C1 신청)라 역할선택 화면이 없지만, 폰에서 모든 화면을 둘러볼 수 있도록
 점검용 인덱스를 뒀다. **이 화면은 개발/점검 전용이며 프로덕션 진입 흐름과 별개**임을
 화면에 명시("점검용 화면 · 프로덕션 진입 흐름과 별개").
+
+---
+
+## 데이터·BE (local-first) — 서버 없이 도는 루프
+
+전체 계약·실패 모드·멱등 보장·Firebase 이관은 **`docs/BE_CONTRACT.md`**. 요약:
+
+- **도메인 모델** `src/domain/` — IA §4 개체를 타입으로(가족·프로필·질문뱅크·답변·응원·책).
+- **저장소 인터페이스** `src/services/repository.ts`(`DiaryRepository`) — 유일한 저장 경계(seam).
+  구현 2종: `local/localRepository.ts`(AsyncStorage, 지금) · `firebase/firestoreRepository.ts`
+  (**미배선 스텁** — 실 Firebase는 PO 영역). **교체는 `src/services/index.ts` 한 줄.**
+- **온디바이스 영속화** `src/services/local/storage.ts` — AsyncStorage(Expo Go 기본 번들 + 웹
+  localStorage 폴백). 앱을 껐다 켜도 데이터 유지.
+- **파이프라인** `src/services/pipeline/` — 질문 분기 엔진(`branching`, 룰 기반·AI 아님) ·
+  모의 STT(`stt`, 질문별 정리본·원음 메타 보존 R7) · 밤사이 정리(`nightly`, 멱등+순서 가드) ·
+  책 조립(`book`, 답변→챕터→C6).
+- **공유 스토어** `src/state/StoreProvider.tsx` — 부모·자녀 두 세계가 한 기기에서 **같은 로컬
+  상태**를 공유한다(점검 인덱스에서 오가면 즉시 반영). 화면은 셀렉터 훅만 소비한다.
+- **질문 뱅크 시드** `src/data/seed/` — 32문항·7챕터(실제 시드) + 분기 룰(서울 치환·배우자 챕터
+  대체 등) + 모의 STT 정리본.
+
+### 체험 시나리오 (이 순서로 눌러보세요)
+
+앱을 열면 **둘러보기(점검) 인덱스**가 나온다. 여기서 부모/자녀를 자유로이 오간다.
+
+1. **부모: 오늘 이야기 남기기** — `P1 오늘` → 질문("처음 서울에 올라오던 날…") 아래
+   **[눌러서 이야기해 주세요]** → `P2 녹음`에서 잠깐 말하고(기기면 실녹음, 아니면 목 타이머)
+   **[다 했어요]** → **[오늘은 여기까지]**. P1이 "밤사이 글로 정리해 드릴게요"로 바뀐다.
+2. **밤사이 정리 돌리기(데모)** — 녹음 후 **5초 뒤 자동**으로 정리된다. 기다리기 싫으면 인덱스
+   맨 아래 **데모 도구 → 🌙 지금 정리하기**를 누른다(수동 트리거).
+3. **자녀: 읽고 응원하기** — 인덱스 → `C4 이야기 읽기·응원`. 방금 부모가 남긴 이야기가 정리 전이면
+   "🌙 정리 중"(원음만), 정리 후면 **글 + 원음**으로 보인다. 하트 칩/한마디 → **[↑ 보내기]**.
+4. **부모: 응원 확인** — `P1 오늘` 상단에 자녀가 방금 보낸 **응원 배너(💛)**가 떠 있다. 루프 완성.
+5. **쌓임 보기** — 자녀 `C5 모아보기`(진행감 "N번째 / 365") → **[책으로 미리보기]** → `C6`
+   (표지·목차=챕터·펼침면). 분기 체험: `C1 신청·프로필`에서 고향에 "서울"을 넣고 초대장을 만들면
+   P1 오늘의 질문이 "어릴 적 살던 동네"로 치환된다(룰 분기).
+
+### 데이터 초기화
+
+점검 인덱스 → **데모 도구 → ↺ 데이터 초기화**. 저장소를 비우고 시드("이미 살아온 며칠")로
+되돌린다. 코드로는 `repository.clearAll()` → `buildSeed()`.
+
+### local ↔ Firebase 교체 지점
+
+`src/services/index.ts` 한 줄만 바꾼다:
+
+```ts
+// 지금 (local-first)
+export const repository: DiaryRepository = new LocalRepository();
+// 이관 시 (PO가 Firebase 프로비저닝 후)
+export const repository: DiaryRepository = new FirestoreRepository({ projectId: '...' });
+```
+
+화면·스토어는 `DiaryRepository`에만 의존하므로 이 파일 외에는 손대지 않는다. 서버 구현이 지킬
+BE 규칙(멱등·순서 가드·orderBy·익명 인증 스위치 등)은 `firestoreRepository.ts` 헤더와
+`docs/BE_CONTRACT.md` §6에 박아뒀다.
+
+### 무엇을 검증했나 (BE 로직)
+
+- `tsc --noEmit` 0 · `expo export` ios·android·web 3플랫폼 0(AsyncStorage 번들 확인).
+- 순수 파이프라인 헤드리스 실행 **22/22 pass**: 분기 치환·챕터 대체·스킵 대체 · 밤사이 정리
+  **멱등**(2회 실행 결과 동일, 2번째 `nightly.run outcome:noop`) · 책 조립(사별 시 배우자 장
+  대체명) · 진행감 투영.
+- **미검증(실기기·런타임)**: AsyncStorage 실영속·앱 재실행 유지 · 자동 정리 타이머(5s) 실동작 ·
+  실마이크 캡처/원음 재생. 이들은 기기/dev-build에서만 확인된다 — 분리 보고.
 
 ---
 
@@ -157,7 +224,8 @@ expo-splash-screen·router/screens/safe-area)과 `scheme`·마이크 권한 문�
 4. **점검용 인덱스(`/`)** 추가 — 프로덕션 진입 흐름과 별개임을 화면·코드에 명시.
 
 ## 남은 TODO
-- `// TODO(BE)`: 질문 시퀀스·답변 상태(밤사이 정리)·응원 수신·프로필 저장 — 서버 계약.
+- ✅ `// TODO(BE)` 해소: 질문 시퀀스·답변 상태(밤사이 정리)·응원 수신·프로필 저장을 local-first로
+  구현(`docs/BE_CONTRACT.md`). 실 Firebase 배선은 스텁까지(PO 프로비저닝 대기).
 - BRAND: 최종 앱 아이콘·키비주얼 실제 시안(현재 개발 단계 심볼).
 - `expo-updates` 도입 시 OTA 채널·runtimeVersion 연결.
 - 텍스트 입력 화면 키보드 회피 플랫폼별 검증(dev build).

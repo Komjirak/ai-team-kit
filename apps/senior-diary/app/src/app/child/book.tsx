@@ -5,7 +5,7 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { AppText } from '@/components/AppText';
 import { BackBar } from '@/components/BackBar';
 import { useTheme } from '@/theme/ThemeProvider';
-import { bookPreview } from '@/data/mock';
+import { useBookPreview } from '@/state/StoreProvider';
 
 /**
  * C6 — 책 미리보기 (자녀). 레퍼런스: stitch/C6-book-preview + PRD §9-4 C6.
@@ -14,7 +14,7 @@ import { bookPreview } from '@/data/mock';
  */
 export default function BookScreen() {
   const { colors, radius } = useTheme();
-  const b = bookPreview;
+  const b = useBookPreview();
 
   return (
     <ScreenContainer scroll justify="flex-start">

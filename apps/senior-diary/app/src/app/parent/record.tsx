@@ -51,7 +51,7 @@ export default function RecordScreen() {
   }
 
   function leaveToToday() {
-    markAnswered();
+    markAnswered(finished ?? { uri: null, durationSec: 0, mock: true });
     router.replace('/parent/today');
   }
 
