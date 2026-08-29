@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>하루담 - 내 서재</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#66645e",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#b4542c",
+                        "on-tertiary-fixed-variant": "#4d463c",
+                        "secondary-fixed": "#e6e2da",
+                        "on-tertiary-fixed": "#201b13",
+                        "primary": "#943d16",
+                        "tertiary-fixed": "#ede1d4",
+                        "outline": "#89726a",
+                        "surface-container-highest": "#ece1d2",
+                        "on-primary-fixed-variant": "#7e2c05",
+                        "surface-variant": "#ece1d2",
+                        "on-surface": "#201b12",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#56423b",
+                        "surface-bright": "#fff8f3",
+                        "surface-tint": "#9d431c",
+                        "on-primary": "#ffffff",
+                        "background": "#fff8f3",
+                        "surface-container-high": "#f2e6d7",
+                        "inverse-surface": "#363025",
+                        "secondary-container": "#e6e2da",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fff4e9",
+                        "inverse-on-surface": "#fbefe0",
+                        "on-primary-fixed": "#370e00",
+                        "primary-fixed": "#ffdbce",
+                        "surface-container-low": "#fef2e2",
+                        "tertiary": "#5f574d",
+                        "primary-fixed-dim": "#ffb59a",
+                        "surface-dim": "#e4d8c9",
+                        "secondary": "#605e58",
+                        "tertiary-fixed-dim": "#d0c5b9",
+                        "outline-variant": "#dcc1b7",
+                        "on-secondary-fixed": "#1c1c17",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6bf",
+                        "on-secondary-fixed-variant": "#484741",
+                        "inverse-primary": "#ffb59a",
+                        "surface": "#fff8f3",
+                        "tertiary-container": "#786f65",
+                        "on-background": "#201b12",
+                        "surface-container": "#f8ecdd",
+                        "on-primary-container": "#fff3ef"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-spacing": "1rem",
+                        "tap-target-min": "64px",
+                        "gutter-block": "1.5rem",
+                        "margin-page": "2rem"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["\"Gowun Batang\""],
+                        "helper-text": ["\"Noto Sans KR\""],
+                        "label-md": ["\"Noto Sans KR\""],
+                        "story-body": ["\"Gowun Batang\""],
+                        "headline-lg": ["\"Gowun Batang\""],
+                        "label-lg": ["\"Noto Sans KR\""]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "helper-text": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-md": ["16px", { "lineHeight": "1.2", "fontWeight": "500" }],
+                        "story-body": ["22px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.4", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-lg": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #fff8f3; }
+        .font-batang { font-family: 'Gowun Batang', serif; }
+        .font-noto { font-family: 'Noto Sans KR', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased pb-[100px] md:pb-0 md:pt-[100px] min-h-screen flex flex-col items-center">
+<!-- Desktop TopAppBar (Hidden on Mobile) -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-page py-4 bg-surface dark:bg-surface-dim fixed top-0 left-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim text-3xl cursor-pointer hover:bg-surface-variant rounded-full p-2" data-icon="menu">menu</span>
+<span class="font-headline-lg text-headline-lg text-primary dark:text-primary-fixed-dim">하루담</span>
+</div>
+<nav class="flex gap-8 items-center">
+<a class="text-on-surface-variant dark:text-on-tertiary-fixed-variant font-label-lg text-label-lg hover:text-primary transition-colors" href="#">이야기</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-fixed-variant font-label-lg text-label-lg hover:text-primary transition-colors" href="#">기록하기</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold font-label-lg text-label-lg" href="#">내 서재</a>
+</nav>
+</header>
+<!-- Mobile TopAppBar (Simplified) -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-page py-4 bg-surface dark:bg-surface-dim sticky top-0 z-40">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim text-2xl" data-icon="menu">menu</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed-dim">하루담</span>
+<div class="w-6"></div> <!-- Spacer -->
+</header>
+<main class="w-full max-w-2xl px-margin-page py-8 flex flex-col gap-8 flex-grow">
+<!-- Progress Card -->
+<section class="bg-surface-container-high rounded-xl p-8 flex flex-col gap-6 shadow-sm border border-outline-variant/30">
+<div class="flex flex-col gap-2">
+<h2 class="font-batang text-2xl md:text-3xl text-on-surface font-bold">23번째 이야기 / 365</h2>
+<p class="font-noto text-on-surface-variant text-base">책이 되어가는 중</p>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 6.3%"></div>
+</div>
+<button class="font-noto font-bold text-primary border-2 border-primary rounded-lg py-4 px-6 h-tap-target-min hover:bg-primary hover:text-on-primary transition-colors duration-200 mt-2">
+                책으로 미리보기
+            </button>
+</section>
+<!-- Story List -->
+<section class="flex flex-col gap-6 mt-4">
+<!-- Month Divider -->
+<div class="flex items-center gap-4 py-2">
+<span class="font-noto font-bold text-outline text-lg">8월</span>
+<div class="flex-grow h-px bg-outline-variant"></div>
+</div>
+<!-- List Item 1 -->
+<article class="flex flex-col gap-2 py-4 border-b border-surface-variant hover:bg-surface-bright transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+<span class="font-noto text-on-surface-variant text-sm font-medium">8월 23일</span>
+<h3 class="font-batang text-[20px] text-on-surface font-bold leading-snug">처음 서울에 올라오던 날</h3>
+<p class="font-batang text-[16px] text-on-surface-variant leading-relaxed line-clamp-2">열아홉에 완행열차를 타고 올라왔어요. 손에는 보따리 하나뿐이었지...</p>
+</article>
+<!-- List Item 2 -->
+<article class="flex flex-col gap-2 py-4 border-b border-surface-variant hover:bg-surface-bright transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+<span class="font-noto text-on-surface-variant text-sm font-medium">8월 22일</span>
+<h3 class="font-batang text-[20px] text-on-surface font-bold leading-snug">어머니가 좋아하시던 노래</h3>
+<p class="font-batang text-[16px] text-on-surface-variant leading-relaxed line-clamp-2">라디오에서 이미자 노래가 나오면 어머닌 항상 일손을 멈추고 들으셨어...</p>
+</article>
+<!-- List Item 3 (Extra for visual weight) -->
+<article class="flex flex-col gap-2 py-4 border-b border-surface-variant hover:bg-surface-bright transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+<span class="font-noto text-on-surface-variant text-sm font-medium">8월 15일</span>
+<h3 class="font-batang text-[20px] text-on-surface font-bold leading-snug">잊을 수 없는 음식</h3>
+<p class="font-batang text-[16px] text-on-surface-variant leading-relaxed line-clamp-2">가마솥에 푹 고아 만든 구수한 누룽지 맛은 요즘 식당에선 찾을 수가 없어...</p>
+</article>
+</section>
+</main>
+<!-- Mobile BottomNavBar (Hidden on Desktop) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-tap-target-min px-4 bg-surface-container dark:bg-surface-container-high rounded-t-xl border-t border-outline-variant dark:border-outline pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-fixed-variant px-6 py-2 hover:bg-surface-variant rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-lg text-xs font-noto font-medium">이야기</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-tertiary-fixed-variant px-6 py-2 hover:bg-surface-variant rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="mic">mic</span>
+<span class="font-label-lg text-xs font-noto font-medium">기록하기</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-6 py-2 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="library_books" style="font-variation-settings: 'FILL' 1;">library_books</span>
+<span class="font-label-lg text-xs font-noto font-bold">내 서재</span>
+</a>
+</nav>
+<script>
+        // Simple interaction for list items to show subtle tactile feedback
+        document.querySelectorAll('article').forEach(item => {
+            item.addEventListener('mousedown', () => {
+                item.style.transform = 'scale(0.98)';
+                item.style.transition = 'transform 0.1s ease';
+            });
+            item.addEventListener('mouseup', () => {
+                item.style.transform = 'scale(1)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

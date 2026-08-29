@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Read &amp; Cheer - 하루담</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#1c1c17",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#c9c6bf",
+                    "on-secondary-fixed-variant": "#484741",
+                    "on-tertiary-container": "#fff4e9",
+                    "outline": "#89726a",
+                    "outline-variant": "#dcc1b7",
+                    "surface": "#fff8f3",
+                    "on-primary-fixed": "#370e00",
+                    "on-error-container": "#93000a",
+                    "on-background": "#201b12",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#f8ecdd",
+                    "surface-variant": "#ece1d2",
+                    "inverse-primary": "#ffb59a",
+                    "tertiary-container": "#786f65",
+                    "background": "#fff8f3",
+                    "on-secondary-container": "#66645e",
+                    "on-tertiary-fixed": "#201b13",
+                    "inverse-surface": "#363025",
+                    "tertiary-fixed": "#ede1d4",
+                    "primary-container": "#b4542c",
+                    "inverse-on-surface": "#fbefe0",
+                    "on-surface": "#201b12",
+                    "surface-container-high": "#f2e6d7",
+                    "on-primary-fixed-variant": "#7e2c05",
+                    "surface-tint": "#9d431c",
+                    "surface-container-low": "#fef2e2",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#ffb59a",
+                    "tertiary": "#5f574d",
+                    "primary": "#943d16",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed-dim": "#d0c5b9",
+                    "secondary": "#605e58",
+                    "surface-container-highest": "#ece1d2",
+                    "secondary-container": "#e6e2da",
+                    "primary-fixed": "#ffdbce",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#e6e2da",
+                    "on-primary-container": "#fff3ef",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#4d463c",
+                    "on-surface-variant": "#56423b",
+                    "surface-bright": "#fff8f3",
+                    "surface-dim": "#e4d8c9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-spacing": "1rem",
+                    "margin-page": "2rem",
+                    "gutter-block": "1.5rem",
+                    "tap-target-min": "64px"
+            },
+            "fontFamily": {
+                    "headline-lg": [
+                            "\"Source Serif 4\""
+                    ],
+                    "label-lg": [
+                            "Noto Sans"
+                    ],
+                    "headline-lg-mobile": [
+                            "\"Source Serif 4\""
+                    ],
+                    "story-body": [
+                            "\"Source Serif 4\""
+                    ],
+                    "helper-text": [
+                            "Noto Sans"
+                    ],
+                    "label-md": [
+                            "Noto Sans"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "story-body": [
+                            "22px",
+                            {
+                                    "lineHeight": "1.7",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "helper-text": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom styles for paper effect */
+        .paper-texture {
+            background-color: #FBF7EF; /* Overriding with requested #FBF7EF */
+        }
+        
+        .ruled-line {
+            background-image: repeating-linear-gradient(transparent, transparent 31px, #dcc1b7 32px);
+            line-height: 32px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="paper-texture text-on-background font-label-md antialiased min-h-screen flex justify-center">
+<!-- Mobile Container Wrapper -->
+<div class="w-full max-w-md bg-transparent min-h-screen flex flex-col relative overflow-hidden pb-32 shadow-xl shadow-surface-variant/50">
+<!-- TopAppBar (Based on JSON, suppressing nav since this is a specific story view) -->
+<header class="flex justify-between items-center w-full px-margin-page py-4 bg-transparent sticky top-0 z-10 backdrop-blur-sm">
+<button aria-label="Back to family sharing" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-on-surface text-2xl" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">하루담</h1>
+<div class="w-12 h-12"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content Scrollable Area -->
+<main class="flex-1 overflow-y-auto px-margin-page py-6 flex flex-col gap-8">
+<!-- Date & Title Header -->
+<div class="flex flex-col gap-8 text-center items-center mt-8 mb-4">
+<span class="text-tertiary font-label-md tracking-wider">8월 23일</span>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background px-4" style="color: rgb(42, 36, 28);">
+                    "처음 서울에 올라오던 날, 기억나세요?"
+                </h2>
+<div class="w-16 h-px bg-outline-variant mt-2"></div>
+</div>
+<!-- Voice Player Card (Glassmorphism inspired, fitting tactile minimalism) -->
+<div class="bg-surface-container-low/60 border border-outline-variant/30 rounded-2xl p-8 shadow-sm flex flex-col gap-4 mt-4 backdrop-blur-md">
+<div class="flex items-center gap-4">
+<button aria-label="Play mother's voice" class="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-md active:scale-95 transition-transform shrink-0">
+<span class="material-symbols-outlined fill text-on-primary text-3xl" data-icon="play_arrow">play_arrow</span>
+</button>
+<div class="flex-1 flex flex-col gap-2">
+<span class="font-label-md text-on-surface font-semibold">엄마의 목소리</span>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary w-1/3 h-full rounded-full relative">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex justify-between text-helper-text text-on-surface-variant">
+<span class="">0:45</span>
+<span class="">2:30</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Transcribed Story Body -->
+<div class="px-2 mt-4 mb-8">
+<p class="font-story-body text-story-body text-on-surface leading-[1.8] tracking-tight text-left whitespace-pre-line">
+                    열아홉에 완행열차를 타고 올라왔어요. 서울역에 내리니 사람이 어찌나 많던지, 손에 쥔 주소 쪽지만 보고 걸었지요…
+                    
+                    처음 보는 높은 건물들과 번쩍이는 간판들 사이에서 작은 가방 하나 들고 서 있었던 기억이 아직도 생생해. 무섭기도 하고 설레기도 했던 그 밤 공기가 생각나네.
+                </p>
+</div>
+<!-- Contextual Image Placeholder (Adding emotional weight) -->
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden border border-outline-variant/50 shadow-sm mt-4 mb-8">
+<img class="w-full h-full object-cover grayscale-[20%] sepia-[10%]" data-alt="A vintage, slightly faded photograph of a busy train station platform in Seoul circa 1970s. The scene is shot from a slightly low angle, capturing the scale of the station and the blur of moving people. The lighting is warm and nostalgic, evoking a sense of memory and anticipation. The aesthetic is tactile minimalism, with muted earthy tones, deep blacks, and soft whites. A quiet, contemplative mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxLkGZvxyIz7qJyUEprxbBYdUxpQpRReVQI3w7tpeDBjO8F7bkfi_T920pB8oieAO5EVC2IAbsAv6U7JA8Rc2QDk9NAvlCBBQLYdAEAuYBCk8u-jMbSiSB4foAXOB66JyP8npP-yaPe7UM-wtd5bX0scoHzLtXfZBkhT6TdRRiysJwSgpcp4-cxQfp8KTItngCUnMHPyTYz-ZmSHKPBVYcSYIfN43ZyVwAsKKjV1wfT8BNOR2Rl0NR">
+</div>
+</main>
+<!-- Bottom Action Area (Sticky) -->
+<div class="absolute bottom-0 left-0 w-full bg-surface/95 backdrop-blur-xl border-t border-outline-variant/30 pt-6 pb-10 px-margin-page flex flex-col gap-6 rounded-t-3xl shadow-[0_-12px_40px_rgba(0,0,0,0.03)] z-20">
+<!-- Quick Chips -->
+<div class="flex overflow-x-auto pb-2 gap-3 hide-scrollbar no-scrollbar" style="scrollbar-width: none; -ms-overflow-style: none;">
+<style>
+                    .no-scrollbar::-webkit-scrollbar { display: none; }
+                </style>
+<button class="shrink-0 px-5 py-3 rounded-full border border-outline-variant bg-surface text-on-surface text-helper-text font-medium hover:bg-surface-variant transition-colors whitespace-nowrap active:bg-secondary-container border-outline-variant/50 text-on-surface-variant">
+                    엄마, 이 얘기 처음 들었어
+                </button>
+<button class="shrink-0 px-5 py-3 rounded-full border border-outline-variant bg-surface text-on-surface text-helper-text font-medium hover:bg-surface-variant transition-colors whitespace-nowrap active:bg-secondary-container border-outline-variant/50 text-on-surface-variant">
+                    오늘도 고마워요
+                </button>
+<button class="shrink-0 px-5 py-3 rounded-full border border-outline-variant bg-surface text-on-surface text-helper-text font-medium hover:bg-surface-variant transition-colors whitespace-nowrap active:bg-secondary-container flex items-center justify-center border-outline-variant/50 text-on-surface-variant">
+                    ❤️
+                </button>
+</div>
+<!-- Input Area -->
+<div class="flex items-end gap-3 w-full">
+<button aria-label="Like" class="w-12 h-12 shrink-0 rounded-full bg-surface border border-outline-variant flex items-center justify-center text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined fill text-2xl" data-icon="favorite">favorite</span>
+</button>
+<div class="flex-1 relative">
+<textarea class="w-full bg-surface border border-outline-variant rounded-2xl py-3 pl-4 pr-14 text-on-surface font-label-md placeholder-on-surface-variant focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[48px] overflow-hidden" placeholder="한마디 남기기..." rows="1" style="line-height: 1.5;"></textarea>
+<button aria-label="Send" class="absolute right-2 bottom-1 w-10 h-10 rounded-xl bg-[#B4542C] text-white flex items-center justify-center active:scale-95 transition-transform shadow-md">
+<span class="material-symbols-outlined text-xl" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+
+
+</body></html>

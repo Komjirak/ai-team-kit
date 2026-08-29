@@ -25,6 +25,21 @@
 공통 스타일 프리앰블(한/영) + **화면 8종 Google Stitch 프롬프트**(P1·P2·P3·C1·C4·C5·
 C6·G1, 한/영 병기). PO가 Stitch에 투입해 컨셉 시안 제작 예정.
 
+🔧 **2026-08-29** — **senior-diary: Stitch 디자인 시스템 수령 → 구현 착수 (결정 #7).**
+PO가 Stitch 산출물 전달: 디자인 시스템(`apps/senior-diary/design/DESIGN_SYSTEM.md` —
+Tactile Minimalism, 크림+주황+먹 토큰, Source Serif 4/Noto Sans, 탭 64px) + 화면 7종
+(`design/stitch/*.{html,png}`: P1·P2·P3·C1·C4·C5·C6, G1 랜딩만 미포함). BRAND §4·
+DESIGN_CONCEPT와 정합 확인. **APP 구현 착수** — §3-2 B안(RN/Expo), 첫 슬라이스는
+부모 핵심 루프 P1→P2(디자인 토큰 기반, 목 데이터).
+
+**다음 세션이 챙길 것(구현)** — ⑲ APP: Expo 앱 스캐폴드 + 디자인 토큰 모듈
+(DESIGN_SYSTEM.md 파생) + P1·P2 실제 구현(목 데이터, 검증: typecheck/export 종료코드
+0, 실행법 문서화). Expo 설치가 이 컨테이너에서 막히면 정직히 보고 + 폴백(토큰 모듈 +
+핵심 화면 러너블 빌드 + Expo 셋업 절차). ⑳ BE 연동·나머지 화면(C1·C4·C5·C6·P3·
+G1)은 후속. 잔여 미결(D2·D3·D5·D8·이름 정식 승격)은 프론트 슬라이스와 독립.
+
+---
+
 ✅ **2026-08-28 (3차)** — **senior-diary: IA 문서화(`apps/senior-diary/docs/IA.md`).**
 PD가 §9 화면 명세를 IA로 구조화 — 최상위 역할 분기(부모/자녀)·sitemap(mermaid 4종,
 화면코드 §9와 1:1)·내비 모델(부모 "보이는 버튼만" vs 자녀 관례)·개체 지도 8개·

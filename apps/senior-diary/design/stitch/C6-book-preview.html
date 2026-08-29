@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>하루담 - Book Preview</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;family=Source+Serif+4:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config injected from Brand Anchors -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#1c1c17",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6bf",
+                        "on-secondary-fixed-variant": "#484741",
+                        "on-tertiary-container": "#fff4e9",
+                        "outline": "#89726a",
+                        "outline-variant": "#dcc1b7",
+                        "surface": "#fff8f3",
+                        "on-primary-fixed": "#370e00",
+                        "on-error-container": "#93000a",
+                        "on-background": "#201b12",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#f8ecdd",
+                        "surface-variant": "#ece1d2",
+                        "inverse-primary": "#ffb59a",
+                        "tertiary-container": "#786f65",
+                        "background": "#fff8f3",
+                        "on-secondary-container": "#66645e",
+                        "on-tertiary-fixed": "#201b13",
+                        "inverse-surface": "#363025",
+                        "tertiary-fixed": "#ede1d4",
+                        "primary-container": "#b4542c",
+                        "inverse-on-surface": "#fbefe0",
+                        "on-surface": "#201b12",
+                        "surface-container-high": "#f2e6d7",
+                        "on-primary-fixed-variant": "#7e2c05",
+                        "surface-tint": "#9d431c",
+                        "surface-container-low": "#fef2e2",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb59a",
+                        "tertiary": "#5f574d",
+                        "primary": "#943d16",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#d0c5b9",
+                        "secondary": "#605e58",
+                        "surface-container-highest": "#ece1d2",
+                        "secondary-container": "#e6e2da",
+                        "primary-fixed": "#ffdbce",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#e6e2da",
+                        "on-primary-container": "#fff3ef",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#4d463c",
+                        "on-surface-variant": "#56423b",
+                        "surface-bright": "#fff8f3",
+                        "surface-dim": "#e4d8c9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-spacing": "1rem",
+                        "margin-page": "2rem",
+                        "gutter-block": "1.5rem",
+                        "tap-target-min": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["\"Source Serif 4\""],
+                        "label-lg": ["Noto Sans"],
+                        "headline-lg-mobile": ["\"Source Serif 4\""],
+                        "story-body": ["\"Source Serif 4\""],
+                        "helper-text": ["Noto Sans"],
+                        "label-md": ["Noto Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.4", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-lg": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "story-body": ["22px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "helper-text": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-md": ["16px", { "lineHeight": "1.2", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar to match paper aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff8f3; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dcc1b7; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #89726a; 
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- App Bar (Hybrid of standard top bar for back navigation) -->
+<header class="docked full-width top-0 bg-surface flex justify-between items-center w-full px-margin-page py-4 z-50">
+<button class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-variant rounded-full px-4 py-2 transition-colors min-h-tap-target-min">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-lg text-label-lg">뒤로 가기</span>
+</button>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">하루담</span>
+<div class="w-24"></div> <!-- Spacer for centering -->
+</header>
+<main class="max-w-3xl mx-auto px-margin-page pb-32 pt-8 flex flex-col gap-12">
+<!-- Header Section -->
+<section class="text-center flex flex-col items-center gap-4">
+<div class="inline-flex items-center gap-2 bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full mb-2">
+<span class="material-symbols-outlined text-[20px]">auto_stories</span>
+<span class="font-label-md text-label-md">미리보기 — 지금까지 담긴 이야기로 미리 엮어봤어요</span>
+</div>
+</section>
+<!-- Centerpiece: Book Mockup -->
+<section class="relative w-full aspect-[3/4] md:aspect-[4/3] rounded-xl overflow-hidden shadow-xl bg-surface-container-highest border border-outline-variant flex items-center justify-center p-8">
+<div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-multiply" data-alt="A highly realistic, tactile mockup of a hardcover book titled '김순자 이야기' (The Story of Kim Soon-ja). The book is bound in an elegant, warm-toned linen cloth that exudes a premium, nostalgic feel. The setting is a soft, light-filled minimalist room, bathed in high-key, warm white lighting that creates a bright, serene aesthetic. The color palette focuses on soft creams, deep text-like blacks, and subtle touches of sunset orange, evoking the quiet dignity of a well-loved journal." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBB5dtMGiTGil-LdeCeKZeLlk89BaXqmjpoLm_O5NCPgqR2q2GQWjztIzJoRBLivDJyJVKf9fIumh0NVe0cLbDx9yX-nq3djuf81NMzpOPQ39tz8pMiwOGJMFnUat25-9rybK57R_0AdJ5I7dFmtZZ-vcEwpOIGptsNBTut26i5v7eGjDhvAxw50qcdFD1Ok1cNl_k57Y7kQ7VBxxAtmh0PNdjX3h1AMEY4UHQtzZRVMXtyjUEy7MVM')"></div>
+<div class="relative z-10 w-3/4 h-full max-h-[500px] bg-surface rounded shadow-2xl border border-outline-variant p-8 flex flex-col items-center justify-center text-center">
+<div class="w-full h-full border-2 border-outline-variant p-6 flex flex-col items-center justify-between">
+<div class="mt-8">
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-4 whitespace-pre-line leading-snug">김순자 이야기</h2>
+<p class="font-story-body text-story-body text-on-surface-variant">딸 이지혜가 묻고,<br/>김순자가 답하다</p>
+</div>
+<div class="mb-4">
+<span class="font-label-lg text-label-lg text-tertiary">2026</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Table of Contents -->
+<section class="bg-surface-container-low rounded-xl p-8 border border-outline-variant">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-8 text-center border-b border-outline-variant pb-4">목차</h3>
+<ul class="flex flex-col gap-6 font-story-body text-story-body text-on-surface">
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>1. 어린 시절</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 12</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>2. 고향과 가족</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 28</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>3. 학창 시절의 기억</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 45</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>4. 청년기, 그리고 일</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 62</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>5. 배우자와의 만남</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 80</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>6. 부모가 된다는 것</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 98</span>
+</li>
+<li class="flex justify-between items-baseline border-b border-outline-variant border-dashed pb-2">
+<span>7. 지금, 그리고 내일</span>
+<span class="text-on-surface-variant font-label-md text-label-md">p. 115</span>
+</li>
+</ul>
+</section>
+<!-- Spread Preview -->
+<section class="flex flex-col md:flex-row gap-4 bg-surface rounded-xl p-8 shadow-sm border border-outline-variant relative overflow-hidden">
+<!-- Simulated Book Spine Shadow -->
+<div class="hidden md:block absolute top-0 bottom-0 left-1/2 w-8 -ml-4 bg-gradient-to-r from-transparent via-surface-variant to-transparent opacity-50 pointer-events-none"></div>
+<div class="flex-1 md:pr-8 md:border-r border-outline-variant border-dashed flex flex-col gap-6">
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">어머니가 끓여주시던 된장찌개</h4>
+<p class="font-story-body text-story-body text-on-surface-variant leading-relaxed">
+                     겨울이 오면 늘 생각나는 냄새가 있어. 시골집 부뚜막에서 어머니가 끓여주시던 그 투박한 된장찌개 냄새 말이야. 별다른 재료 없이 무 숭숭 썰어 넣고 두부 몇 조각 넣은 게 다였는데, 그게 왜 그렇게 맛있었는지 몰라. 지금 아무리 좋은 식당에 가서 먹어도 그 맛은 안 나더라. 
+                 </p>
+<div class="mt-auto pt-4 flex items-center justify-center bg-surface-container rounded-lg p-4 border border-outline-variant">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-[40px] text-primary">qr_code_scanner</span>
+<span class="font-label-md text-label-md text-on-surface">🔗 목소리로 듣기</span>
+</div>
+</div>
+</div>
+<div class="flex-1 md:pl-8 flex flex-col gap-6 pt-8 md:pt-0">
+<div class="w-full aspect-square rounded-lg overflow-hidden border border-outline-variant relative">
+<img class="w-full h-full object-cover" data-alt="A nostalgic, softly focused photograph of a traditional Korean rustic kitchen setup, featuring an old iron pot on a stone stove. The image evokes a sense of warmth, memory, and culinary heritage. Lit by soft, diffused natural light filtering through a small window, creating a serene and timeless atmosphere. The color palette emphasizes warm earthy tones, deep browns, and soft creams, perfectly complementing a legacy journal aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCxO3EtR3fvkH7kOLVh42lHhCmG3nlFMD1VKzYQQBWDMyms1vtTDqdXr1dxVxjwYwz6dE7_3qHT3n68srMekaKt7QFnYItXwDoeZrzWTvfJycIfTcR5BvY7ccsmUEmcI82rj1ZyIwdYqwqvMDVQRg32SG8NiQIJmmMa6GU71YS9VgFnBB0kyIo-dUTy5clSsmm2mvNX7q4mgUofbun5nRrTZjEZIQHllxX6UKwX5LzAUOieXx2LSJa"/>
+</div>
+<p class="font-story-body text-story-body text-on-surface-variant text-center text-sm italic">
+                     1970년대, 고향집 부엌의 풍경.
+                 </p>
+</div>
+</section>
+<!-- Footer Note -->
+<section class="text-center mt-8">
+<p class="font-story-body text-story-body text-primary italic">"이야기가 쌓일수록 책이 두꺼워져요."</p>
+</section>
+</main>
+</body></html>

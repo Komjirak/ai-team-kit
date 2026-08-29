@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>지난 이야기</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#f2e6d7",
+                        "tertiary-container": "#786f65",
+                        "surface-dim": "#e4d8c9",
+                        "outline-variant": "#dcc1b7",
+                        "on-tertiary-container": "#fff4e9",
+                        "surface-tint": "#9d431c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#66645e",
+                        "inverse-surface": "#363025",
+                        "surface-container-low": "#fef2e2",
+                        "surface-container": "#f8ecdd",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdbce",
+                        "surface": "#fff8f3",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#4d463c",
+                        "primary-container": "#b4542c",
+                        "on-primary-fixed": "#370e00",
+                        "on-surface": "#201b12",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#943d16",
+                        "on-primary-fixed-variant": "#7e2c05",
+                        "outline": "#89726a",
+                        "primary-fixed-dim": "#ffb59a",
+                        "secondary-fixed-dim": "#c9c6bf",
+                        "inverse-on-surface": "#fbefe0",
+                        "on-secondary-fixed": "#1c1c17",
+                        "tertiary-fixed-dim": "#d0c5b9",
+                        "on-tertiary-fixed": "#201b13",
+                        "secondary": "#605e58",
+                        "on-surface-variant": "#56423b",
+                        "surface-container-highest": "#ece1d2",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ede1d4",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fff8f3",
+                        "on-background": "#201b12",
+                        "inverse-primary": "#ffb59a",
+                        "secondary-fixed": "#e6e2da",
+                        "surface-variant": "#ece1d2",
+                        "on-primary-container": "#fff3ef",
+                        "on-secondary-fixed-variant": "#484741",
+                        "tertiary": "#5f574d",
+                        "secondary-container": "#e6e2da",
+                        "background": "#fff8f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "2rem",
+                        "tap-target-min": "64px",
+                        "gutter-block": "1.5rem",
+                        "stack-spacing": "1rem"
+                    },
+                    "fontFamily": {
+                        "story-body": ["\"Source Serif 4\""],
+                        "label-md": ["Noto Sans"],
+                        "helper-text": ["Noto Sans"],
+                        "label-lg": ["Noto Sans"],
+                        "headline-lg-mobile": ["\"Source Serif 4\""],
+                        "headline-lg": ["\"Source Serif 4\""]
+                    },
+                    "fontSize": {
+                        "story-body": ["22px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "label-md": ["16px", { "lineHeight": "1.2", "fontWeight": "500" }],
+                        "helper-text": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-lg": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.4", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #fff8f3; }
+        .tap-active:active { transform: scale(0.98); background-color: #ece1d2; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen antialiased flex flex-col font-label-md">
+<!-- Top App Bar -->
+<header class="bg-surface docked full-width top-0 flex justify-between items-center w-full px-margin-page py-4 flat no shadows z-40 relative">
+<button aria-label="Back" class="h-tap-target-min w-tap-target-min flex items-center justify-start text-primary">
+<span class="material-symbols-outlined text-3xl">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">지난 이야기</h1>
+<div class="h-tap-target-min w-tap-target-min"></div> <!-- Spacer -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow px-margin-page pb-margin-page flex flex-col gap-stack-spacing mt-4 max-w-md mx-auto w-full">
+<!-- Story Card 1 -->
+<article aria-label="Story from August 25th: What song did your mother like? Status: Written" class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 flex flex-col gap-4 shadow-sm tap-active transition-all cursor-pointer min-h-[120px]" role="button" tabindex="0">
+<div class="flex justify-between items-start">
+<span class="font-helper-text text-helper-text text-on-surface-variant">8월 25일</span>
+<div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-helper-text text-helper-text text-primary">정리된 글</span>
+</div>
+</div>
+<h2 class="font-story-body text-story-body text-on-surface font-semibold leading-snug">어머니가 좋아하시던 노래는?</h2>
+</article>
+<!-- Story Card 2 -->
+<article aria-label="Story from August 24th: Which child were you among your siblings? Status: Organizing overnight" class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 flex flex-col gap-4 shadow-sm tap-active transition-all cursor-pointer min-h-[120px]" role="button" tabindex="0">
+<div class="flex justify-between items-start">
+<span class="font-helper-text text-helper-text text-on-surface-variant">8월 24일</span>
+<div class="flex items-center gap-2 bg-secondary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">nightlight</span>
+<span class="font-helper-text text-helper-text text-secondary">밤사이 정리 중</span>
+</div>
+</div>
+<h2 class="font-story-body text-story-body text-on-surface font-semibold leading-snug">형제 중 몇째로 자라셨어요?</h2>
+</article>
+<!-- Story Card 3 -->
+<article aria-label="Story from August 23rd: The day I first came up to Seoul... Status: Written" class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 flex flex-col gap-4 shadow-sm tap-active transition-all cursor-pointer min-h-[120px]" role="button" tabindex="0">
+<div class="flex justify-between items-start">
+<span class="font-helper-text text-helper-text text-on-surface-variant">8월 23일</span>
+<div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-helper-text text-helper-text text-primary">정리된 글</span>
+</div>
+</div>
+<h2 class="font-story-body text-story-body text-on-surface font-semibold leading-snug">처음 서울에 올라오던 날...</h2>
+</article>
+<!-- Story Card 4 -->
+<article aria-label="Story from August 20th: What was your favorite food as a child? Status: Written" class="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 flex flex-col gap-4 shadow-sm tap-active transition-all cursor-pointer min-h-[120px]" role="button" tabindex="0">
+<div class="flex justify-between items-start">
+<span class="font-helper-text text-helper-text text-on-surface-variant">8월 20일</span>
+<div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-helper-text text-helper-text text-primary">정리된 글</span>
+</div>
+</div>
+<h2 class="font-story-body text-story-body text-on-surface font-semibold leading-snug">어릴 적 가장 좋아했던 음식은 무엇인가요?</h2>
+</article>
+</main>
+<!-- BottomNavBar suppressed for focused list view -->
+</body></html>

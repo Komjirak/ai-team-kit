@@ -135,4 +135,23 @@ PO가 내린 결정을 번호·날짜와 함께 기록한다. **결정은 여기
 - **영향**: `BRAND.md`(하루담으로 이름 확정 표기 + 비주얼 컨셉 §4 확정),
   `apps/senior-diary/docs/DESIGN_CONCEPT.md` 신설(디자인 컨셉 + Google Stitch
   프롬프트 — PO가 Stitch로 컨셉 시안 제작 예정).
+- **상태**: 반영 완료. 시안은 #7에서 수령·구현 착수.
+
+## #7 (2026-08-29) senior-diary — Stitch 디자인 시스템 수령, 구현 착수
+
+- **결정**: PO가 Google Stitch 산출물(디자인 시스템 `DESIGN.md` + 화면 7종
+  HTML/PNG)을 전달하며 **"이 디자인 시스템·컨셉을 토대로 구현 작업을 진행"** 지시.
+  → 디자인 단계 종료, **구현(APP) 착수.**
+- **디자인 시스템 요지**: "Tactile Minimalism"(종이 은유). 토큰 — surface 크림
+  `#fff8f3` · primary 주황 `#b4542c/#943d16` · ink `#201b12`, 서체 Source Serif 4
+  (질문·이야기, Gowun Batang 대체)+Noto Sans(UI), 탭 타깃 64px, radius 20px,
+  그림자 대신 톤 레이어. **BRAND §4·DESIGN_CONCEPT와 정합** 확인됨.
+- **수령 화면 7종**(IA 코드 매핑): P1 오늘·P2 녹음·P3 지난이야기 / C1 프로필·
+  C4 읽기·응원·C5 서재(모아보기)·C6 책 미리보기. **G1 랜딩은 미포함**(추후).
+- **저장**: `apps/senior-diary/design/DESIGN_SYSTEM.md` + `design/stitch/*.{html,png}`.
+- **구현 방침**: §3-2 B안(RN/Expo) 유지. 첫 슬라이스는 **부모 핵심 루프
+  (P1→P2)** 를 디자인 토큰 기반으로 실제 구현(목 데이터, 결제·서버 없음 — MVP
+  §3-0). 나머지 화면·BE 연동은 후속.
+- **미결(불변)**: D2(G1 집행)·D3(응답경로 확정 단서)·D5(가격)·D8(놓친 하루)·
+  이름 정식 승격(상표 확인). 구현은 이들과 독립적으로 프론트 슬라이스부터.
 - **상태**: 진행 중.
