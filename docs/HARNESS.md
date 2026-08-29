@@ -25,6 +25,21 @@
 공통 스타일 프리앰블(한/영) + **화면 8종 Google Stitch 프롬프트**(P1·P2·P3·C1·C4·C5·
 C6·G1, 한/영 병기). PO가 Stitch에 투입해 컨셉 시안 제작 예정.
 
+📦 **2026-08-29 (4차)** — **senior-diary: MVP 산출물 8종 최종화 — 실구현 컨셉 문서 세트 완성.**
+PO 요청으로 전 역할이 산출물을 최종화: ①BD BUSINESS_CASE §0.5 경쟁·차별화 요약
+②PM PRD §0-1/§3-7/§3-8 + BACKLOG.md(에픽 E0~E8) ③BRAND 슬로건 체계·UX Writing·
+마케팅 슬로건 ④PD DESIGN_GUIDE.md(컨셉·아이콘·시스템·컴포넌트 13종) ⑤PM Backlog
+⑥APP APP_PROCESS.md(역할 플로우·일별 Push) ⑦BE BE_ARCHITECTURE.md(음성 이중백업·
+STT·AI 정리) ⑧QA QA_CHECKLIST.md. 인덱스 `apps/senior-diary/docs/README.md`.
+
+**전체 관통 미결(실구현 전 정리 — README 표)**: 이름 정식 승격(상표) · PO 결정
+D2/D5/D8/D3 · Firebase 프로비저닝(최상단 블로커) · 폰트 28MB 서브셋팅 · 종이색
+토큰 불일치(#fff8f3 vs #FBF7EF, DESIGN_GUIDE G-4) · **헤드리스 테스트 미커밋 →
+`npm run verify` 게이트 승격 필요(QA R-0)** · today/record의 DiaryContext shim
+정리(동작 정상·오진 아님) · 실기기 육안 미검증.
+
+---
+
 🔧 **2026-08-29 (3차)** — **senior-diary: BE 통합 — 체험 가능한 local-first MVP.**
 BE가 `apps/senior-diary/app/` 안에 서버 없는 local-first 백엔드를 넣어 **전체 루프
 실동작**(녹음→모의STT→밤사이 정리→자녀 읽기·응원→부모 반영). 구조: 도메인
