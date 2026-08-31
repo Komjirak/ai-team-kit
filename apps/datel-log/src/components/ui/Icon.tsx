@@ -39,6 +39,7 @@ import {
   Sparkles,
   Trash2,
   Trees,
+  Upload,
   UserPlus,
   Utensils,
   X,
@@ -98,6 +99,7 @@ const MAP: Record<string, LucideIcon> = {
   sentiment_dissatisfied: Frown,
   settings: Settings,
   straighten: Ruler,
+  upload: Upload,
 }
 
 /** A Datel.log icon. `fill` fills the glyph (used for the brand heart / active tabs). */

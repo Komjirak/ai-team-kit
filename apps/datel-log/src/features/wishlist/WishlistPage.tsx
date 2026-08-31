@@ -5,6 +5,7 @@ import { PlaceCard, PlaceCardSkeleton } from '../../components/PlaceCard'
 import { Button, EmptyState } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { AddPlaceSheet } from '../place/AddPlaceSheet'
+import { ImportSheet } from '../place/ImportSheet'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
 
@@ -12,6 +13,7 @@ export function WishlistPage() {
   const { places, loading } = useCouple()
   const { markVisited, remove } = usePlaceActions()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [editing, setEditing] = useState<Place | null>(null)
 
   const wishlist = places.filter((p) => p.status === 'wishlist')
@@ -29,9 +31,14 @@ export function WishlistPage() {
     <div>
       <div className="flex items-end justify-between">
         <PageTitle title="가고 싶은 곳" subtitle="언젠가 꼭 함께 가고 싶은 장소들" />
-        <Button icon="add" onClick={openAdd} className="mb-2 hidden sm:inline-flex">
-          가고 싶은 곳 추가
-        </Button>
+        <div className="mb-2 flex gap-2">
+          <Button variant="ghost" icon="upload" onClick={() => setImportOpen(true)}>
+            가져오기
+          </Button>
+          <Button icon="add" onClick={openAdd} className="hidden sm:inline-flex">
+            가고 싶은 곳 추가
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -83,6 +90,7 @@ export function WishlistPage() {
       </button>
 
       <AddPlaceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} editing={editing} />
+      <ImportSheet open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
   )
 }
