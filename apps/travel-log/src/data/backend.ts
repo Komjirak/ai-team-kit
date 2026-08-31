@@ -3,6 +3,7 @@ import type {
   AppUser,
   Memory,
   Place,
+  ScheduleItem,
   Trip,
 } from './types'
 
@@ -48,6 +49,12 @@ export interface Backend {
   addPlace(input: Omit<Place, 'id' | 'createdAt'>): Promise<Place>
   updatePlace(id: string, patch: Partial<Place>): Promise<void>
   deletePlace(id: string): Promise<void>
+
+  // Schedule (M2) — 인앱 정본. orderBy 없이 클라 정렬(색인 이슈 회피).
+  watchSchedule(tripId: string, cb: (items: ScheduleItem[]) => void): () => void
+  addScheduleItem(input: Omit<ScheduleItem, 'id' | 'createdAt'>): Promise<ScheduleItem>
+  updateScheduleItem(id: string, patch: Partial<ScheduleItem>): Promise<void>
+  deleteScheduleItem(id: string): Promise<void>
 
   // Memories + photos
   watchMemories(tripId: string, cb: (memories: Memory[]) => void): () => void

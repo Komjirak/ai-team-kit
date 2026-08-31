@@ -4,6 +4,7 @@ import type {
   AppUser,
   Memory,
   Place,
+  ScheduleItem,
   Trip,
 } from './types'
 
@@ -18,6 +19,7 @@ const K = {
   trips: 'ganjik:trips',
   users: 'ganjik:users',
   places: 'ganjik:places',
+  schedule: 'ganjik:schedule',
   memories: 'ganjik:memories',
   notifs: 'ganjik:notifications',
 }
@@ -110,11 +112,20 @@ function seed() {
       visitedAt: '2026-09-18', createdBy: me.id, createdAt: now - 6 * day,
     },
   ]
+  // 3일치 일정 (장소 연결 포함) — 바로 보이도록 시드
+  const schedule: ScheduleItem[] = [
+    { id: 's1', tripId: trip.id, date: '2026-09-18', order: 0, time: '15:00', title: '제주공항 도착 · 렌터카 픽업', createdBy: me.id, createdAt: now - 6 * day },
+    { id: 's2', tripId: trip.id, date: '2026-09-18', order: 1, time: '19:00', title: '첫날 저녁 회식', placeId: 'p3', memo: '근고기 예약 완료', createdBy: me.id, createdAt: now - 6 * day },
+    { id: 's3', tripId: trip.id, date: '2026-09-19', order: 0, time: '09:00', title: '바다 보며 모닝커피', placeId: 'p1', createdBy: jihoon.id, createdAt: now - 5 * day },
+    { id: 's4', tripId: trip.id, date: '2026-09-19', order: 1, time: '13:00', title: '한라산 등반', placeId: 'p2', memo: '김밥·물 챙기기, 일찍 하산', createdBy: minji.id, createdAt: now - 5 * day },
+    { id: 's5', tripId: trip.id, date: '2026-09-20', order: 0, title: '자유시간 · 각자 카페 투어', createdBy: suah.id, createdAt: now - 4 * day },
+  ]
 
   write(K.user, me)
   write(K.users, [me, jihoon, minji, suah])
   write(K.trips, [trip])
   write(K.places, places)
+  write(K.schedule, schedule)
   write(K.memories, memories)
   write(K.notifs, [] as AppNotification[])
 }
@@ -217,6 +228,7 @@ export const localBackend: Backend = {
       // 마지막 멤버가 나가면 여행과 딸린 데이터를 정리
       write(K.trips, trips.filter((x) => x.id !== tripId))
       write(K.places, read<Place[]>(K.places, []).filter((p) => p.tripId !== tripId))
+      write(K.schedule, read<ScheduleItem[]>(K.schedule, []).filter((s) => s.tripId !== tripId))
       write(K.memories, read<Memory[]>(K.memories, []).filter((m) => m.tripId !== tripId))
       write(K.notifs, read<AppNotification[]>(K.notifs, []).filter((n) => n.tripId !== tripId))
       return
@@ -262,6 +274,28 @@ export const localBackend: Backend = {
   },
   async deletePlace(id) {
     write(K.places, read<Place[]>(K.places, []).filter((p) => p.id !== id))
+  },
+
+  watchSchedule(tripId, cb) {
+    const run = () => cb(read<ScheduleItem[]>(K.schedule, []).filter((s) => s.tripId === tripId))
+    run()
+    return bus.on(K.schedule, run)
+  },
+  async addScheduleItem(input) {
+    const item: ScheduleItem = { ...input, id: uid(), createdAt: Date.now() }
+    write(K.schedule, [...read<ScheduleItem[]>(K.schedule, []), item])
+    return item
+  },
+  async updateScheduleItem(id, patch) {
+    const list = read<ScheduleItem[]>(K.schedule, [])
+    const i = list.findIndex((s) => s.id === id)
+    if (i >= 0) {
+      list[i] = { ...list[i], ...patch }
+      write(K.schedule, list)
+    }
+  },
+  async deleteScheduleItem(id) {
+    write(K.schedule, read<ScheduleItem[]>(K.schedule, []).filter((s) => s.id !== id))
   },
 
   watchMemories(tripId, cb) {

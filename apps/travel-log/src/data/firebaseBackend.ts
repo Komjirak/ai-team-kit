@@ -27,6 +27,7 @@ import type {
   AppUser,
   Memory,
   Place,
+  ScheduleItem,
   Trip,
 } from './types'
 
@@ -176,6 +177,22 @@ export const firebaseBackend: Backend = {
   },
   async deletePlace(id) {
     await deleteDoc(doc(fbDb(), 'places', id))
+  },
+
+  watchSchedule(tripId, cb) {
+    // orderBy 없이 tripId 동등 필터만 — 클라에서 정렬(색인 요구 회피).
+    const q = query(collection(fbDb(), 'schedules'), where('tripId', '==', tripId))
+    return onSnapshot(q, (s) => cb(s.docs.map((d) => mapDoc<ScheduleItem>(d))))
+  },
+  async addScheduleItem(input) {
+    const ref_ = await addDoc(collection(fbDb(), 'schedules'), { ...input, createdAt: Date.now() })
+    return { ...input, id: ref_.id, createdAt: Date.now() }
+  },
+  async updateScheduleItem(id, patch) {
+    await updateDoc(doc(fbDb(), 'schedules', id), patch)
+  },
+  async deleteScheduleItem(id) {
+    await deleteDoc(doc(fbDb(), 'schedules', id))
   },
 
   watchMemories(tripId, cb) {

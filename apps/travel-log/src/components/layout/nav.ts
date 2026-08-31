@@ -4,10 +4,11 @@ export interface Tab {
   icon: string
 }
 
-// The canonical tabs (PRD §10-1, M1). 데이트코스는 여행 PRD 범위 밖이라 제거,
-// 일정·가계부는 M2~M3라 아직 없다. Same labels/order across all breakpoints.
+// The canonical tabs (PRD §10-1). 일정=조연(M2 리스트 뷰), 가계부는 M3라 아직 없다.
+// Same labels/order across all breakpoints.
 export const TABS: Tab[] = [
   { to: '/', label: '전체', icon: 'grid_view' },
+  { to: '/schedule', label: '일정', icon: 'event' },
   { to: '/wishlist', label: '장소', icon: 'location_on' },
   { to: '/memories', label: '추억', icon: 'photo_library' },
   { to: '/dashboard', label: '여행', icon: 'luggage' },

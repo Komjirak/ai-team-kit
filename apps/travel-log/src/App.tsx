@@ -7,6 +7,7 @@ import { Icon } from './components/ui/Icon'
 import { Welcome } from './features/onboarding/Welcome'
 import { TripPicker } from './features/trips/TripPicker'
 import { HomePage } from './features/home/HomePage'
+import { SchedulePage } from './features/schedule/SchedulePage'
 import { WishlistPage } from './features/wishlist/WishlistPage'
 import { MemoriesPage } from './features/memories/MemoriesPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
@@ -36,6 +37,7 @@ function TripRoutes() {
     <AppShell>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/schedule" element={<SchedulePage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/memories" element={<MemoriesPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />

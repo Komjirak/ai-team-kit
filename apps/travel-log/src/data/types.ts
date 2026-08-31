@@ -59,6 +59,21 @@ export interface Memory {
   createdAt: number
 }
 
+// 신규(M2) — 일자별 일정 항목. 인앱이 source of truth (PRD §5, §6-3).
+// 구글캘린더 미러링(googleEventId)·그리드 뷰는 M5 이후. 여기선 리스트만.
+export interface ScheduleItem {
+  id: string
+  tripId: string
+  date: string       // ISO yyyy-mm-dd (어느 Day인지)
+  order: number      // 같은 날 안에서의 순서
+  time?: string      // "14:30" (선택)
+  title: string
+  placeId?: string   // 장소 연결 (③ 모듈)
+  memo?: string
+  createdBy: string
+  createdAt: number
+}
+
 export interface AppNotification {
   id: string
   tripId: string

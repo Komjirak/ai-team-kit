@@ -15,6 +15,7 @@ import type {
   AppUser,
   Memory,
   Place,
+  ScheduleItem,
   Stats,
   Trip,
 } from '../data/types'
@@ -31,6 +32,7 @@ interface TripState {
   // 활성 여행 스코프 데이터
   members: AppUser[]
   places: Place[]
+  schedule: ScheduleItem[]
   memories: Memory[]
   notifications: AppNotification[]
   unreadCount: number
@@ -69,6 +71,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   const [members, setMembers] = useState<AppUser[]>([])
   const [places, setPlaces] = useState<Place[]>([])
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([])
   const [memories, setMemories] = useState<Memory[]>([])
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [loading, setLoading] = useState(false)
@@ -135,12 +138,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!activeTripId) {
       setPlaces([])
+      setSchedule([])
       setMemories([])
       setNotifications([])
       return
     }
     const unsubs = [
       backend.watchPlaces(activeTripId, setPlaces),
+      backend.watchSchedule(activeTripId, setSchedule),
       backend.watchMemories(activeTripId, setMemories),
       backend.watchNotifications(activeTripId, setNotifications),
     ]
@@ -163,6 +168,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     isOwner,
     members,
     places,
+    schedule,
     memories,
     notifications,
     unreadCount,
