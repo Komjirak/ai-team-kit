@@ -1,0 +1,21 @@
+{
+  "name": "ganjik-functions",
+  "private": true,
+  "description": "간직.log — FCM 웹푸시 3종 Cloud Functions (Firestore 트리거). 루트 웹앱과 분리된 배포 단위.",
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

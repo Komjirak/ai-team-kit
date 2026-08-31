@@ -13,6 +13,7 @@ export interface AppUser {
   nickname: string
   email: string
   photoURL?: string
+  fcmTokens?: string[] // M4 — 웹푸시 기기 토큰(옵트인 시 등록). 본인 uid만 쓰기(규칙).
   // NOTE: 단일 coupleId 소속을 제거했다. 유저는 여러 여행에 속한다(Trip.memberIds).
 }
 
@@ -99,8 +100,13 @@ export interface ScheduleItem {
 export interface AppNotification {
   id: string
   tripId: string
-  // v1 여행용 알림. FCM 3종(member_joined/schedule_changed/settlement_requested)은 M4.
-  type: 'member_joined' | 'place_added' | 'memory_added'
+  // v1 여행용 알림. FCM 3종 = member_joined · schedule_changed · settlement_requested (M4).
+  type:
+    | 'member_joined'
+    | 'place_added'
+    | 'memory_added'
+    | 'schedule_changed'
+    | 'settlement_requested'
   message: string
   createdAt: number
   readAt?: number

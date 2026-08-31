@@ -9,6 +9,7 @@ import { Avatar } from '../../components/layout/Header'
 import { Washi } from '../../components/ui/deco'
 import { useToast } from '../../components/ui/Toast'
 import { BRAND } from '../../components/layout/nav'
+import { PushSettings } from './PushSettings'
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -151,6 +152,9 @@ export function SettingsPage() {
           ))}
         </ul>
       </section>
+
+      {/* Push notifications (M4) */}
+      <PushSettings />
 
       {/* Trip info */}
       <section className="dl-card p-5">

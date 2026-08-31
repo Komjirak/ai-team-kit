@@ -7,6 +7,8 @@ const typeIcon: Record<string, string> = {
   member_joined: 'group_add',
   place_added: 'add_location_alt',
   memory_added: 'photo_camera',
+  schedule_changed: 'event',
+  settlement_requested: 'wallet',
 }
 
 export function NotificationBell() {

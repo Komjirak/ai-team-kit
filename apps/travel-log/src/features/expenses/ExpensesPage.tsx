@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useAuth } from '../../auth/AuthContext'
 import { useTrip } from '../../trip/TripContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, Skeleton } from '../../components/ui/basics'
@@ -13,10 +14,12 @@ import type { Expense } from '../../data/types'
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
 
 export function ExpensesPage() {
+  const { user } = useAuth()
   const { activeTrip, members, expenses, settledKeys, loading } = useTrip()
   const toast = useToast()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editing, setEditing] = useState<Expense | null>(null)
+  const [requesting, setRequesting] = useState(false)
 
   const memberIds = useMemo(() => members.map((m) => m.id), [members])
   const nameOf = (id: string) => members.find((m) => m.id === id)?.nickname ?? '나간 멤버'
@@ -52,6 +55,18 @@ export function ExpensesPage() {
   async function toggleSettled(key: string, next: boolean) {
     if (!activeTrip) return
     await backend.setTransferSettled(activeTrip.id, key, next)
+  }
+  async function sendSettlementRequest() {
+    if (!activeTrip || !user) return
+    setRequesting(true)
+    try {
+      await backend.requestSettlement(activeTrip.id, user.nickname)
+      toast.show('정산 요청을 보냈어요. 멤버들에게 알림이 가요.')
+    } catch {
+      toast.show('요청을 보내지 못했어요. (settlement.request_failed)')
+    } finally {
+      setRequesting(false)
+    }
   }
 
   if (loading || !activeTrip) {
@@ -148,6 +163,15 @@ export function ExpensesPage() {
                     )
                   })}
                 </ul>
+              )}
+              {settlement.transfers.length > 0 && (
+                <button
+                  className="dl-focus mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-sm font-bold text-on-primary disabled:opacity-60"
+                  onClick={sendSettlementRequest}
+                  disabled={requesting}
+                >
+                  <Icon name="notifications" size={18} /> 정산 요청 보내기
+                </button>
               )}
             </div>
 

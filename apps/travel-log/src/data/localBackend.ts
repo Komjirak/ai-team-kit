@@ -115,6 +115,21 @@ function seed() {
       photoUrls: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=640&q=70'],
       visitedAt: '2026-09-18', createdBy: me.id, createdAt: now - 6 * day,
     },
+    {
+      id: 'm2', tripId: trip.id, placeId: 'p2', placeName: '한라산 성판악 코스',
+      text: '정상까지 5시간… 다리는 후들거렸지만 백록담 보고 다 같이 소리 질렀다. 이 맛에 등산하나 봐.',
+      photoUrls: [
+        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=640&q=70',
+        'https://images.unsplash.com/photo-1454372182658-c712e4c5a1db?w=640&q=70',
+      ],
+      visitedAt: '2026-09-19', createdBy: minji.id, createdAt: now - 5 * day,
+    },
+    {
+      id: 'm3', tripId: trip.id, placeId: 'p1', placeName: '카페 델문도',
+      text: '바다 보면서 마신 아침 커피. 지훈이가 여기 오려고 여행 짰다고 실토함 ㅋㅋ',
+      photoUrls: ['https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=640&q=70'],
+      visitedAt: '2026-09-19', createdBy: jihoon.id, createdAt: now - 5 * day,
+    },
   ]
   // 3일치 일정 (장소 연결 포함) — 바로 보이도록 시드
   const schedule: ScheduleItem[] = [
@@ -146,7 +161,10 @@ function seed() {
   write(K.expenses, expenses)
   write(K.settlements, [] as SettlementState[])
   write(K.memories, memories)
-  write(K.notifs, [] as AppNotification[])
+  // 인앱 알림 3종 중 '합류'를 시드로 노출(나머지 2종은 사용자 행동으로 생성)
+  write(K.notifs, [
+    { id: 'n1', tripId: trip.id, type: 'member_joined', message: '수아님이 여행에 합류했어요.', createdAt: now - 6 * day },
+  ] as AppNotification[])
 }
 
 // ── Auth (mock Google) ────────────────────────────────────────
@@ -305,6 +323,7 @@ export const localBackend: Backend = {
   async addScheduleItem(input) {
     const item: ScheduleItem = { ...input, id: uid(), createdAt: Date.now() }
     write(K.schedule, [...read<ScheduleItem[]>(K.schedule, []), item])
+    pushNotif({ tripId: item.tripId, type: 'schedule_changed', message: `새 일정 ‘${item.title}’을(를) 추가했어요.` })
     return item
   },
   async updateScheduleItem(id, patch) {
@@ -401,5 +420,40 @@ export const localBackend: Backend = {
         touched = true
       }
     if (touched) write(K.notifs, list)
+  },
+  async requestSettlement(tripId, requesterNickname) {
+    pushNotif({
+      tripId,
+      type: 'settlement_requested',
+      message: `${requesterNickname}님이 정산을 요청했어요. 가계부에서 확인해요.`,
+    })
+  },
+
+  async saveFcmToken(userId, token) {
+    const users = read<AppUser[]>(K.users, [])
+    const i = users.findIndex((u) => u.id === userId)
+    if (i >= 0) {
+      const set = new Set([...(users[i].fcmTokens ?? []), token])
+      users[i] = { ...users[i], fcmTokens: [...set] }
+      write(K.users, users)
+    }
+    const me = read<AppUser | null>(K.user, null)
+    if (me && me.id === userId) {
+      write(K.user, { ...me, fcmTokens: [...new Set([...(me.fcmTokens ?? []), token])] })
+      emitUser()
+    }
+  },
+  async removeFcmToken(userId, token) {
+    const users = read<AppUser[]>(K.users, [])
+    const i = users.findIndex((u) => u.id === userId)
+    if (i >= 0) {
+      users[i] = { ...users[i], fcmTokens: (users[i].fcmTokens ?? []).filter((t) => t !== token) }
+      write(K.users, users)
+    }
+    const me = read<AppUser | null>(K.user, null)
+    if (me && me.id === userId) {
+      write(K.user, { ...me, fcmTokens: (me.fcmTokens ?? []).filter((t) => t !== token) })
+      emitUser()
+    }
   },
 }

@@ -29,6 +29,10 @@ function ensure() {
   }
 }
 
+export function fbApp(): FirebaseApp {
+  ensure()
+  return app!
+}
 export function fbAuth(): Auth {
   ensure()
   return authInstance!

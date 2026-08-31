@@ -7,11 +7,16 @@ import { Washi, Pin } from '../../components/ui/deco'
 import { AddMemorySheet } from './AddMemorySheet'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
+import type { Trip } from '../../data/types'
+
+const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
 
 export function MemoriesPage() {
-  const { memories, loading } = useTrip()
+  const { activeTrip, memories, expenses, members, stats, loading } = useTrip()
   const toast = useToast()
   const [open, setOpen] = useState(false)
+
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0)
 
   async function del(id: string, name: string) {
     if (!confirm(`‘${name}’의 추억을 삭제할까요?`)) return
@@ -28,6 +33,18 @@ export function MemoriesPage() {
         </Button>
       </div>
 
+      {/* 여행 요약 카드 — 재방문 훅(K1) */}
+      {!loading && activeTrip && (
+        <TripRecap
+          trip={activeTrip}
+          tripDays={stats.tripDays}
+          visitedCount={stats.visitedCount}
+          photoCount={stats.photoCount}
+          memberCount={members.length}
+          totalSpent={totalSpent}
+        />
+      )}
+
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -38,7 +55,7 @@ export function MemoriesPage() {
         <EmptyState
           icon="auto_awesome"
           title="아직 남긴 추억이 없어요."
-          hint="다녀온 곳에 사진과 후기를 남겨 추억을 모아보세요."
+          hint="다녀온 곳에 사진과 후기를 남기면, 여행이 끝난 뒤에도 페이지로 남아요."
           action={
             <Button icon="add" onClick={() => setOpen(true)}>
               추억 남기기
@@ -93,5 +110,70 @@ export function MemoriesPage() {
 
       <AddMemorySheet open={open} onClose={() => setOpen(false)} />
     </div>
+  )
+}
+
+function isPast(trip: Trip): boolean {
+  if (!trip.endDate) return false
+  return trip.endDate < new Date().toISOString().slice(0, 10)
+}
+
+function TripRecap({
+  trip,
+  tripDays,
+  visitedCount,
+  photoCount,
+  memberCount,
+  totalSpent,
+}: {
+  trip: Trip
+  tripDays: number | null
+  visitedCount: number
+  photoCount: number
+  memberCount: number
+  totalSpent: number
+}) {
+  const past = isPast(trip)
+  const stats: { icon: string; label: string; value: string }[] = [
+    { icon: 'event', label: '여행', value: tripDays != null ? `${tripDays}일` : '—' },
+    { icon: 'location_on', label: '다녀온 곳', value: `${visitedCount}곳` },
+    { icon: 'photo_library', label: '사진', value: `${photoCount}장` },
+    { icon: 'group', label: '멤버', value: `${memberCount}명` },
+    { icon: 'wallet', label: '함께 쓴 돈', value: won(totalSpent) },
+  ]
+
+  return (
+    <section className="dl-card relative mb-6 overflow-hidden p-5">
+      <Washi color="yellow" className="left-1/2 -top-2 -translate-x-1/2" rotate={-2} />
+      {past && (
+        <span className="dl-mono mb-2 inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">
+          <Icon name="history" size={14} /> 지난 여행 · 다시 꺼내보기
+        </span>
+      )}
+      <div className="flex items-start gap-4">
+        {trip.coverPhoto && (
+          <div className="polaroid hidden shrink-0 rounded-xl sm:block" style={{ transform: 'rotate(-3deg)', width: 96 }}>
+            <img src={trip.coverPhoto} alt="" className="aspect-square w-full rounded-lg object-cover" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-2xl font-extrabold text-ink">{trip.title}</h2>
+          <p className="mt-1 text-sm text-muted">
+            {[trip.destination].filter(Boolean).join('')} 이 여행을 오래 간직해요.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {stats.map((s) => (
+              <span
+                key={s.label}
+                className="dl-mono inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-ink"
+              >
+                <Icon name={s.icon} size={14} className="text-primary" />
+                <span className="text-muted">{s.label}</span> {s.value}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }

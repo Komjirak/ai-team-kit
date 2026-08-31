@@ -76,4 +76,10 @@ export interface Backend {
   // Notifications
   watchNotifications(tripId: string, cb: (n: AppNotification[]) => void): () => void
   markNotificationsRead(tripId: string): Promise<void>
+  /** 정산 요청 알림(settlement_requested) 생성 — 금액은 본문에 넣지 않는다(§7 프라이버시). */
+  requestSettlement(tripId: string, requesterNickname: string): Promise<void>
+
+  // Push (M4) — 옵트인 시 기기 토큰을 본인 유저 문서에 등록/해제.
+  saveFcmToken(userId: string, token: string): Promise<void>
+  removeFcmToken(userId: string, token: string): Promise<void>
 }

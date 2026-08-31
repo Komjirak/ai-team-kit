@@ -63,7 +63,8 @@ const auth: AuthApi = {
       if (!existing.exists()) {
         await setDoc(userRef, { ...base, createdAt: serverTimestamp() })
       }
-      cb(base)
+      const fcmTokens = (existing.data()?.fcmTokens as string[] | undefined) ?? undefined
+      cb({ ...base, fcmTokens })
     })
   },
   async signInWithGoogle() {
@@ -76,11 +77,13 @@ const auth: AuthApi = {
   async reload() {
     const u = fbAuth().currentUser
     if (!u) return null
+    const snap = await getDoc(doc(fbDb(), 'users', u.uid))
     return {
       id: u.uid,
       nickname: u.displayName || (u.email ? u.email.split('@')[0] : '나'),
       email: u.email || '',
       photoURL: u.photoURL || undefined,
+      fcmTokens: (snap.data()?.fcmTokens as string[] | undefined) ?? undefined,
     }
   },
 }
@@ -189,6 +192,13 @@ export const firebaseBackend: Backend = {
   },
   async addScheduleItem(input) {
     const ref_ = await addDoc(collection(fbDb(), 'schedules'), { ...input, createdAt: Date.now() })
+    await addDoc(collection(fbDb(), 'notifications'), {
+      tripId: input.tripId,
+      type: 'schedule_changed',
+      message: `새 일정 ‘${input.title}’을(를) 추가했어요.`,
+      createdAt: Date.now(),
+      readAt: null,
+    })
     return { ...input, id: ref_.id, createdAt: Date.now() }
   },
   async updateScheduleItem(id, patch) {
@@ -259,5 +269,22 @@ export const firebaseBackend: Backend = {
     )
     const snap = await getDocs(q)
     await Promise.all(snap.docs.map((d) => updateDoc(d.ref, { readAt: Date.now() })))
+  },
+  async requestSettlement(tripId, requesterNickname) {
+    // 금액은 본문에 넣지 않는다(§7). Functions (c)가 이 문서 생성을 감지해 FCM 전송.
+    await addDoc(collection(fbDb(), 'notifications'), {
+      tripId,
+      type: 'settlement_requested',
+      message: `${requesterNickname}님이 정산을 요청했어요. 가계부에서 확인해요.`,
+      createdAt: Date.now(),
+      readAt: null,
+    })
+  },
+
+  async saveFcmToken(userId, token) {
+    await updateDoc(doc(fbDb(), 'users', userId), { fcmTokens: arrayUnion(token) })
+  },
+  async removeFcmToken(userId, token) {
+    await updateDoc(doc(fbDb(), 'users', userId), { fcmTokens: arrayRemove(token) })
   },
 }
