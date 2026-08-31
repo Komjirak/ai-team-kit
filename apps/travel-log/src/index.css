@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   Datel.log — "Dakku" scrapbook design system
+   Warm keepsake paper, washi tape, pins, polaroid, gel-pen ink.
+   ───────────────────────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    color: theme('colors.ink');
+    font-family: theme('fontFamily.body');
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Grid-paper base — the "notebook page" */
+    background-color: theme('colors.bg');
+    background-image: linear-gradient(rgba(136, 114, 109, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(136, 114, 109, 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: theme('fontFamily.display');
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* Card = a "diary page": white fill, extra-round, soft glow */
+  .dl-card {
+    @apply relative rounded-card bg-surface shadow-soft;
+  }
+
+  /* Wobbly hand-drawn underline under headlines */
+  .wobbly-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .wobbly-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 100%;
+    height: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0,5 Q25,0 50,5 T100,5' fill='none' stroke='%23984631' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 50px 100%;
+  }
+
+  /* Focusable, accessible pill button */
+  .dl-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3
+      font-display font-bold text-on-primary shadow-glow-primary
+      transition-transform active:scale-[0.96] disabled:opacity-50;
+    min-height: 44px;
+  }
+  .dl-btn-soft {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary-soft px-5 py-2.5
+      font-semibold text-primary transition-transform active:scale-[0.96];
+    min-height: 44px;
+  }
+  .dl-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-surface-container px-4 py-2
+      font-semibold text-ink transition-transform active:scale-[0.96];
+    min-height: 40px;
+  }
+
+  /* Filter chip (tab) */
+  .dl-chip {
+    @apply inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold
+      transition-colors;
+  }
+  .dl-chip-on {
+    @apply bg-primary text-on-primary shadow-glow-primary;
+  }
+  .dl-chip-off {
+    @apply bg-surface text-muted hover:bg-surface-container;
+  }
+
+  /* Numbers / dates / labels use the label-maker mono face */
+  .dl-mono {
+    font-family: theme('fontFamily.mono');
+    letter-spacing: 0.02em;
+  }
+
+  /* Focus ring — accessibility */
+  .dl-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg;
+  }
+}
+
+@layer utilities {
+  /* Washi tape strip — pin a card to the page */
+  .washi {
+    position: absolute;
+    height: 24px;
+    width: 62px;
+    background-color: rgba(249, 227, 146, 0.75);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+  }
+  .washi-lavender {
+    background-color: rgba(216, 210, 235, 0.85);
+  }
+  .washi-mint {
+    background-color: rgba(190, 225, 212, 0.85);
+  }
+  .washi-blue {
+    background-color: rgba(196, 225, 246, 0.85);
+  }
+
+  /* Polaroid frame */
+  .polaroid {
+    background: #fff;
+    padding: 12px 12px 40px;
+    box-shadow: theme('boxShadow.polaroid');
+  }
+
+  /* Hide scrollbars on chip rails but keep scroll */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Snap for horizontal chip rails */
+  .snap-x-chips {
+    scroll-snap-type: x proximity;
+  }
+  .snap-chip {
+    scroll-snap-align: start;
+  }
+}
+
+/* Skeleton shimmer for loading states */
+@keyframes dl-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.dl-skeleton {
+  background: linear-gradient(
+    90deg,
+    theme('colors.surface-variant') 25%,
+    theme('colors.surface-container') 37%,
+    theme('colors.surface-variant') 63%
+  );
+  background-size: 800px 100%;
+  animation: dl-shimmer 1.4s ease infinite;
+}
