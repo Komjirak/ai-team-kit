@@ -29,7 +29,10 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
   const [memo, setMemo] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [thumbnail, setThumbnail] = useState<string | undefined>()
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const debounce = useRef<number>()
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -37,6 +40,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
       setSelected({ name: editing.name, address: editing.address, lat: editing.lat ?? 0, lng: editing.lng ?? 0 })
       setCategory(editing.category)
       setMemo(editing.memo ?? '')
+      setThumbnail(editing.thumbnail)
       setManual(true)
     } else {
       setKeyword('')
@@ -45,6 +49,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
       setManual(false)
       setCategory('카페')
       setMemo('')
+      setThumbnail(undefined)
     }
     setSearchError(null)
     setSaveError(null)
@@ -71,6 +76,18 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
     }, 350)
   }
 
+  async function pickPhoto(files: FileList | null) {
+    if (!files?.[0] || !user?.coupleId) return
+    setUploadingPhoto(true)
+    try {
+      setThumbnail(await backend.uploadPhoto(user.coupleId, files[0]))
+    } catch {
+      toast.show('사진을 올리지 못했어요.')
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
   async function save() {
     if (!user?.coupleId) return
     const name = selected?.name?.trim()
@@ -90,6 +107,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
           lng: selected?.lng || undefined,
           category,
           memo: memo.trim() || undefined,
+          thumbnail,
         })
         toast.show('장소를 수정했어요.')
       } else {
@@ -103,6 +121,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
           status: 'wishlist',
           createdBy: user.id,
           memo: memo.trim() || undefined,
+          thumbnail,
         })
         toast.show('가고 싶은 곳에 담았어요.')
       }
@@ -229,6 +248,45 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
               rows={2}
               placeholder="여기서 뭘 하고 싶어요?"
               className="w-full resize-none rounded-2xl bg-surface-container px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-muted">사진 (선택)</label>
+            {thumbnail ? (
+              <div className="relative w-fit">
+                <img src={thumbnail} alt="" className="h-28 w-40 rounded-2xl object-cover" />
+                <button
+                  type="button"
+                  className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-ink text-white"
+                  onClick={() => setThumbnail(undefined)}
+                  aria-label="사진 제거"
+                >
+                  <Icon name="close" size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="flex h-28 w-40 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-surface-variant text-muted"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadingPhoto}
+              >
+                {uploadingPhoto ? (
+                  <Spinner size={22} />
+                ) : (
+                  <>
+                    <Icon name="add_a_photo" size={24} />
+                    <span className="text-xs">사진 추가</span>
+                  </>
+                )}
+              </button>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => pickPhoto(e.target.files)}
             />
           </div>
           {saveError && (
