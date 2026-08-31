@@ -9,7 +9,16 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'favicon-16.png', 'favicon-32.png', 'apple-touch-icon.png'],
+      includeAssets: [
+        'favicon.svg',
+        'favicon-16.png',
+        'favicon-32.png',
+        'apple-touch-icon.png',
+        'apple-touch-icon-152.png',
+        'apple-touch-icon-167.png',
+        'og-image.png',
+        'robots.txt',
+      ],
       manifest: {
         name: 'Datel.log — 우리가 함께 걸은 곳',
         short_name: 'Datel.log',
