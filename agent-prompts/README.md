@@ -6,6 +6,9 @@
 - 구조(공통): `핵심 역할 · 도구 · 워크플로우(받음/전달/결손 처리) · 출력 형식 · 예시 · 품질 기준(9.5 게이트) · 원칙`
 - 팀장: [`lead-orchestrator.md`](./lead-orchestrator.md) — 목표를 받아 목표별(시장 조사 / 프로덕트 개발 / 상품 마케팅)로 팀을 편성·위임·통합·검토.
 - 조직·일하는 방식·헌장: 저장소 루트의 [`TEAM.md`](../TEAM.md) 참고.
+- 검토: [`reviewer.md`](./reviewer.md) — 역할 무관 독립 검토자. 팀장이 합격선(9.5) 판정에 씁니다.
+
+> ⚠️ **수정은 이 디렉터리에서만 합니다.** `agents/`와 `.claude/agents/`는 이 파일들의 배포본(플러그인 래퍼 부착)이라 직접 고치지 않습니다. 수정 후 `bash scripts/build-agents.sh`로 배포본을 다시 생성합니다.
 
 | id | 직책 | Role (EN) | 하는 일 | 프롬프트 |
 |---|---|---|---|---|
@@ -14,7 +17,7 @@
 | 53 | 프로덕트 매니저 | Product Manager | PRD로 범위·일정·품질 기준을 확정합니다 | [`53-product-manager.md`](./53-product-manager.md) |
 | 54 | 브랜드 디자이너 | Brand Designer | 브랜드 아이덴티티와 컨셉을 정합니다 | [`54-brand-designer.md`](./54-brand-designer.md) |
 | 55 | 프로덕트 디자이너 | Product Designer | 화면·UX·디자인 시스템·라이팅을 확정합니다 | [`55-product-designer.md`](./55-product-designer.md) |
-| 56 | 앱 엔지니어 | App Engineer | RN·웹·익스텐션으로 화면을 구현합니다 | [`56-app-engineer.md`](./56-app-engineer.md) |
+| 56 | 앱 엔지니어 | App Engineer | RN/Expo 앱·익스텐션으로 화면을 구현합니다 | [`56-app-engineer.md`](./56-app-engineer.md) |
 | 57 | 백엔드 엔지니어 | Backend Engineer | 서버·데이터·결제를 구현합니다 | [`57-backend-engineer.md`](./57-backend-engineer.md) |
 | 58 | AI 엔지니어 | AI Engineer | 모델·AI 기능을 프로덕트에 녹입니다 | [`58-ai-engineer.md`](./58-ai-engineer.md) |
 | 59 | QA 엔지니어 | QA Engineer | 완료 주장을 검증으로 사실로 바꿉니다 | [`59-qa-engineer.md`](./59-qa-engineer.md) |
@@ -22,6 +25,6 @@
 | 61 | 그로스 마케터 | Growth Marketer | 스토어 문구·홍보로 사용자에게 닿습니다 | [`61-growth-marketer.md`](./61-growth-marketer.md) |
 | 62 | 데이터 사이언티스트 | Data Scientist | 데이터로 모델링하고 실험을 설계합니다 | [`62-data-scientist.md`](./62-data-scientist.md) |
 | 63 | 테크 리더 | Tech Lead | 인프라·아키텍처를 설계하고 기술 표준을 세웁니다 | [`63-tech-lead.md`](./63-tech-lead.md) |
-| 64 | 프론트엔드 엔지니어 | Frontend Engineer | 사용자가 만나는 화면을 구현합니다 | [`64-frontend-engineer.md`](./64-frontend-engineer.md) |
+| 64 | 프론트엔드 엔지니어 | Frontend Engineer | 순수 웹(마케팅 페이지·웹앱) 화면을 구현합니다 | [`64-frontend-engineer.md`](./64-frontend-engineer.md) |
 
 > 이 프롬프트들은 에이전트 팀 빌더( [50agents.airoasting.com](https://50agents.airoasting.com) · [github.com/airoasting/casting](https://github.com/airoasting/casting) )의 하우스 스타일을 따릅니다.
