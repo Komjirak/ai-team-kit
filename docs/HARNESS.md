@@ -28,11 +28,20 @@
 하나카드·Wanderlog 충돌로 리브랜드) ③ 정산 = 1/N 요약+완료체크(송금연동 제외)
 ④ 캘린더 = 인앱 정본 + 구글연동 옵셔널(Should).
 
-**개발 마일스톤(제품 소스 = `apps/travel-log/`):**
-- ✅ **M1 토대** — 커플(1:1)→여행(N인) 모델 피벗(Trip/ownerId/memberIds, coupleId→tripId),
-  여행 만들기·초대코드 합류·멤버·설정, 데이트코스 제거, 간직.log 리브랜드,
-  보안규칙 trips 스코프 재작성. verify=0·build=0, 데모 4인 여행 재현. (커밋됨)
-- ⏳ **M2 일정·캘린더**(진행 중, app-dev) → M3 가계부·정산 → M4 회고+FCM푸시 → v1.0.0.
+**개발 마일스톤(제품 소스 = `apps/travel-log/`) — ✅ v1.0.0 기능셋 완성(전부 커밋됨):**
+- ✅ **M1 토대** — 커플(1:1)→여행(N인) 피벗(Trip/ownerId/memberIds, coupleId→tripId),
+  여행 만들기·초대코드 합류·멤버·설정, 데이트코스 제거, 간직.log 리브랜드.
+- ✅ **M2 일정** — ScheduleItem, 여행기간 기준 일자별 리스트·CRUD·순서·장소 연결(인앱 정본).
+- ✅ **M3 가계부·정산(주연)** — Expense·순수함수 정산(정수 1/N·반올림 결정적)·정산 요약
+  ("A→B"）·"정산됨" 토글. **단위테스트 21케이스(vitest, `npm test`)로 정확도 고정**(K2 대비).
+- ✅ **M4 회고+푸시(주연)** — 회고 스크랩북 + 여행 요약 카드(재방문 훅, K1 대비) ·
+  FCM 웹푸시 3종 옵트인 + 인앱 폴백 · `functions/`(Firestore 트리거→FCM, 배포문서).
+- **게이트 전부 통과:** app verify=0·build=0·test=0 · functions tsc=0. 데모 모드로 전체 흐름 검증.
+
+⚠️ **v1.0.0은 "기능 완성"이지 "배포 완료"가 아니다.** 실 배포 = **PO 승인 대기(비가역)**:
+① 새 Firebase 프로젝트(예 `ganjik-log`) 키 `.env.local` ② firestore/storage 규칙 게시
+(trips/schedules/expenses/settlements 멤버 스코프 — 규칙 전엔 실모드 막힘) ③ Kakao JS
+도메인 등록 ④ 푸시는 VAPID+**Blaze**+`functions` 배포 ⑤ Hosting 배포 ⑥ 정식 상표·도메인(대외).
 
 **다음 세션이 챙길 것:**
 1. **간직.log는 Datel.log와 별개 배포 대상.** 실제 배포 시 **새 Firebase 프로젝트**
