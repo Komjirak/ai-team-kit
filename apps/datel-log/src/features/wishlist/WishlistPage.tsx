@@ -3,6 +3,7 @@ import { useCouple } from '../../couple/CoupleContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { PlaceCard, PlaceCardSkeleton } from '../../components/PlaceCard'
 import { Button, EmptyState } from '../../components/ui/basics'
+import { Icon } from '../../components/ui/Icon'
 import { AddPlaceSheet } from '../place/AddPlaceSheet'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
@@ -77,9 +78,7 @@ export function WishlistPage() {
         onClick={openAdd}
         aria-label="가고 싶은 곳 추가"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
-          add
-        </span>
+        <Icon name="add" size={28} />
       </button>
 
       <AddPlaceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} editing={editing} />

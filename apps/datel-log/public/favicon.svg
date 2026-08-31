@@ -1,4 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#FAF3EC"/>
-  <path d="M16 26s-9-5.5-9-12a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6.5-9 12-9 12z" fill="#E8846B" stroke="#984631" stroke-width="1.5" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Datel.log">
+  <defs>
+    <clipPath id="page"><rect x="4" y="4" width="56" height="56" rx="15"/></clipPath>
+  </defs>
+  <!-- notebook page -->
+  <rect x="4" y="4" width="56" height="56" rx="15" fill="#FFF3EA" stroke="#EBD9CC" stroke-width="1.5"/>
+  <!-- faint grid -->
+  <g clip-path="url(#page)" stroke="#88726D" stroke-opacity="0.14" stroke-width="1">
+    <path d="M18 4V60M32 4V60M46 4V60M4 18H60M4 32H60M4 46H60"/>
+  </g>
+  <!-- washi tape, top-left -->
+  <g transform="rotate(-18 20 15)">
+    <rect x="6" y="9" width="28" height="11" rx="1.5" fill="#F9E392" fill-opacity="0.85"/>
+    <rect x="6" y="9" width="28" height="11" rx="1.5" fill="none" stroke="#E7CB63" stroke-opacity="0.5"/>
+  </g>
+  <!-- coral heart sticker -->
+  <path d="M32 51 C 11 36, 15.5 17.5, 26.5 17.5 C 30 17.5, 32 20.5, 32 23.5 C 32 20.5, 34 17.5, 37.5 17.5 C 48.5 17.5, 53 36, 32 51 Z"
+        fill="#E8846B" stroke="#984631" stroke-width="2.4" stroke-linejoin="round"/>
+  <!-- highlight -->
+  <path d="M25 24 C 23 26, 22.5 29, 23.5 31.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- sparkle -->
+  <path d="M47 40 L48.2 43.4 L51.6 44.6 L48.2 45.8 L47 49.2 L45.8 45.8 L42.4 44.6 L45.8 43.4 Z" fill="#655689"/>
 </svg>

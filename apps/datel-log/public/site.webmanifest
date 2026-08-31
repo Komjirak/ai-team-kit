@@ -1,0 +1,17 @@
+{
+  "name": "Datel.log — 우리가 함께 걸은 곳",
+  "short_name": "Datel.log",
+  "description": "함께 갈 곳을 담고, 다녀온 곳으로 넘기고, 그 궤적을 지도와 숫자로 돌아보는 커플 다이어리.",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF3EC",
+  "theme_color": "#984631",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}

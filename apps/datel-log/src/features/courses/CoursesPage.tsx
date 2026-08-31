@@ -75,9 +75,7 @@ export function CoursesPage() {
         onClick={() => setOpen(true)}
         aria-label="코스 만들기"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
-          add
-        </span>
+        <Icon name="add" size={28} />
       </button>
 
       <CreateCourseSheet open={open} onClose={() => setOpen(false)} />

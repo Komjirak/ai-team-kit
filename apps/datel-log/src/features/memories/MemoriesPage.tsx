@@ -88,9 +88,7 @@ export function MemoriesPage() {
         onClick={() => setOpen(true)}
         aria-label="추억 남기기"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
-          add
-        </span>
+        <Icon name="add" size={28} />
       </button>
 
       <AddMemorySheet open={open} onClose={() => setOpen(false)} />
