@@ -1,6 +1,6 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
-import { getFirestore, type Firestore } from 'firebase/firestore'
+import { initializeFirestore, type Firestore } from 'firebase/firestore'
 import { getStorage, type FirebaseStorage } from 'firebase/storage'
 import { firebaseConfig, hasFirebase } from './env'
 
@@ -22,7 +22,9 @@ function ensure() {
       appId: firebaseConfig.appId!,
     })
     authInstance = getAuth(app)
-    dbInstance = getFirestore(app)
+    // ignoreUndefinedProperties: 선택 필드(메모·좌표 등)가 없을 때 undefined로
+    // 넘어와도 Firestore가 거부하지 않고 그 필드를 생략하도록 한다.
+    dbInstance = initializeFirestore(app, { ignoreUndefinedProperties: true })
     storageInstance = getStorage(app)
   }
 }
