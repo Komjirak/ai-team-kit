@@ -151,6 +151,9 @@ const auth: AuthApi = {
     write(K.user, null)
     emitUser()
   },
+  async reload() {
+    return read<AppUser | null>(K.user, null)
+  },
 }
 
 // ── helpers ───────────────────────────────────────────────────

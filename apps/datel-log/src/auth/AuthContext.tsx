@@ -7,6 +7,8 @@ interface AuthState {
   loading: boolean
   signIn: () => Promise<void>
   signOut: () => Promise<void>
+  /** re-read the signed-in user (e.g. after pairing sets a coupleId). */
+  refreshUser: () => Promise<void>
 }
 
 const Ctx = createContext<AuthState | null>(null)
@@ -29,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signIn: () => backend.auth.signInWithGoogle(),
       signOut: () => backend.auth.signOut(),
+      refreshUser: async () => setUser(await backend.auth.reload()),
     }),
     [user, loading],
   )

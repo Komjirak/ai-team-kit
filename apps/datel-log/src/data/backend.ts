@@ -18,6 +18,8 @@ export interface AuthApi {
   onUser(cb: (user: AppUser | null) => void): () => void
   signInWithGoogle(): Promise<void>
   signOut(): Promise<void>
+  /** re-read the current user (e.g. to pick up a freshly set coupleId). */
+  reload(): Promise<AppUser | null>
 }
 
 export interface Backend {

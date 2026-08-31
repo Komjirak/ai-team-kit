@@ -75,6 +75,17 @@ const auth: AuthApi = {
   async signOut() {
     await fbSignOut(fbAuth())
   },
+  async reload() {
+    const u = fbAuth().currentUser
+    if (!u) return null
+    const base: AppUser = {
+      id: u.uid,
+      nickname: u.displayName || (u.email ? u.email.split('@')[0] : '나'),
+      email: u.email || '',
+      photoURL: u.photoURL || undefined,
+    }
+    return { ...base, coupleId: await loadCoupleId(u.uid) }
+  },
 }
 
 function mapDoc<T>(d: { id: string; data: () => unknown }): T {

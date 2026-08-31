@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
-import { useCouple } from '../../couple/CoupleContext'
 import { backend } from '../../data'
 import { Icon } from '../../components/ui/Icon'
 import { Button, Spinner } from '../../components/ui/basics'
@@ -15,8 +14,7 @@ const errText: Record<string, string> = {
 
 /** Couple binding (design screen _9). Create code OR join with a code. */
 export function Pairing() {
-  const { user } = useAuth()
-  const { refreshCouple } = useCouple()
+  const { user, refreshUser } = useAuth()
   const [mode, setMode] = useState<'choice' | 'join'>('choice')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
@@ -28,7 +26,7 @@ export function Pairing() {
     setError(null)
     try {
       await backend.createCouple(user)
-      await refreshCouple()
+      await refreshUser()
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -42,7 +40,7 @@ export function Pairing() {
     setError(null)
     try {
       await backend.joinCouple(user, code)
-      await refreshCouple()
+      await refreshUser()
     } catch (e) {
       setError((e as Error).message)
     } finally {
