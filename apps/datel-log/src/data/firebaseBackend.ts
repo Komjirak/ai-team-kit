@@ -149,6 +149,9 @@ export const firebaseBackend: Backend = {
   async setStartDate(coupleId, startDate) {
     await updateDoc(doc(fbDb(), 'couples', coupleId), { startDate })
   },
+  async setCoverPhoto(coupleId, url) {
+    await updateDoc(doc(fbDb(), 'couples', coupleId), { coverPhoto: url })
+  },
   async getCoupleMembers(coupleId) {
     const couple = await this.getCouple(coupleId)
     if (!couple) return []

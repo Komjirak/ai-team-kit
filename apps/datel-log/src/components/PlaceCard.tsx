@@ -22,12 +22,14 @@ export function PlaceCard({
   onVisit,
   onEdit,
   onDelete,
+  onOpen,
 }: {
   place: Place
   index?: number
   onVisit?: (p: Place) => void
   onEdit?: (p: Place) => void
   onDelete?: (p: Place) => void
+  onOpen?: (p: Place) => void
 }) {
   const [menu, setMenu] = useState(false)
   const visited = place.status === 'visited'
@@ -41,7 +43,12 @@ export function PlaceCard({
         <Pin className="-right-1 -top-2" color="#655689" />
       )}
 
-      <div className="relative overflow-hidden rounded-2xl bg-surface-container">
+      <div
+        className={`relative overflow-hidden rounded-2xl bg-surface-container ${onOpen ? 'cursor-pointer' : ''}`}
+        onClick={onOpen ? () => onOpen(place) : undefined}
+        role={onOpen ? 'button' : undefined}
+        aria-label={onOpen ? `${place.name} 상세` : undefined}
+      >
         {place.thumbnail ? (
           <img
             src={place.thumbnail}
@@ -66,7 +73,12 @@ export function PlaceCard({
 
       <div className="px-1 pt-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-lg font-bold leading-tight text-ink">{place.name}</h3>
+          <h3
+            className={`font-display text-lg font-bold leading-tight text-ink ${onOpen ? 'cursor-pointer' : ''}`}
+            onClick={onOpen ? () => onOpen(place) : undefined}
+          >
+            {place.name}
+          </h3>
           {(onEdit || onDelete) && (
             <div className="relative">
               <button

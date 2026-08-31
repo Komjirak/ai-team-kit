@@ -9,6 +9,7 @@ import { Washi, Sticker } from '../../components/ui/deco'
 import { PlaceCard } from '../../components/PlaceCard'
 import { AddPlaceSheet } from '../place/AddPlaceSheet'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
+import type { Place } from '../../data/types'
 
 export function HomePage() {
   const { user } = useAuth()
@@ -16,6 +17,16 @@ export function HomePage() {
   const { markVisited, remove } = usePlaceActions()
   const nav = useNavigate()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editing, setEditing] = useState<Place | null>(null)
+
+  function openEdit(p: Place) {
+    setEditing(p)
+    setSheetOpen(true)
+  }
+  function openAdd() {
+    setEditing(null)
+    setSheetOpen(true)
+  }
 
   const recent = [...places].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6)
 
@@ -37,7 +48,7 @@ export function HomePage() {
           <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/80">
             오늘의 자리를 다이어리에 담아볼까요? 함께 갈 곳도, 다녀온 곳도 모두 우리의 기록이 돼요.
           </p>
-          <Button icon="photo_camera" className="mt-4" onClick={() => setSheetOpen(true)}>
+          <Button icon="photo_camera" className="mt-4" onClick={openAdd}>
             새로운 장소 담기
           </Button>
         </div>
@@ -101,7 +112,7 @@ export function HomePage() {
             title="첫 기록을 시작해볼까요?"
             hint="가고 싶은 곳을 담으면 여기에 우리의 로그가 쌓여요."
             action={
-              <Button icon="add" onClick={() => setSheetOpen(true)}>
+              <Button icon="add" onClick={openAdd}>
                 첫 장소 담기
               </Button>
             }
@@ -114,14 +125,16 @@ export function HomePage() {
                 place={p}
                 index={i}
                 onVisit={markVisited}
+                onEdit={openEdit}
                 onDelete={remove}
+                onOpen={openEdit}
               />
             ))}
           </div>
         )}
       </section>
 
-      <AddPlaceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+      <AddPlaceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} editing={editing} />
     </div>
   )
 }

@@ -1,17 +1,37 @@
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { useCouple } from '../../couple/CoupleContext'
+import { backend } from '../../data'
 import { StatTile } from '../../components/ui/StatTile'
 import { Icon } from '../../components/ui/Icon'
-import { Skeleton } from '../../components/ui/basics'
-import { BRAND } from '../../components/layout/nav'
+import { Skeleton, Spinner } from '../../components/ui/basics'
 import { Washi, Pin } from '../../components/ui/deco'
+import { useToast } from '../../components/ui/Toast'
 import { RunnerRace } from './RunnerRace'
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const { couple, stats, loading, partner } = useCouple()
+  const { couple, stats, loading, partner, refreshCouple } = useCouple()
   const nav = useNavigate()
+  const toast = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  async function pickCover(files: FileList | null) {
+    if (!files?.[0] || !couple) return
+    setUploading(true)
+    try {
+      const url = await backend.uploadPhoto(couple.id, files[0])
+      await backend.setCoverPhoto(couple.id, url)
+      await refreshCouple()
+      toast.show('대표 사진을 바꿨어요.')
+    } catch {
+      toast.show('사진을 올리지 못했어요.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -26,24 +46,42 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 pt-2">
-      <div className="flex items-center gap-2">
-        <Icon name="favorite" fill className="text-primary-container" size={24} />
-        <h1 className="font-display text-2xl font-extrabold text-primary">{BRAND} · 우리의 기록</h1>
-      </div>
-
-      {/* D-day hero */}
+    <div className="space-y-6 pt-4">
+      {/* D-day hero — 커플 대표 사진 */}
       <section className="relative">
         <Washi color="yellow" className="left-1/2 -top-2 -translate-x-1/2" rotate={-2} />
         <div className="polaroid rounded-[24px]" style={{ transform: 'rotate(-1deg)' }}>
-          <div className="relative overflow-hidden rounded-2xl">
-            <img
-              src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=900&q=70"
-              alt=""
-              className="aspect-[16/10] w-full object-cover"
-            />
+          <div className="relative overflow-hidden rounded-2xl bg-surface-container">
+            {couple?.coverPhoto ? (
+              <img src={couple.coverPhoto} alt="" className="aspect-[16/10] w-full object-cover" />
+            ) : (
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 bg-primary-soft text-primary"
+              >
+                {uploading ? <Spinner size={26} /> : <Icon name="add_a_photo" size={30} />}
+                <span className="text-sm font-semibold">우리 사진 추가하기</span>
+              </button>
+            )}
             <span className="washi washi-mint left-6 top-4" style={{ transform: 'rotate(-8deg)', width: 90 }} />
+            {couple?.coverPhoto && (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="dl-focus absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-white backdrop-blur"
+                aria-label="대표 사진 바꾸기"
+              >
+                {uploading ? <Spinner size={18} /> : <Icon name="photo_camera" size={20} />}
+              </button>
+            )}
           </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => pickCover(e.target.files)}
+          />
           {stats.daysTogether != null ? (
             <div className="flex flex-wrap items-end justify-between gap-2 px-2 pt-3">
               <p className="font-display text-3xl font-extrabold text-ink">

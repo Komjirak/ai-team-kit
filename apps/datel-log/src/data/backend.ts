@@ -31,6 +31,7 @@ export interface Backend {
   createCouple(user: AppUser): Promise<Couple>
   joinCouple(user: AppUser, inviteCode: string): Promise<Couple>
   setStartDate(coupleId: string, startDate: string): Promise<void>
+  setCoverPhoto(coupleId: string, url: string): Promise<void>
   getCoupleMembers(coupleId: string): Promise<AppUser[]>
 
   // Places (I2, I3)

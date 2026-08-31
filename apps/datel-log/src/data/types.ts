@@ -18,6 +18,7 @@ export interface Couple {
   inviteCode: string
   startDate?: string // ISO yyyy-mm-dd
   memberIds: string[] // ≤ 2
+  coverPhoto?: string // 우리의 기록 대표 사진 URL
 }
 
 export interface Place {

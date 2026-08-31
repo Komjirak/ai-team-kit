@@ -211,6 +211,13 @@ export const localBackend: Backend = {
     c.startDate = startDate
     write(K.couples, couples)
   },
+  async setCoverPhoto(coupleId, url) {
+    const couples = read<Couple[]>(K.couples, [])
+    const c = couples.find((x) => x.id === coupleId)
+    if (!c) throw new Error('couple.not_found')
+    c.coverPhoto = url
+    write(K.couples, couples)
+  },
   async getCoupleMembers(coupleId) {
     const couple = await this.getCouple(coupleId)
     if (!couple) return []

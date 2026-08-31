@@ -63,6 +63,7 @@ export function WishlistPage() {
                 onVisit={markVisited}
                 onEdit={openEdit}
                 onDelete={remove}
+                onOpen={openEdit}
               />
             ))}
           </div>
