@@ -13,6 +13,7 @@ import { computeStats } from '../data/stats'
 import type {
   AppNotification,
   AppUser,
+  Expense,
   Memory,
   Place,
   ScheduleItem,
@@ -33,6 +34,8 @@ interface TripState {
   members: AppUser[]
   places: Place[]
   schedule: ScheduleItem[]
+  expenses: Expense[]
+  settledKeys: string[]
   memories: Memory[]
   notifications: AppNotification[]
   unreadCount: number
@@ -72,6 +75,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<AppUser[]>([])
   const [places, setPlaces] = useState<Place[]>([])
   const [schedule, setSchedule] = useState<ScheduleItem[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [settledKeys, setSettledKeys] = useState<string[]>([])
   const [memories, setMemories] = useState<Memory[]>([])
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [loading, setLoading] = useState(false)
@@ -139,6 +144,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!activeTripId) {
       setPlaces([])
       setSchedule([])
+      setExpenses([])
+      setSettledKeys([])
       setMemories([])
       setNotifications([])
       return
@@ -146,6 +153,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const unsubs = [
       backend.watchPlaces(activeTripId, setPlaces),
       backend.watchSchedule(activeTripId, setSchedule),
+      backend.watchExpenses(activeTripId, setExpenses),
+      backend.watchSettlement(activeTripId, setSettledKeys),
       backend.watchMemories(activeTripId, setMemories),
       backend.watchNotifications(activeTripId, setNotifications),
     ]
@@ -169,6 +178,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
     members,
     places,
     schedule,
+    expenses,
+    settledKeys,
     memories,
     notifications,
     unreadCount,

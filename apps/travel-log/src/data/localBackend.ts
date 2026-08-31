@@ -2,9 +2,11 @@ import type { Backend, AuthApi } from './backend'
 import type {
   AppNotification,
   AppUser,
+  Expense,
   Memory,
   Place,
   ScheduleItem,
+  SettlementState,
   Trip,
 } from './types'
 
@@ -20,6 +22,8 @@ const K = {
   users: 'ganjik:users',
   places: 'ganjik:places',
   schedule: 'ganjik:schedule',
+  expenses: 'ganjik:expenses',
+  settlements: 'ganjik:settlements',
   memories: 'ganjik:memories',
   notifs: 'ganjik:notifications',
 }
@@ -121,11 +125,26 @@ function seed() {
     { id: 's5', tripId: trip.id, date: '2026-09-20', order: 0, title: '자유시간 · 각자 카페 투어', createdBy: suah.id, createdAt: now - 4 * day },
   ]
 
+  // 제주여행 비용 8건 (결제자·참여자 섞어서) — 정산 요약이 바로 보이도록 시드
+  const all = [me.id, jihoon.id, minji.id, suah.id]
+  const expenses: Expense[] = [
+    { id: 'x1', tripId: trip.id, title: '렌터카 3박4일', amount: 240000, paidBy: me.id, participants: all, category: '교통', date: '2026-09-18', createdBy: me.id, createdAt: now - 6 * day },
+    { id: 'x2', tripId: trip.id, title: '첫날 흑돼지 회식', amount: 132000, paidBy: jihoon.id, participants: all, category: '식비', date: '2026-09-18', createdBy: jihoon.id, createdAt: now - 6 * day },
+    { id: 'x3', tripId: trip.id, title: '숙소 (2박)', amount: 320000, paidBy: minji.id, participants: all, category: '숙박', date: '2026-09-18', createdBy: minji.id, createdAt: now - 6 * day },
+    { id: 'x4', tripId: trip.id, title: '카페 델문도', amount: 28000, paidBy: suah.id, participants: all, category: '카페', date: '2026-09-19', createdBy: suah.id, createdAt: now - 5 * day },
+    { id: 'x5', tripId: trip.id, title: '한라산 김밥·간식', amount: 21000, paidBy: me.id, participants: all, category: '식비', date: '2026-09-19', createdBy: me.id, createdAt: now - 5 * day },
+    { id: 'x6', tripId: trip.id, title: '둘째날 저녁 해산물', amount: 96000, paidBy: jihoon.id, participants: all, category: '식비', date: '2026-09-19', createdBy: jihoon.id, createdAt: now - 5 * day },
+    { id: 'x7', tripId: trip.id, title: '기념품 (민지·수아)', amount: 34000, paidBy: minji.id, participants: [minji.id, suah.id], category: '기타', date: '2026-09-20', createdBy: minji.id, createdAt: now - 4 * day },
+    { id: 'x8', tripId: trip.id, title: '주유비', amount: 55000, paidBy: suah.id, participants: all, category: '교통', date: '2026-09-20', createdBy: suah.id, createdAt: now - 4 * day },
+  ]
+
   write(K.user, me)
   write(K.users, [me, jihoon, minji, suah])
   write(K.trips, [trip])
   write(K.places, places)
   write(K.schedule, schedule)
+  write(K.expenses, expenses)
+  write(K.settlements, [] as SettlementState[])
   write(K.memories, memories)
   write(K.notifs, [] as AppNotification[])
 }
@@ -229,6 +248,8 @@ export const localBackend: Backend = {
       write(K.trips, trips.filter((x) => x.id !== tripId))
       write(K.places, read<Place[]>(K.places, []).filter((p) => p.tripId !== tripId))
       write(K.schedule, read<ScheduleItem[]>(K.schedule, []).filter((s) => s.tripId !== tripId))
+      write(K.expenses, read<Expense[]>(K.expenses, []).filter((x) => x.tripId !== tripId))
+      write(K.settlements, read<SettlementState[]>(K.settlements, []).filter((x) => x.tripId !== tripId))
       write(K.memories, read<Memory[]>(K.memories, []).filter((m) => m.tripId !== tripId))
       write(K.notifs, read<AppNotification[]>(K.notifs, []).filter((n) => n.tripId !== tripId))
       return
@@ -296,6 +317,50 @@ export const localBackend: Backend = {
   },
   async deleteScheduleItem(id) {
     write(K.schedule, read<ScheduleItem[]>(K.schedule, []).filter((s) => s.id !== id))
+  },
+
+  watchExpenses(tripId, cb) {
+    const run = () => cb(read<Expense[]>(K.expenses, []).filter((x) => x.tripId === tripId))
+    run()
+    return bus.on(K.expenses, run)
+  },
+  async addExpense(input) {
+    const item: Expense = { ...input, id: uid(), createdAt: Date.now() }
+    write(K.expenses, [...read<Expense[]>(K.expenses, []), item])
+    return item
+  },
+  async updateExpense(id, patch) {
+    const list = read<Expense[]>(K.expenses, [])
+    const i = list.findIndex((x) => x.id === id)
+    if (i >= 0) {
+      list[i] = { ...list[i], ...patch }
+      write(K.expenses, list)
+    }
+  },
+  async deleteExpense(id) {
+    write(K.expenses, read<Expense[]>(K.expenses, []).filter((x) => x.id !== id))
+  },
+
+  watchSettlement(tripId, cb) {
+    const run = () => {
+      const s = read<SettlementState[]>(K.settlements, []).find((x) => x.tripId === tripId)
+      cb(s?.settledKeys ?? [])
+    }
+    run()
+    return bus.on(K.settlements, run)
+  },
+  async setTransferSettled(tripId, key, settled) {
+    const list = read<SettlementState[]>(K.settlements, [])
+    let s = list.find((x) => x.tripId === tripId)
+    if (!s) {
+      s = { tripId, settledKeys: [] }
+      list.push(s)
+    }
+    const has = s.settledKeys.includes(key)
+    if (settled && !has) s.settledKeys.push(key)
+    else if (!settled && has) s.settledKeys = s.settledKeys.filter((k) => k !== key)
+    else return
+    write(K.settlements, list)
   },
 
   watchMemories(tripId, cb) {

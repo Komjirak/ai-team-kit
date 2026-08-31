@@ -76,6 +76,13 @@ export function Header() {
                     <>
                       <p className="px-2 text-xs text-muted">현재 여행</p>
                       <p className="px-2 pb-2 font-medium text-ink">{activeTrip.title}</p>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-surface-container"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Icon name="luggage" size={18} /> 여행 기록
+                      </Link>
                       <button
                         className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-surface-container"
                         onClick={() => {

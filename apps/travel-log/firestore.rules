@@ -55,6 +55,19 @@ service cloud.firestore {
       allow create: if isMemberOf(request.resource.data.tripId);
       allow update: if isMemberOf(resource.data.tripId);
     }
+    // 비용은 민감정보(금액) — 트립 멤버 외 read 절대 차단(PRD §7).
+    match /expenses/{id} {
+      allow read, delete: if isMemberOf(resource.data.tripId);
+      allow create: if isMemberOf(request.resource.data.tripId);
+      allow update: if isMemberOf(resource.data.tripId)
+        && isMemberOf(request.resource.data.tripId);
+    }
+    // 정산 완료 체크: 문서 id == tripId, settledKeys[] 토글.
+    match /settlements/{tripId} {
+      allow read: if isMemberOf(tripId);
+      allow write: if isMemberOf(tripId)
+        && request.resource.data.tripId == tripId;
+    }
     match /notifications/{id} {
       allow read, update: if isMemberOf(resource.data.tripId);
       allow create: if isMemberOf(request.resource.data.tripId);

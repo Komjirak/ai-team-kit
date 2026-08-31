@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   ChevronUp,
+  Circle,
   Coffee,
   Copy,
   Footprints,
@@ -51,6 +52,7 @@ import {
   Users,
   UserCircle,
   Utensils,
+  Wallet,
   X,
   type LucideIcon,
 } from 'lucide-react'
@@ -73,6 +75,7 @@ const MAP: Record<string, LucideIcon> = {
   auto_stories: BookOpen,
   check: Check,
   chevron_right: ChevronRight,
+  circle: Circle,
   close: X,
   content_copy: Copy,
   delete: Trash2,
@@ -117,6 +120,7 @@ const MAP: Record<string, LucideIcon> = {
   swap_horiz: ArrowLeftRight,
   unfold_more: ChevronsUpDown,
   upload: Upload,
+  wallet: Wallet,
   workspace_premium: Award,
 }
 

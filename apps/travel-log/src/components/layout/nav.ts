@@ -4,14 +4,14 @@ export interface Tab {
   icon: string
 }
 
-// The canonical tabs (PRD §10-1). 일정=조연(M2 리스트 뷰), 가계부는 M3라 아직 없다.
-// Same labels/order across all breakpoints.
+// The canonical tabs (PRD §10-1). 가계부=주연(M3)이라 하단탭에 노출.
+// '여행'(트립 전환·기록·설정)은 헤더 사용자칩 메뉴로 옮겼다.
 export const TABS: Tab[] = [
   { to: '/', label: '전체', icon: 'grid_view' },
   { to: '/schedule', label: '일정', icon: 'event' },
   { to: '/wishlist', label: '장소', icon: 'location_on' },
+  { to: '/expenses', label: '가계부', icon: 'wallet' },
   { to: '/memories', label: '추억', icon: 'photo_library' },
-  { to: '/dashboard', label: '여행', icon: 'luggage' },
 ]
 
 // 확정 이름(BRAND.md · PO 확정 2026-08-31): 간직.log

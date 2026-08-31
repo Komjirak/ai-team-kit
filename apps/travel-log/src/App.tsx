@@ -9,6 +9,7 @@ import { TripPicker } from './features/trips/TripPicker'
 import { HomePage } from './features/home/HomePage'
 import { SchedulePage } from './features/schedule/SchedulePage'
 import { WishlistPage } from './features/wishlist/WishlistPage'
+import { ExpensesPage } from './features/expenses/ExpensesPage'
 import { MemoriesPage } from './features/memories/MemoriesPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { SettingsPage } from './features/settings/SettingsPage'
@@ -39,6 +40,7 @@ function TripRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/schedule" element={<SchedulePage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/expenses" element={<ExpensesPage />} />
         <Route path="/memories" element={<MemoriesPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/settings" element={<SettingsPage />} />

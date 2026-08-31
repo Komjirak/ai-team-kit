@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "lint": "tsc -b --noEmit",
-    "verify": "tsc -b --noEmit"
+    "verify": "tsc -b --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "firebase": "^11.1.0",
@@ -28,6 +29,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.6.3",
     "vite": "^6.0.3",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^2.1.9"
   }
 }

@@ -6,6 +6,8 @@ import {
 } from 'firebase/auth'
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -25,6 +27,7 @@ import type { Backend, AuthApi } from './backend'
 import type {
   AppNotification,
   AppUser,
+  Expense,
   Memory,
   Place,
   ScheduleItem,
@@ -193,6 +196,35 @@ export const firebaseBackend: Backend = {
   },
   async deleteScheduleItem(id) {
     await deleteDoc(doc(fbDb(), 'schedules', id))
+  },
+
+  watchExpenses(tripId, cb) {
+    const q = query(collection(fbDb(), 'expenses'), where('tripId', '==', tripId))
+    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Expense>(d)))))
+  },
+  async addExpense(input) {
+    const ref_ = await addDoc(collection(fbDb(), 'expenses'), { ...input, createdAt: Date.now() })
+    return { ...input, id: ref_.id, createdAt: Date.now() }
+  },
+  async updateExpense(id, patch) {
+    await updateDoc(doc(fbDb(), 'expenses', id), patch)
+  },
+  async deleteExpense(id) {
+    await deleteDoc(doc(fbDb(), 'expenses', id))
+  },
+
+  watchSettlement(tripId, cb) {
+    // settlements/{tripId} 문서 하나. 없으면 빈 배열.
+    return onSnapshot(doc(fbDb(), 'settlements', tripId), (s) =>
+      cb(((s.data()?.settledKeys as string[] | undefined) ?? [])),
+    )
+  },
+  async setTransferSettled(tripId, key, settled) {
+    await setDoc(
+      doc(fbDb(), 'settlements', tripId),
+      { tripId, settledKeys: settled ? arrayUnion(key) : arrayRemove(key) },
+      { merge: true },
+    )
   },
 
   watchMemories(tripId, cb) {

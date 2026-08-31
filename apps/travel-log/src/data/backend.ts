@@ -1,6 +1,7 @@
 import type {
   AppNotification,
   AppUser,
+  Expense,
   Memory,
   Place,
   ScheduleItem,
@@ -55,6 +56,16 @@ export interface Backend {
   addScheduleItem(input: Omit<ScheduleItem, 'id' | 'createdAt'>): Promise<ScheduleItem>
   updateScheduleItem(id: string, patch: Partial<ScheduleItem>): Promise<void>
   deleteScheduleItem(id: string): Promise<void>
+
+  // Expenses (M3, 주연) — 1/N 정산. orderBy 없이 tripId 동등필터 + 클라 정렬.
+  watchExpenses(tripId: string, cb: (items: Expense[]) => void): () => void
+  addExpense(input: Omit<Expense, 'id' | 'createdAt'>): Promise<Expense>
+  updateExpense(id: string, patch: Partial<Expense>): Promise<void>
+  deleteExpense(id: string): Promise<void>
+
+  // Settlement "정산됨" 체크 상태 — tripId당 settledKeys[] 하나. 되돌리기 가능.
+  watchSettlement(tripId: string, cb: (settledKeys: string[]) => void): () => void
+  setTransferSettled(tripId: string, key: string, settled: boolean): Promise<void>
 
   // Memories + photos
   watchMemories(tripId: string, cb: (memories: Memory[]) => void): () => void

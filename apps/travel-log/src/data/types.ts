@@ -59,6 +59,28 @@ export interface Memory {
   createdAt: number
 }
 
+// 신규(M3) — 비용. v1은 1/N 균등 분담만(오픈이슈 A 확정). 개별지정/비율은 Should.
+// 실제 송금·PG는 Won't — 계산·요약·"정산됨" 체크까지만.
+export interface Expense {
+  id: string
+  tripId: string
+  title: string
+  amount: number         // 정수 KRW (v1 통화 고정)
+  paidBy: string         // 결제자 userId
+  participants: string[] // 분담 대상 userId[] (1/N)
+  category?: string      // Could(통계)는 범위 밖. 라벨만 저장
+  date?: string          // ISO yyyy-mm-dd (선택)
+  createdBy: string
+  createdAt: number
+}
+
+// 신규(M3) — 정산 완료 체크의 영속 상태. tripId당 문서 하나.
+// settledKeys: "정산됨"으로 표시된 이체의 키(`${from}>${to}`) 목록. 되돌리기 가능.
+export interface SettlementState {
+  tripId: string
+  settledKeys: string[]
+}
+
 // 신규(M2) — 일자별 일정 항목. 인앱이 source of truth (PRD §5, §6-3).
 // 구글캘린더 미러링(googleEventId)·그리드 뷰는 M5 이후. 여기선 리스트만.
 export interface ScheduleItem {
