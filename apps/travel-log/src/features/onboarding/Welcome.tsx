@@ -23,7 +23,7 @@ export function Welcome() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col px-6 py-8">
       <div className="flex items-center gap-2">
-        <Icon name="favorite" fill className="text-primary-container" size={28} />
+        <Icon name="luggage" fill className="text-primary-container" size={28} />
         <span className="font-display text-2xl font-extrabold text-primary">{BRAND}</span>
       </div>
 
@@ -34,13 +34,13 @@ export function Welcome() {
         <div className="polaroid rotate-[-2deg] rounded-2xl">
           <div className="overflow-hidden rounded-xl">
             <img
-              src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=720&q=70"
-              alt="함께 걷는 커플"
+              src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=720&q=70"
+              alt="함께 떠난 친구들"
               className="aspect-[4/5] w-full object-cover"
             />
           </div>
-          <p className="mt-3 text-center font-display text-lg font-bold text-ink">함께하는 산책의 즐거움</p>
-          <p className="text-center text-xs text-muted">서로의 발걸음을 맞춰보세요.</p>
+          <p className="mt-3 text-center font-display text-lg font-bold text-ink">함께 떠난 그날</p>
+          <p className="text-center text-xs text-muted">친구들과의 여행을 오래 간직해요.</p>
         </div>
         <Sticker
           icon={<Icon name="auto_awesome" size={18} />}
@@ -52,12 +52,12 @@ export function Welcome() {
 
       <div className="mt-10 text-center">
         <h1 className="font-display text-4xl font-extrabold leading-tight text-ink">
-          너와 나의
+          친구와 함께
           <br />
-          <span className="wobbly-underline">특별한 기록</span>
+          <span className="wobbly-underline">간직하는 여행</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xs text-[15px] leading-relaxed text-muted">
-          우리의 데이트를 다꾸하듯 예쁘게 기록해보세요. 작은 조각들이 모여 큰 추억이 됩니다.
+          갈 곳을 함께 담고, 다녀와서 사진과 후기로 남겨요. 흩어진 기억이 우리만의 스크랩북이 됩니다.
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { StatTile } from '../../components/ui/StatTile'
 import { Icon } from '../../components/ui/Icon'
@@ -10,30 +10,36 @@ import { Washi, Pin } from '../../components/ui/deco'
 import { useToast } from '../../components/ui/Toast'
 import { RunnerRace } from './RunnerRace'
 
+function fmtRange(startDate?: string, endDate?: string): string | null {
+  if (!startDate) return null
+  const s = startDate.replace(/-/g, '.')
+  if (!endDate || endDate === startDate) return s
+  return `${s} – ${endDate.replace(/-/g, '.')}`
+}
+
 export function DashboardPage() {
   const { user } = useAuth()
-  const { couple, stats, loading, partner, refreshCouple } = useCouple()
+  const { activeTrip, stats, loading, members } = useTrip()
   const nav = useNavigate()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
   async function pickCover(files: FileList | null) {
-    if (!files?.[0] || !couple) return
+    if (!files?.[0] || !activeTrip) return
     setUploading(true)
     try {
-      const url = await backend.uploadPhoto(couple.id, files[0])
-      await backend.setCoverPhoto(couple.id, url)
-      await refreshCouple()
+      const url = await backend.uploadPhoto(activeTrip.id, files[0])
+      await backend.updateTrip(activeTrip.id, { coverPhoto: url })
       toast.show('대표 사진을 바꿨어요.')
     } catch {
-      toast.show('사진을 올리지 못했어요.')
+      toast.show('사진을 올리지 못했어요. (photo.upload_failed)')
     } finally {
       setUploading(false)
     }
   }
 
-  if (loading) {
+  if (loading || !activeTrip) {
     return (
       <div className="space-y-4 pt-4">
         <Skeleton className="h-56" />
@@ -45,26 +51,28 @@ export function DashboardPage() {
     )
   }
 
+  const range = fmtRange(activeTrip.startDate, activeTrip.endDate)
+
   return (
     <div className="space-y-6 pt-4">
-      {/* D-day hero — 커플 대표 사진 */}
+      {/* cover hero */}
       <section className="relative">
         <Washi color="yellow" className="left-1/2 -top-2 -translate-x-1/2" rotate={-2} />
         <div className="polaroid rounded-[24px]" style={{ transform: 'rotate(-1deg)' }}>
           <div className="relative overflow-hidden rounded-2xl bg-surface-container">
-            {couple?.coverPhoto ? (
-              <img src={couple.coverPhoto} alt="" className="aspect-[16/10] w-full object-cover" />
+            {activeTrip.coverPhoto ? (
+              <img src={activeTrip.coverPhoto} alt="" className="aspect-[16/10] w-full object-cover" />
             ) : (
               <button
                 onClick={() => fileRef.current?.click()}
                 className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 bg-primary-soft text-primary"
               >
                 {uploading ? <Spinner size={26} /> : <Icon name="add_a_photo" size={30} />}
-                <span className="text-sm font-semibold">우리 사진 추가하기</span>
+                <span className="text-sm font-semibold">여행 대표 사진 추가하기</span>
               </button>
             )}
             <span className="washi washi-mint left-6 top-4" style={{ transform: 'rotate(-8deg)', width: 90 }} />
-            {couple?.coverPhoto && (
+            {activeTrip.coverPhoto && (
               <button
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
@@ -75,30 +83,29 @@ export function DashboardPage() {
               </button>
             )}
           </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => pickCover(e.target.files)}
-          />
-          {stats.daysTogether != null ? (
-            <div className="flex flex-wrap items-end justify-between gap-2 px-2 pt-3">
-              <p className="font-display text-3xl font-extrabold text-ink">
-                함께한 지 <span className="text-primary">{stats.daysTogether}</span>일
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pickCover(e.target.files)} />
+
+          <div className="flex flex-wrap items-end justify-between gap-2 px-2 pt-3">
+            <div className="min-w-0">
+              <p className="truncate font-display text-2xl font-extrabold text-ink">{activeTrip.title}</p>
+              <p className="dl-mono mt-0.5 text-sm text-muted">
+                {[activeTrip.destination, range].filter(Boolean).join(' · ') || '기간 미정'}
               </p>
-              <span className="dl-mono rounded-full border border-primary/40 bg-primary-soft px-3 py-1 text-sm font-bold text-primary">
-                D {couple?.startDate?.replace(/-/g, '.')}
-              </span>
             </div>
-          ) : (
+            {stats.tripDays != null && (
+              <span className="dl-mono rounded-full border border-primary/40 bg-primary-soft px-3 py-1 text-sm font-bold text-primary">
+                {stats.tripDays}일 여행
+              </span>
+            )}
+          </div>
+          {!range && (
             <button
               onClick={() => nav('/settings')}
               className="mt-3 flex w-full items-center justify-between rounded-2xl bg-primary-soft px-4 py-3 text-left"
             >
               <span>
-                <span className="block font-display text-lg font-bold text-ink">함께한 지</span>
-                <span className="text-sm text-muted">관계 시작일을 설정해주세요</span>
+                <span className="block font-display text-lg font-bold text-ink">여행 기간</span>
+                <span className="text-sm text-muted">설정에서 날짜를 정해요</span>
               </span>
               <span className="dl-btn-soft">설정에서 입력하기 →</span>
             </button>
@@ -110,7 +117,7 @@ export function DashboardPage() {
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile icon="restaurant" color="lavender" value={stats.visitedCount} label="다녀온 곳" onClick={() => nav('/wishlist')} />
         <StatTile icon="location_on" color="mint" value={stats.wishlistCount} label="가고싶은 곳" onClick={() => nav('/wishlist')} />
-        <StatTile icon="favorite" color="primary" value={stats.memoryCount} label="남긴 추억" onClick={() => nav('/memories')} />
+        <StatTile icon="photo_camera" color="primary" value={stats.memoryCount} label="남긴 추억" onClick={() => nav('/memories')} />
         <StatTile icon="photo_library" color="yellow" value={stats.photoCount} label="사진" onClick={() => nav('/memories')} />
       </section>
 
@@ -146,17 +153,28 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {/* runner race */}
+      {/* member race */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <h2 className="font-display text-lg font-bold text-ink">누가 더 많이 등록했을까 🏃</h2>
+          <h2 className="font-display text-lg font-bold text-ink">누가 더 많이 담았을까 🏃</h2>
         </div>
-        {!partner && (
-          <p className="mb-3 text-sm text-muted">파트너가 합류하면 함께 겨뤄봐요. 지금은 나의 기록만 보여요.</p>
+        {members.length <= 1 && (
+          <p className="mb-3 text-sm text-muted">친구가 합류하면 함께 겨뤄봐요. 지금은 나의 기록만 보여요.</p>
         )}
         <RunnerRace runners={stats.perMemberPlaceCount} meId={user?.id} />
-        <p className="mt-2 text-center text-xs text-muted">둘이 함께 쌓아온 자리들이에요.</p>
+        <p className="mt-2 text-center text-xs text-muted">함께 쌓아온 자리들이에요.</p>
       </section>
+
+      {/* to settings */}
+      <button
+        onClick={() => nav('/settings')}
+        className="dl-focus flex w-full items-center justify-between rounded-2xl bg-surface-container px-4 py-3 text-left hover:bg-primary-soft"
+      >
+        <span className="flex items-center gap-2 font-semibold text-ink">
+          <Icon name="settings" size={20} className="text-primary" /> 여행 설정 · 초대코드 · 멤버
+        </span>
+        <Icon name="chevron_right" className="text-muted" />
+      </button>
     </div>
   )
 }

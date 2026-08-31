@@ -1,10 +1,9 @@
 import type {
   AppNotification,
   AppUser,
-  Couple,
-  Course,
   Memory,
   Place,
+  Trip,
 } from './types'
 
 // The backend contract. Two implementations satisfy it:
@@ -18,41 +17,45 @@ export interface AuthApi {
   onUser(cb: (user: AppUser | null) => void): () => void
   signInWithGoogle(): Promise<void>
   signOut(): Promise<void>
-  /** re-read the current user (e.g. to pick up a freshly set coupleId). */
+  /** re-read the current user. */
   reload(): Promise<AppUser | null>
+}
+
+export interface CreateTripInput {
+  title: string
+  destination?: string
+  startDate?: string
+  endDate?: string
 }
 
 export interface Backend {
   auth: AuthApi
 
-  // Couple / pairing (I1, I9)
-  getCouple(coupleId: string): Promise<Couple | null>
-  getCoupleByMember(userId: string): Promise<Couple | null>
-  createCouple(user: AppUser): Promise<Couple>
-  joinCouple(user: AppUser, inviteCode: string): Promise<Couple>
-  setStartDate(coupleId: string, startDate: string): Promise<void>
-  setCoverPhoto(coupleId: string, url: string): Promise<void>
-  getCoupleMembers(coupleId: string): Promise<AppUser[]>
+  // Trips / membership (PRD §5, §6) — N인, 권한은 Trip.ownerId/memberIds로 표현
+  /** 내가 멤버인 여행 목록(실시간). */
+  watchTrips(userId: string, cb: (trips: Trip[]) => void): () => void
+  getTrip(tripId: string): Promise<Trip | null>
+  createTrip(user: AppUser, input: CreateTripInput): Promise<Trip>
+  /** 초대코드로 합류(N인). 이미 멤버면 그대로 반환(무시). */
+  joinTrip(user: AppUser, inviteCode: string): Promise<Trip>
+  /** 여행 나가기. owner가 나가면 이양, 마지막 멤버면 삭제. */
+  leaveTrip(tripId: string, userId: string): Promise<void>
+  updateTrip(tripId: string, patch: Partial<Trip>): Promise<void>
+  getTripMembers(tripId: string): Promise<AppUser[]>
 
-  // Places (I2, I3)
-  watchPlaces(coupleId: string, cb: (places: Place[]) => void): () => void
+  // Places
+  watchPlaces(tripId: string, cb: (places: Place[]) => void): () => void
   addPlace(input: Omit<Place, 'id' | 'createdAt'>): Promise<Place>
   updatePlace(id: string, patch: Partial<Place>): Promise<void>
   deletePlace(id: string): Promise<void>
 
-  // Courses (I5)
-  watchCourses(coupleId: string, cb: (courses: Course[]) => void): () => void
-  addCourse(input: Omit<Course, 'id' | 'createdAt'>): Promise<Course>
-  updateCourse(id: string, patch: Partial<Course>): Promise<void>
-  deleteCourse(id: string): Promise<void>
-
-  // Memories + photos (I8)
-  watchMemories(coupleId: string, cb: (memories: Memory[]) => void): () => void
+  // Memories + photos
+  watchMemories(tripId: string, cb: (memories: Memory[]) => void): () => void
   addMemory(input: Omit<Memory, 'id' | 'createdAt'>): Promise<Memory>
   deleteMemory(id: string): Promise<void>
-  uploadPhoto(coupleId: string, file: File): Promise<string>
+  uploadPhoto(tripId: string, file: File): Promise<string>
 
-  // Notifications (I10)
-  watchNotifications(coupleId: string, cb: (n: AppNotification[]) => void): () => void
-  markNotificationsRead(coupleId: string): Promise<void>
+  // Notifications
+  watchNotifications(tripId: string, cb: (n: AppNotification[]) => void): () => void
+  markNotificationsRead(tripId: string): Promise<void>
 }

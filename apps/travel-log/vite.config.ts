@@ -20,9 +20,9 @@ export default defineConfig({
         'robots.txt',
       ],
       manifest: {
-        name: 'Datel.log — 우리가 함께 걸은 곳',
-        short_name: 'Datel.log',
-        description: '함께 갈 곳을 담고, 다녀온 곳으로 넘기고, 그 궤적을 지도와 숫자로 돌아보는 커플 다이어리.',
+        name: '간직.log — 친구와 함께 남기는 여행',
+        short_name: '간직.log',
+        description: '친구를 초대해 함께 갈 곳을 담고, 다녀와서 사진·후기로 오래 남기는 여행 기억장.',
         lang: 'ko',
         start_url: '/',
         scope: '/',

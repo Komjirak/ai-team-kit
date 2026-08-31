@@ -1,58 +1,57 @@
 rules_version = '2';
 
-// Datel.log — 커플 데이터는 커플 멤버에게만. 초대코드로만 결합.
+// 간직.log — 여행 데이터는 그 여행의 멤버(N인)에게만. 초대코드로만 합류.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() {
       return request.auth != null;
     }
-    function isMemberOf(coupleId) {
+    function tripMembers(tripId) {
+      return get(/databases/$(database)/documents/trips/$(tripId)).data.memberIds;
+    }
+    function isMemberOf(tripId) {
       return signedIn()
-        && exists(/databases/$(database)/documents/couples/$(coupleId))
-        && request.auth.uid in get(/databases/$(database)/documents/couples/$(coupleId)).data.memberIds;
+        && exists(/databases/$(database)/documents/trips/$(tripId))
+        && request.auth.uid in tripMembers(tripId);
     }
 
-    // users/{uid}: 본인만 읽고 쓴다. coupleId는 본인이 설정.
+    // users/{uid}: 본인만 쓰고, 로그인 사용자는 읽는다(멤버 이름 표시용).
     match /users/{uid} {
       allow read: if signedIn();
       allow create, update: if signedIn() && request.auth.uid == uid;
       allow delete: if false;
     }
 
-    // couples: 멤버만 읽는다. 생성은 로그인 사용자(자신을 첫 멤버로).
-    // 합류는 memberIds 배열에 자신을 추가하는 업데이트만 허용(≤2명).
-    match /couples/{coupleId} {
+    // trips: 멤버만 읽는다. 생성은 자신을 유일 멤버+owner로. 합류는 자신을
+    // memberIds에 추가하는 갱신(N인, 상한 없음). 삭제는 owner만.
+    match /trips/{tripId} {
       allow read: if signedIn();
       allow create: if signedIn()
-        && request.resource.data.memberIds.hasOnly([request.auth.uid]);
-      allow update: if isMemberOf(coupleId)
+        && request.resource.data.memberIds.hasOnly([request.auth.uid])
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isMemberOf(tripId)
         || (signedIn()
-            && request.auth.uid in request.resource.data.memberIds
-            && request.resource.data.memberIds.size() <= 2);
-      allow delete: if false;
+            && !(request.auth.uid in resource.data.memberIds)
+            && request.auth.uid in request.resource.data.memberIds);
+      allow delete: if signedIn() && request.auth.uid == resource.data.ownerId;
     }
 
-    // 커플 소유 컬렉션: 멤버만 읽고 쓴다. coupleId는 문서 필드로 스코프.
+    // 여행 소유 컬렉션: 그 여행 멤버만 읽고 쓴다. tripId 문서 필드로 스코프.
     match /places/{id} {
-      allow read, delete: if isMemberOf(resource.data.coupleId);
-      allow create: if isMemberOf(request.resource.data.coupleId);
-      allow update: if isMemberOf(resource.data.coupleId)
-        && isMemberOf(request.resource.data.coupleId);
-    }
-    match /courses/{id} {
-      allow read, delete: if isMemberOf(resource.data.coupleId);
-      allow create: if isMemberOf(request.resource.data.coupleId);
-      allow update: if isMemberOf(resource.data.coupleId);
+      allow read, delete: if isMemberOf(resource.data.tripId);
+      allow create: if isMemberOf(request.resource.data.tripId);
+      allow update: if isMemberOf(resource.data.tripId)
+        && isMemberOf(request.resource.data.tripId);
     }
     match /memories/{id} {
-      allow read, delete: if isMemberOf(resource.data.coupleId);
-      allow create: if isMemberOf(request.resource.data.coupleId);
-      allow update: if isMemberOf(resource.data.coupleId);
+      allow read, delete: if isMemberOf(resource.data.tripId);
+      allow create: if isMemberOf(request.resource.data.tripId);
+      allow update: if isMemberOf(resource.data.tripId);
     }
     match /notifications/{id} {
-      allow read, update: if isMemberOf(resource.data.coupleId);
-      allow create: if isMemberOf(request.resource.data.coupleId);
+      allow read, update: if isMemberOf(resource.data.tripId);
+      allow create: if isMemberOf(request.resource.data.tripId);
       allow delete: if false;
     }
   }

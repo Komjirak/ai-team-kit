@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { StatTile } from '../../components/ui/StatTile'
 import { Icon } from '../../components/ui/Icon'
 import { Button, EmptyState, Skeleton } from '../../components/ui/basics'
@@ -13,7 +13,7 @@ import type { Place } from '../../data/types'
 
 export function HomePage() {
   const { user } = useAuth()
-  const { places, stats, loading } = useCouple()
+  const { activeTrip, places, stats, loading } = useTrip()
   const { markVisited, remove } = usePlaceActions()
   const nav = useNavigate()
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -43,10 +43,10 @@ export function HomePage() {
             color="text-primary-container"
           />
           <h2 className="font-display text-2xl font-extrabold text-ink">
-            안녕, {user?.nickname ?? '러버즈'}! ✨
+            {activeTrip?.title ?? '우리 여행'} ✨
           </h2>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/80">
-            오늘의 자리를 다이어리에 담아볼까요? 함께 갈 곳도, 다녀온 곳도 모두 우리의 기록이 돼요.
+            {user?.nickname ?? '친구'}님, 가고 싶은 곳을 담아볼까요? 함께 갈 곳도, 다녀온 곳도 모두 이 여행의 기록이 돼요.
           </p>
           <Button icon="photo_camera" className="mt-4" onClick={openAdd}>
             새로운 장소 담기
@@ -66,14 +66,14 @@ export function HomePage() {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatTile
-              icon="favorite"
+              icon="event"
               color="primary"
-              value={stats.daysTogether ?? '—'}
-              label="함께한 날"
+              value={stats.tripDays ?? '—'}
+              label="여행 일수"
               onClick={() => nav('/dashboard')}
             />
             <StatTile
-              icon="local_cafe"
+              icon="restaurant"
               color="lavender"
               value={stats.visitedCount}
               label="다녀온 곳"

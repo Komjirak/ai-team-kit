@@ -12,7 +12,7 @@ const placeholder: Record<PlaceCategory, { icon: string; tint: string; fg: strin
   맛집: { icon: 'restaurant', tint: 'bg-tape-yellow/50', fg: 'text-ink/70' },
   자연: { icon: 'park', tint: 'bg-pastel-mint', fg: 'text-tertiary' },
   문화: { icon: 'auto_stories', tint: 'bg-pastel-blue', fg: 'text-secondary' },
-  데이트: { icon: 'favorite', tint: 'bg-pastel-lavender', fg: 'text-secondary' },
+  숙소: { icon: 'hotel', tint: 'bg-pastel-lavender', fg: 'text-secondary' },
   기타: { icon: 'place', tint: 'bg-surface-container', fg: 'text-muted' },
 }
 

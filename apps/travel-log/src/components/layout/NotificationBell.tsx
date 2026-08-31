@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import { Icon } from '../ui/Icon'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 
 const typeIcon: Record<string, string> = {
-  partner_joined: 'group_add',
+  member_joined: 'group_add',
   place_added: 'add_location_alt',
   memory_added: 'photo_camera',
-  course_added: 'map',
 }
 
 export function NotificationBell() {
-  const { notifications, unreadCount, couple } = useCouple()
+  const { notifications, unreadCount, activeTrip } = useTrip()
   const [open, setOpen] = useState(false)
 
   return (
@@ -21,7 +20,7 @@ export function NotificationBell() {
         aria-label={`알림 ${unreadCount}개`}
         onClick={() => {
           setOpen((o) => !o)
-          if (!open && couple) backend.markNotificationsRead(couple.id).catch(() => {})
+          if (!open && activeTrip) backend.markNotificationsRead(activeTrip.id).catch(() => {})
         }}
       >
         <Icon name="notifications" size={22} />

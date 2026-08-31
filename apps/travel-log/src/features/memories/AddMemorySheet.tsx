@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Sheet } from '../../components/ui/Sheet'
 import { Button, Spinner } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { useAuth } from '../../auth/AuthContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
@@ -11,7 +11,7 @@ const today = () => new Date().toISOString().slice(0, 10)
 
 /** 추억 남기기: pick a place, write a note, attach photos. */
 export function AddMemorySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { places } = useCouple()
+  const { places, activeTrip } = useTrip()
   const { user } = useAuth()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -35,13 +35,13 @@ export function AddMemorySheet({ open, onClose }: { open: boolean; onClose: () =
   }, [open])
 
   async function pickPhotos(files: FileList | null) {
-    if (!files || !user?.coupleId) return
+    if (!files || !activeTrip) return
     setUploading(true)
     setError(null)
     try {
       const urls: string[] = []
       for (const f of Array.from(files).slice(0, 6)) {
-        urls.push(await backend.uploadPhoto(user.coupleId, f))
+        urls.push(await backend.uploadPhoto(activeTrip.id, f))
       }
       setPhotos((p) => [...p, ...urls].slice(0, 6))
     } catch {
@@ -52,12 +52,12 @@ export function AddMemorySheet({ open, onClose }: { open: boolean; onClose: () =
   }
 
   async function save() {
-    if (!user?.coupleId || !placeId || !text.trim()) return
+    if (!user || !activeTrip || !placeId || !text.trim()) return
     const place = places.find((p) => p.id === placeId)
     setSaving(true)
     try {
       await backend.addMemory({
-        coupleId: user.coupleId,
+        tripId: activeTrip.id,
         placeId,
         placeName: place?.name ?? '이름 없는 장소',
         text: text.trim(),

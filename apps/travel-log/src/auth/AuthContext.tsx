@@ -7,7 +7,7 @@ interface AuthState {
   loading: boolean
   signIn: () => Promise<void>
   signOut: () => Promise<void>
-  /** re-read the signed-in user (e.g. after pairing sets a coupleId). */
+  /** re-read the signed-in user from the backend. */
   refreshUser: () => Promise<void>
 }
 

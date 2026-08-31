@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, Skeleton } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
@@ -9,7 +9,7 @@ import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 
 export function MemoriesPage() {
-  const { memories, loading } = useCouple()
+  const { memories, loading } = useTrip()
   const toast = useToast()
   const [open, setOpen] = useState(false)
 
@@ -22,7 +22,7 @@ export function MemoriesPage() {
   return (
     <div>
       <div className="flex items-end justify-between">
-        <PageTitle title="추억" subtitle="다녀온 곳에 남긴 우리의 조각들" />
+        <PageTitle title="추억" subtitle="다녀온 곳에 남긴 여행의 조각들" />
         <Button icon="add" onClick={() => setOpen(true)} className="mb-2 hidden sm:inline-flex">
           추억 남기기
         </Button>

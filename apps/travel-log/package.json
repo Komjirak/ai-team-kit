@@ -1,9 +1,9 @@
 {
-  "name": "datel-log",
+  "name": "ganjik-log",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Datel.log — 커플 다이어리 (반응형 웹). 함께 갈 곳을 담고, 다녀온 곳으로 넘기고, 그 궤적을 지도·숫자로 돌아본다.",
+  "description": "간직.log — 친구 여행 기억장 (반응형 웹). 친구를 초대해 함께 갈 곳을 담고, 다녀와서 사진·후기로 오래 남긴다.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

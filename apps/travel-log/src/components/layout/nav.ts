@@ -4,14 +4,15 @@ export interface Tab {
   icon: string
 }
 
-// The canonical 5 tabs (PRD §4). Same labels/order across all breakpoints.
+// The canonical tabs (PRD §10-1, M1). 데이트코스는 여행 PRD 범위 밖이라 제거,
+// 일정·가계부는 M2~M3라 아직 없다. Same labels/order across all breakpoints.
 export const TABS: Tab[] = [
   { to: '/', label: '전체', icon: 'grid_view' },
-  { to: '/wishlist', label: '가고싶은 곳', icon: 'location_on' },
-  { to: '/courses', label: '데이트코스', icon: 'map' },
-  { to: '/memories', label: '추억', icon: 'auto_awesome' },
-  { to: '/dashboard', label: '우리의 기록', icon: 'menu_book' },
+  { to: '/wishlist', label: '장소', icon: 'location_on' },
+  { to: '/memories', label: '추억', icon: 'photo_library' },
+  { to: '/dashboard', label: '여행', icon: 'luggage' },
 ]
 
-export const BRAND = 'Datel.log'
-export const SLOGAN = '우리가 함께 걸은 곳'
+// 확정 이름(BRAND.md · PO 확정 2026-08-31): 간직.log
+export const BRAND = '간직.log'
+export const SLOGAN = '친구와 함께 남기는 여행'

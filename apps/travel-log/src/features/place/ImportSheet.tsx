@@ -3,6 +3,7 @@ import { Sheet } from '../../components/ui/Sheet'
 import { Button, Spinner } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { useAuth } from '../../auth/AuthContext'
+import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { PLACE_CATEGORIES, type PlaceCategory } from '../../data/types'
@@ -20,6 +21,7 @@ type Phase = 'input' | 'working' | 'preview' | 'saving'
 /** 목록 가져오기 — 구글 Takeout(GeoJSON/CSV)·CSV·붙여넣기 → Kakao 좌표 보정 → 일괄 담기. */
 export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth()
+  const { activeTrip } = useTrip()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<Phase>('input')
@@ -92,7 +94,7 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
   }
 
   async function save() {
-    if (!user?.coupleId) return
+    if (!user || !activeTrip) return
     const chosen = rows.filter((r) => r.selected)
     if (chosen.length === 0) return
     setPhase('saving')
@@ -101,7 +103,7 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
     for (const r of chosen) {
       try {
         await backend.addPlace({
-          coupleId: user.coupleId,
+          tripId: activeTrip.id,
           name: r.name,
           address: r.address || '',
           lat: r.lat,

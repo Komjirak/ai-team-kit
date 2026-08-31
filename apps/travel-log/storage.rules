@@ -1,9 +1,9 @@
 rules_version = '2';
 
-// 추억 사진은 커플 폴더에만. 로그인 사용자가 자기 커플 경로에 업로드.
+// 여행 사진(대표사진·회고)은 그 여행 폴더에만. 로그인 사용자가 이미지 업로드.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /couples/{coupleId}/{allPaths=**} {
+    match /trips/{tripId}/{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
         && request.resource.size < 10 * 1024 * 1024          // ≤10MB/장

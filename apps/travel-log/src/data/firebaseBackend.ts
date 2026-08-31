@@ -25,16 +25,16 @@ import type { Backend, AuthApi } from './backend'
 import type {
   AppNotification,
   AppUser,
-  Couple,
-  Course,
   Memory,
   Place,
+  Trip,
 } from './types'
 
 // ─────────────────────────────────────────────────────────────
 // Real backend: Firebase Auth (Google) + Firestore + Storage.
-// Collections: users, couples, places, courses, memories, notifications.
-// Membership-scoped access is enforced in firestore.rules.
+// Collections: users, trips, places, memories, notifications.
+// Trip-member-scoped access is enforced in firestore.rules
+// (a member is anyone in trips/{id}.memberIds — see report to BE/ORCH).
 // ─────────────────────────────────────────────────────────────
 
 const code6 = () =>
@@ -42,11 +42,6 @@ const code6 = () =>
     { length: 6 },
     () => '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 32)],
   ).join('')
-
-async function loadCoupleId(userId: string): Promise<string | undefined> {
-  const snap = await getDoc(doc(fbDb(), 'users', userId))
-  return (snap.data()?.coupleId as string | undefined) ?? undefined
-}
 
 const auth: AuthApi = {
   onUser(cb) {
@@ -58,13 +53,13 @@ const auth: AuthApi = {
         email: u.email || '',
         photoURL: u.photoURL || undefined,
       }
-      // ensure a users/{uid} doc exists, then attach coupleId
+      // ensure a users/{uid} doc exists (used to resolve member names)
       const userRef = doc(fbDb(), 'users', u.uid)
       const existing = await getDoc(userRef)
       if (!existing.exists()) {
         await setDoc(userRef, { ...base, createdAt: serverTimestamp() })
       }
-      cb({ ...base, coupleId: await loadCoupleId(u.uid) })
+      cb(base)
     })
   },
   async signInWithGoogle() {
@@ -77,13 +72,12 @@ const auth: AuthApi = {
   async reload() {
     const u = fbAuth().currentUser
     if (!u) return null
-    const base: AppUser = {
+    return {
       id: u.uid,
       nickname: u.displayName || (u.email ? u.email.split('@')[0] : '나'),
       email: u.email || '',
       photoURL: u.photoURL || undefined,
     }
-    return { ...base, coupleId: await loadCoupleId(u.uid) }
   },
 }
 
@@ -92,7 +86,7 @@ function mapDoc<T>(d: { id: string; data: () => unknown }): T {
 }
 
 // Sort newest-first in the client so the list queries need only a single
-// equality filter (coupleId) — no composite index required.
+// equality/array-contains filter — no composite index required.
 function byCreatedDesc<T extends { createdAt?: number }>(arr: T[]): T[] {
   return [...arr].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
 }
@@ -100,71 +94,77 @@ function byCreatedDesc<T extends { createdAt?: number }>(arr: T[]): T[] {
 export const firebaseBackend: Backend = {
   auth,
 
-  async getCouple(id) {
-    const snap = await getDoc(doc(fbDb(), 'couples', id))
-    return snap.exists() ? (mapDoc<Couple>(snap) as Couple) : null
+  watchTrips(userId, cb) {
+    const q = query(collection(fbDb(), 'trips'), where('memberIds', 'array-contains', userId))
+    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Trip>(d)))))
   },
-  async getCoupleByMember(userId) {
-    const q = query(collection(fbDb(), 'couples'), where('memberIds', 'array-contains', userId), limit(1))
-    const snap = await getDocs(q)
-    return snap.empty ? null : (mapDoc<Couple>(snap.docs[0]) as Couple)
+  async getTrip(id) {
+    const snap = await getDoc(doc(fbDb(), 'trips', id))
+    return snap.exists() ? (mapDoc<Trip>(snap) as Trip) : null
   },
-  async createCouple(user) {
-    const ref_ = await addDoc(collection(fbDb(), 'couples'), {
+  async createTrip(user, input) {
+    const ref_ = await addDoc(collection(fbDb(), 'trips'), {
       inviteCode: code6(),
+      title: input.title,
+      destination: input.destination ?? null,
+      startDate: input.startDate ?? null,
+      endDate: input.endDate ?? null,
+      ownerId: user.id,
       memberIds: [user.id],
-      startDate: null,
-      createdAt: serverTimestamp(),
+      createdAt: Date.now(),
     })
-    await updateDoc(doc(fbDb(), 'users', user.id), { coupleId: ref_.id })
     const snap = await getDoc(ref_)
-    return mapDoc<Couple>(snap) as Couple
+    return mapDoc<Trip>(snap) as Trip
   },
-  async joinCouple(user, inviteCode) {
+  async joinTrip(user, inviteCode) {
     const q = query(
-      collection(fbDb(), 'couples'),
+      collection(fbDb(), 'trips'),
       where('inviteCode', '==', inviteCode.trim().toUpperCase()),
       limit(1),
     )
     const snap = await getDocs(q)
     if (snap.empty) throw new Error('invite.invalid')
-    const couple = mapDoc<Couple>(snap.docs[0]) as Couple
-    if (user.coupleId && user.coupleId !== couple.id) throw new Error('couple.already_bound')
-    if (couple.memberIds.length >= 2 && !couple.memberIds.includes(user.id))
-      throw new Error('couple.full')
-    const members = couple.memberIds.includes(user.id)
-      ? couple.memberIds
-      : [...couple.memberIds, user.id]
-    await updateDoc(doc(fbDb(), 'couples', couple.id), { memberIds: members })
-    await updateDoc(doc(fbDb(), 'users', user.id), { coupleId: couple.id })
+    const trip = mapDoc<Trip>(snap.docs[0]) as Trip
+    if (trip.memberIds.includes(user.id)) return trip // 이미 멤버면 무시
+    const members = [...trip.memberIds, user.id]
+    await updateDoc(doc(fbDb(), 'trips', trip.id), { memberIds: members })
     await addDoc(collection(fbDb(), 'notifications'), {
-      coupleId: couple.id,
-      type: 'partner_joined',
-      message: `${user.nickname}님이 합류했어요.`,
-      createdAt: serverTimestamp(),
+      tripId: trip.id,
+      type: 'member_joined',
+      message: `${user.nickname}님이 여행에 합류했어요.`,
+      createdAt: Date.now(),
       readAt: null,
     })
-    return { ...couple, memberIds: members }
+    return { ...trip, memberIds: members }
   },
-  async setStartDate(coupleId, startDate) {
-    await updateDoc(doc(fbDb(), 'couples', coupleId), { startDate })
+  async leaveTrip(tripId, userId) {
+    const trip = await this.getTrip(tripId)
+    if (!trip) return
+    const members = trip.memberIds.filter((id) => id !== userId)
+    if (members.length === 0) {
+      await deleteDoc(doc(fbDb(), 'trips', tripId))
+      return
+    }
+    const patch: Partial<Trip> = { memberIds: members }
+    if (trip.ownerId === userId) patch.ownerId = members[0] // owner 이양
+    await updateDoc(doc(fbDb(), 'trips', tripId), patch)
   },
-  async setCoverPhoto(coupleId, url) {
-    await updateDoc(doc(fbDb(), 'couples', coupleId), { coverPhoto: url })
+  async updateTrip(tripId, patch) {
+    await updateDoc(doc(fbDb(), 'trips', tripId), patch)
   },
-  async getCoupleMembers(coupleId) {
-    const couple = await this.getCouple(coupleId)
-    if (!couple) return []
+  async getTripMembers(tripId) {
+    const trip = await this.getTrip(tripId)
+    if (!trip) return []
     const out: AppUser[] = []
-    for (const id of couple.memberIds) {
+    for (const id of trip.memberIds) {
       const s = await getDoc(doc(fbDb(), 'users', id))
-      out.push(s.exists() ? (mapDoc<AppUser>(s) as AppUser) : { id, nickname: '파트너', email: '' })
+      out.push(s.exists() ? (mapDoc<AppUser>(s) as AppUser) : { id, nickname: '친구', email: '' })
     }
     return out
   },
 
-  watchPlaces(coupleId, cb) {
-    const q = query(collection(fbDb(), 'places'), where('coupleId', '==', coupleId))
+  watchPlaces(tripId, cb) {
+    const q = query(collection(fbDb(), 'places'), where('tripId', '==', tripId))
     return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Place>(d)))))
   },
   async addPlace(input) {
@@ -178,23 +178,8 @@ export const firebaseBackend: Backend = {
     await deleteDoc(doc(fbDb(), 'places', id))
   },
 
-  watchCourses(coupleId, cb) {
-    const q = query(collection(fbDb(), 'courses'), where('coupleId', '==', coupleId))
-    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Course>(d)))))
-  },
-  async addCourse(input) {
-    const ref_ = await addDoc(collection(fbDb(), 'courses'), { ...input, createdAt: Date.now() })
-    return { ...input, id: ref_.id, createdAt: Date.now() }
-  },
-  async updateCourse(id, patch) {
-    await updateDoc(doc(fbDb(), 'courses', id), patch)
-  },
-  async deleteCourse(id) {
-    await deleteDoc(doc(fbDb(), 'courses', id))
-  },
-
-  watchMemories(coupleId, cb) {
-    const q = query(collection(fbDb(), 'memories'), where('coupleId', '==', coupleId))
+  watchMemories(tripId, cb) {
+    const q = query(collection(fbDb(), 'memories'), where('tripId', '==', tripId))
     return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Memory>(d)))))
   },
   async addMemory(input) {
@@ -204,23 +189,23 @@ export const firebaseBackend: Backend = {
   async deleteMemory(id) {
     await deleteDoc(doc(fbDb(), 'memories', id))
   },
-  async uploadPhoto(coupleId, file) {
-    const path = `couples/${coupleId}/${Date.now()}-${file.name}`
+  async uploadPhoto(tripId, file) {
+    const path = `trips/${tripId}/${Date.now()}-${file.name}`
     const r = ref(fbStorage(), path)
     await uploadBytes(r, file)
     return await getDownloadURL(r)
   },
 
-  watchNotifications(coupleId, cb) {
-    const q = query(collection(fbDb(), 'notifications'), where('coupleId', '==', coupleId))
+  watchNotifications(tripId, cb) {
+    const q = query(collection(fbDb(), 'notifications'), where('tripId', '==', tripId))
     return onSnapshot(q, (s) =>
       cb(byCreatedDesc(s.docs.map((d) => mapDoc<AppNotification>(d))).slice(0, 30)),
     )
   },
-  async markNotificationsRead(coupleId) {
+  async markNotificationsRead(tripId) {
     const q = query(
       collection(fbDb(), 'notifications'),
-      where('coupleId', '==', coupleId),
+      where('tripId', '==', tripId),
       where('readAt', '==', null),
     )
     const snap = await getDocs(q)

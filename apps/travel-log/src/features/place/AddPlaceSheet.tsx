@@ -6,6 +6,7 @@ import { PLACE_CATEGORIES, type Place, type PlaceCategory } from '../../data/typ
 import { searchPlaces, type PlaceResult } from '../../kakao/placeSearch'
 import { backend } from '../../data'
 import { useAuth } from '../../auth/AuthContext'
+import { useTrip } from '../../trip/TripContext'
 import { useToast } from '../../components/ui/Toast'
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 /** 장소 추가 / 수정 (PRD §5-3). Search → select → category · memo → 담기. */
 export function AddPlaceSheet({ open, onClose, editing }: Props) {
   const { user } = useAuth()
+  const { activeTrip } = useTrip()
   const toast = useToast()
 
   const [keyword, setKeyword] = useState('')
@@ -77,10 +79,10 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
   }
 
   async function pickPhoto(files: FileList | null) {
-    if (!files?.[0] || !user?.coupleId) return
+    if (!files?.[0] || !activeTrip) return
     setUploadingPhoto(true)
     try {
-      setThumbnail(await backend.uploadPhoto(user.coupleId, files[0]))
+      setThumbnail(await backend.uploadPhoto(activeTrip.id, files[0]))
     } catch {
       toast.show('사진을 올리지 못했어요.')
     } finally {
@@ -89,7 +91,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
   }
 
   async function save() {
-    if (!user?.coupleId) return
+    if (!user || !activeTrip) return
     const name = selected?.name?.trim()
     const address = selected?.address?.trim()
     if (!name) {
@@ -112,7 +114,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
         toast.show('장소를 수정했어요.')
       } else {
         await backend.addPlace({
-          coupleId: user.coupleId,
+          tripId: activeTrip.id,
           name,
           address: address ?? '',
           lat: selected?.lat || undefined,

@@ -1,17 +1,17 @@
-import type { AppUser, Course, Couple, Memory, Place, Stats } from './types'
+import type { AppUser, Memory, Place, Stats, Trip } from './types'
 
-export function daysBetween(startDate: string | undefined): number | null {
-  if (!startDate) return null
-  const start = new Date(startDate + 'T00:00:00')
-  if (Number.isNaN(start.getTime())) return null
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const diff = Math.floor((today.getTime() - start.getTime()) / 86_400_000)
-  return diff + 1 // day 1 = start day itself ("함께한 지 N일째")
+/** 여행 기간(일). start~end 양끝 포함. 기간 미설정이면 null. */
+export function tripDayCount(trip: Trip | null): number | null {
+  if (!trip?.startDate || !trip?.endDate) return null
+  const start = new Date(trip.startDate + 'T00:00:00')
+  const end = new Date(trip.endDate + 'T00:00:00')
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+  const diff = Math.floor((end.getTime() - start.getTime()) / 86_400_000)
+  return diff >= 0 ? diff + 1 : null
 }
 
 export function computeStats(
-  couple: Couple | null,
+  trip: Trip | null,
   members: AppUser[],
   places: Place[],
   memories: Memory[],
@@ -32,7 +32,7 @@ export function computeStats(
   for (const [name, count] of byPlace)
     if (!topMemoryPlace || count > topMemoryPlace.count) topMemoryPlace = { name, count }
 
-  // per-member registration count (the "runner race")
+  // per-member registration count (the "누가 더 많이 담았나")
   const perMemberPlaceCount = members.map((u) => ({
     userId: u.id,
     nickname: u.nickname,
@@ -40,7 +40,7 @@ export function computeStats(
   }))
 
   return {
-    daysTogether: daysBetween(couple?.startDate),
+    tripDays: tripDayCount(trip),
     visitedCount: visited.length,
     wishlistCount: wishlist.length,
     memoryCount: memories.length,
@@ -49,16 +49,6 @@ export function computeStats(
     topMemoryPlace,
     perMemberPlaceCount,
   }
-}
-
-/** total segment distances for a course, using straight-line (haversine). */
-export function courseDistanceKm(course: Course, places: Place[]): number {
-  const pts = course.placeIds
-    .map((id) => places.find((p) => p.id === id))
-    .filter((p): p is Place => !!p && p.lat != null && p.lng != null)
-  let km = 0
-  for (let i = 1; i < pts.length; i++) km += haversine(pts[i - 1], pts[i])
-  return km
 }
 
 export function haversine(a: { lat?: number; lng?: number }, b: { lat?: number; lng?: number }): number {

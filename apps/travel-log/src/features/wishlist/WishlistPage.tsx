@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCouple } from '../../couple/CoupleContext'
+import { useTrip } from '../../trip/TripContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { PlaceCard, PlaceCardSkeleton } from '../../components/PlaceCard'
 import { Button, EmptyState } from '../../components/ui/basics'
@@ -10,7 +10,7 @@ import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
 
 export function WishlistPage() {
-  const { places, loading } = useCouple()
+  const { places, loading } = useTrip()
   const { markVisited, remove } = usePlaceActions()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -30,7 +30,7 @@ export function WishlistPage() {
   return (
     <div>
       <div className="flex items-end justify-between">
-        <PageTitle title="가고 싶은 곳" subtitle="언젠가 꼭 함께 가고 싶은 장소들" />
+        <PageTitle title="장소" subtitle="이번 여행에서 가고 싶은 곳" />
         <div className="mb-2 flex gap-2">
           <Button variant="ghost" icon="upload" onClick={() => setImportOpen(true)}>
             가져오기
@@ -75,7 +75,7 @@ export function WishlistPage() {
             ))}
           </div>
           <p className="mt-4 text-center text-xs text-muted">
-            전환한 장소는 “우리의 기록”에서 다시 볼 수 있어요.
+            다녀온 곳으로 넘긴 장소는 “여행”에서 다시 볼 수 있어요.
           </p>
         </>
       )}

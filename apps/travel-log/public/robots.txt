@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://date-log-b1e52.web.app/sitemap.xml
+Sitemap: https://ganjik-log.web.app/sitemap.xml

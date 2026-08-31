@@ -44,7 +44,7 @@ const catStyle: Partial<Record<PlaceCategory, string>> = {
   맛집: 'bg-tape-yellow/60 text-ink',
   자연: 'bg-pastel-mint text-tertiary',
   문화: 'bg-pastel-blue text-secondary',
-  데이트: 'bg-pastel-lavender text-secondary',
+  숙소: 'bg-pastel-lavender text-secondary',
   기타: 'bg-surface-container text-muted',
 }
 export function CategoryBadge({ category }: { category: PlaceCategory }) {
