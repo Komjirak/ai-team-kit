@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+**/.DS_Store
+
+# Build/temp artifacts
+*.log
+
+# Local zips/exports
+aiteamkit.zip
