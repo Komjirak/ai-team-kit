@@ -199,8 +199,29 @@
   .pm-btn{display:inline-flex;align-items:center;gap:7px;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--line2);background:var(--panel2);color:var(--ink)}
   .pm-btn.primary{background:var(--amber);color:#1a0e08;border-color:transparent}
   .pm-btn:hover{border-color:var(--amber)}
-  .pm-body{overflow:auto;padding:20px 22px}
-  .pm-body pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d6cec6;background:#0d0d10;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .pm-body{overflow:auto;padding:20px 24px 26px}
+  /* 렌더링된 마크다운 */
+  .mdview{font-size:14.5px;line-height:1.72;color:var(--ink2)}
+  .mdview>:first-child{margin-top:0}
+  .mdview h1{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-.01em;margin:0 0 6px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .mdview h2{font-size:15.5px;font-weight:800;color:var(--ink);margin:26px 0 10px;padding-left:11px;border-left:3px solid var(--amber)}
+  .mdview h3{font-size:13.5px;font-weight:700;color:var(--amber2);margin:20px 0 8px}
+  .mdview h4{font-size:13px;font-weight:700;color:var(--ink);margin:16px 0 6px}
+  .mdview p{margin:10px 0}
+  .mdview ul,.mdview ol{margin:10px 0;padding-left:22px}
+  .mdview li{margin:5px 0}
+  .mdview li::marker{color:var(--amber2)}
+  .mdview strong{color:var(--ink);font-weight:700}
+  .mdview em{color:var(--ink);font-style:italic}
+  .mdview a{color:var(--amber2);border-bottom:1px solid rgba(255,138,92,.4)}
+  .mdview hr{border:none;border-top:1px solid var(--line);margin:20px 0}
+  .mdview blockquote{margin:12px 0;padding:2px 14px;border-left:3px solid var(--line2);color:var(--muted)}
+  .mdview code{font-family:var(--mono);font-size:.86em;background:#0d0d10;border:1px solid var(--line);border-radius:6px;padding:1.5px 6px;color:var(--gold)}
+  .mdview pre{margin:12px 0;white-space:pre;overflow-x:auto;background:#0d0d10;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .mdview pre code{background:none;border:none;padding:0;font-size:12.5px;line-height:1.7;color:#d6cec6;white-space:pre}
+  .mdview table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px;display:block;overflow-x:auto}
+  .mdview th,.mdview td{border:1px solid var(--line2);padding:7px 10px;text-align:left}
+  .mdview th{background:var(--panel2);color:var(--ink);font-weight:700}
   .pm-toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:var(--amber);color:#1a0e08;font-weight:700;font-size:13px;padding:10px 18px;border-radius:999px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
   .pm-toast.on{opacity:1}
 
@@ -424,7 +445,7 @@
       <button class="pm-btn primary" id="pmCopy">⧉ 프롬프트 복사</button>
       <button class="pm-btn" id="pmDl">↓ .md 다운로드</button>
     </div>
-    <div class="pm-body"><pre id="pmPre"></pre></div>
+    <div class="pm-body"><div id="pmPre" class="mdview"></div></div>
   </div>
 </div>
 <div class="pm-toast" id="pmToast">복사했습니다</div>
@@ -433,12 +454,58 @@
 (function(){
   var D=JSON.parse(document.getElementById('kjdata').textContent);
   var ov=document.getElementById('pmOv'),cur=null;
+  // --- 경량 마크다운 렌더러 (헤딩·목록·코드블록·인라인) ---
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function inline(s){
+    return esc(s)
+      .replace(/`([^`]+)`/g,function(_,c){return '<code>'+c+'</code>';})
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>')
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+  function mdToHtml(md){
+    var lines=md.replace(/\r\n?/g,'\n').split('\n'), out=[], i=0;
+    function flushList(tag,items){ out.push('<'+tag+'>'+items.map(function(x){return '<li>'+inline(x)+'</li>';}).join('')+'</'+tag+'>'); }
+    while(i<lines.length){
+      var l=lines[i];
+      // 코드펜스
+      var f=l.match(/^```(.*)$/);
+      if(f){ var buf=[]; i++; while(i<lines.length && !/^```/.test(lines[i])){ buf.push(lines[i]); i++; } i++; out.push('<pre><code>'+esc(buf.join('\n'))+'</code></pre>'); continue; }
+      // 헤딩
+      var h=l.match(/^(#{1,6})\s+(.*)$/);
+      if(h){ var n=h[1].length; out.push('<h'+n+'>'+inline(h[2])+'</h'+n+'>'); i++; continue; }
+      // 수평선
+      if(/^\s*(---+|\*\*\*+|—+)\s*$/.test(l)){ out.push('<hr>'); i++; continue; }
+      // 표
+      if(/^\s*\|.*\|\s*$/.test(l) && i+1<lines.length && /^\s*\|?[\s:|-]+\|?\s*$/.test(lines[i+1]) && lines[i+1].indexOf('-')>=0){
+        var rows=[]; while(i<lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){ rows.push(lines[i]); i++; }
+        var cells=function(r){ return r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(function(x){return x.trim();}); };
+        var head=cells(rows[0]), body=rows.slice(2);
+        var t='<table><thead><tr>'+head.map(function(c){return '<th>'+inline(c)+'</th>';}).join('')+'</tr></thead><tbody>';
+        t+=body.map(function(r){return '<tr>'+cells(r).map(function(c){return '<td>'+inline(c)+'</td>';}).join('')+'</tr>';}).join('');
+        out.push(t+'</tbody></table>'); continue;
+      }
+      // 인용
+      if(/^>\s?/.test(l)){ var q=[]; while(i<lines.length && /^>\s?/.test(lines[i])){ q.push(lines[i].replace(/^>\s?/,'')); i++; } out.push('<blockquote>'+inline(q.join(' '))+'</blockquote>'); continue; }
+      // 순서 목록
+      if(/^\s*\d+\.\s+/.test(l)){ var oi=[]; while(i<lines.length && /^\s*\d+\.\s+/.test(lines[i])){ oi.push(lines[i].replace(/^\s*\d+\.\s+/,'')); i++; } flushList('ol',oi); continue; }
+      // 비순서 목록
+      if(/^\s*[-*]\s+/.test(l)){ var ui=[]; while(i<lines.length && /^\s*[-*]\s+/.test(lines[i])){ ui.push(lines[i].replace(/^\s*[-*]\s+/,'')); i++; } flushList('ul',ui); continue; }
+      // 빈 줄
+      if(/^\s*$/.test(l)){ i++; continue; }
+      // 문단 (연속 비어있지 않은 줄)
+      var p=[]; while(i<lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,6}\s|```|>\s?|\s*[-*]\s|\s*\d+\.\s|\s*\|)/.test(lines[i]) && !/^\s*(---+|\*\*\*+|—+)\s*$/.test(lines[i])){ p.push(lines[i]); i++; }
+      out.push('<p>'+p.map(inline).join('<br>')+'</p>');
+    }
+    return out.join('\n');
+  }
   function imgFor(id){ if(window.KJIMG&&window.KJIMG[id])return window.KJIMG[id]; return id==='lead'?'assets/agents/lead-komjirak-cut.png':'assets/agents/pt-'+id+'.png'; }
   function open(id){ var d=D[id]; if(!d)return; cur=id;
     document.getElementById('pmName').textContent=d.ko;
     document.getElementById('pmEn').textContent=d.en;
     document.getElementById('pmImg').src=imgFor(id);
-    document.getElementById('pmPre').textContent=d.md;
+    document.getElementById('pmPre').innerHTML=mdToHtml(d.md);
+    document.getElementById('pmPre').scrollTop=0;
     ov.classList.add('on'); document.body.style.overflow='hidden';
   }
   function close(){ ov.classList.remove('on'); document.body.style.overflow=''; }
