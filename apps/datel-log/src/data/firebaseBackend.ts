@@ -13,7 +13,6 @@ import {
   getDocs,
   limit,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -92,6 +91,12 @@ function mapDoc<T>(d: { id: string; data: () => unknown }): T {
   return { id: d.id, ...(d.data() as object) } as T
 }
 
+// Sort newest-first in the client so the list queries need only a single
+// equality filter (coupleId) — no composite index required.
+function byCreatedDesc<T extends { createdAt?: number }>(arr: T[]): T[] {
+  return [...arr].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+}
+
 export const firebaseBackend: Backend = {
   auth,
 
@@ -156,12 +161,8 @@ export const firebaseBackend: Backend = {
   },
 
   watchPlaces(coupleId, cb) {
-    const q = query(
-      collection(fbDb(), 'places'),
-      where('coupleId', '==', coupleId),
-      orderBy('createdAt', 'desc'),
-    )
-    return onSnapshot(q, (s) => cb(s.docs.map((d) => mapDoc<Place>(d))))
+    const q = query(collection(fbDb(), 'places'), where('coupleId', '==', coupleId))
+    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Place>(d)))))
   },
   async addPlace(input) {
     const ref_ = await addDoc(collection(fbDb(), 'places'), { ...input, createdAt: Date.now() })
@@ -175,12 +176,8 @@ export const firebaseBackend: Backend = {
   },
 
   watchCourses(coupleId, cb) {
-    const q = query(
-      collection(fbDb(), 'courses'),
-      where('coupleId', '==', coupleId),
-      orderBy('createdAt', 'desc'),
-    )
-    return onSnapshot(q, (s) => cb(s.docs.map((d) => mapDoc<Course>(d))))
+    const q = query(collection(fbDb(), 'courses'), where('coupleId', '==', coupleId))
+    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Course>(d)))))
   },
   async addCourse(input) {
     const ref_ = await addDoc(collection(fbDb(), 'courses'), { ...input, createdAt: Date.now() })
@@ -194,12 +191,8 @@ export const firebaseBackend: Backend = {
   },
 
   watchMemories(coupleId, cb) {
-    const q = query(
-      collection(fbDb(), 'memories'),
-      where('coupleId', '==', coupleId),
-      orderBy('createdAt', 'desc'),
-    )
-    return onSnapshot(q, (s) => cb(s.docs.map((d) => mapDoc<Memory>(d))))
+    const q = query(collection(fbDb(), 'memories'), where('coupleId', '==', coupleId))
+    return onSnapshot(q, (s) => cb(byCreatedDesc(s.docs.map((d) => mapDoc<Memory>(d)))))
   },
   async addMemory(input) {
     const ref_ = await addDoc(collection(fbDb(), 'memories'), { ...input, createdAt: Date.now() })
@@ -216,13 +209,10 @@ export const firebaseBackend: Backend = {
   },
 
   watchNotifications(coupleId, cb) {
-    const q = query(
-      collection(fbDb(), 'notifications'),
-      where('coupleId', '==', coupleId),
-      orderBy('createdAt', 'desc'),
-      limit(30),
+    const q = query(collection(fbDb(), 'notifications'), where('coupleId', '==', coupleId))
+    return onSnapshot(q, (s) =>
+      cb(byCreatedDesc(s.docs.map((d) => mapDoc<AppNotification>(d))).slice(0, 30)),
     )
-    return onSnapshot(q, (s) => cb(s.docs.map((d) => mapDoc<AppNotification>(d))))
   },
   async markNotificationsRead(coupleId) {
     const q = query(
