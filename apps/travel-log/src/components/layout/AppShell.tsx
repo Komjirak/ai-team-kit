@@ -8,7 +8,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <Header />
-      <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-5 md:pb-12">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-5 lg:pb-12">{children}</main>
       <BottomNav />
       <InstallPrompt />
     </div>

@@ -9,13 +9,16 @@ const washiCycle = ['yellow', 'lavender', 'mint', 'blue'] as const
 
 // Pretty placeholder (icon + soft tint) shown when a place has no photo.
 const placeholder: Record<PlaceCategory, { icon: string; tint: string; fg: string }> = {
-  카페: { icon: 'local_cafe', tint: 'bg-primary-soft', fg: 'text-primary' },
+  관광: { icon: 'landmark', tint: 'bg-pastel-blue', fg: 'text-secondary' },
   맛집: { icon: 'restaurant', tint: 'bg-tape-yellow/50', fg: 'text-ink/70' },
+  카페: { icon: 'local_cafe', tint: 'bg-primary-soft', fg: 'text-primary' },
+  쇼핑: { icon: 'shopping_bag', tint: 'bg-pastel-lavender', fg: 'text-secondary' },
   자연: { icon: 'park', tint: 'bg-pastel-mint', fg: 'text-tertiary' },
   문화: { icon: 'auto_stories', tint: 'bg-pastel-blue', fg: 'text-secondary' },
   숙소: { icon: 'hotel', tint: 'bg-pastel-lavender', fg: 'text-secondary' },
   기타: { icon: 'place', tint: 'bg-surface-container', fg: 'text-muted' },
 }
+const fallbackPlaceholder = placeholder['기타']
 
 export function PlaceCard({
   place,
@@ -62,9 +65,9 @@ export function PlaceCard({
           />
         ) : (
           <div
-            className={`flex aspect-[16/10] w-full flex-col items-center justify-center gap-1 ${placeholder[place.category].tint} ${placeholder[place.category].fg}`}
+            className={`flex aspect-[16/10] w-full flex-col items-center justify-center gap-1 ${(placeholder[place.category] ?? fallbackPlaceholder).tint} ${(placeholder[place.category] ?? fallbackPlaceholder).fg}`}
           >
-            <Icon name={placeholder[place.category].icon} size={34} />
+            <Icon name={(placeholder[place.category] ?? fallbackPlaceholder).icon} size={34} />
             <span className="dl-mono text-xs opacity-70">{place.category}</span>
           </div>
         )}

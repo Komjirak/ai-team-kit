@@ -256,7 +256,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
         )}
 
         <div className="flex gap-2">
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <label className="mb-1 block text-xs font-semibold text-muted">날짜 *</label>
             {days.length > 0 ? (
               <select
@@ -280,7 +280,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
             )}
           </div>
           {!isFlight && (
-            <div className="w-28">
+            <div className="w-36 shrink-0">
               <label className="mb-1 block text-xs font-semibold text-muted">시간 (선택)</label>
               <input
                 type="time"

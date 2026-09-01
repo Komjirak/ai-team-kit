@@ -3,8 +3,10 @@
 //   Couple(≤2) → Trip(N인) · coupleId → tripId · 권한 owner/member 2단계.
 // M1 범위: Trip / 초대합류 / 백엔드 인터페이스 확장. 일정·정산·푸시는 M2~M4.
 
-export type PlaceCategory = '카페' | '맛집' | '자연' | '문화' | '숙소' | '기타'
-export const PLACE_CATEGORIES: PlaceCategory[] = ['카페', '맛집', '자연', '문화', '숙소', '기타']
+// 일반적인 여행 카테고리(공통). 기존 값(카페·맛집·자연·문화·숙소·기타)은 유지해
+// 이미 담긴 데이터가 그대로 유효하고, 여행에 흔한 관광·쇼핑을 더했다.
+export type PlaceCategory = '관광' | '맛집' | '카페' | '쇼핑' | '자연' | '문화' | '숙소' | '기타'
+export const PLACE_CATEGORIES: PlaceCategory[] = ['관광', '맛집', '카페', '쇼핑', '자연', '문화', '숙소', '기타']
 
 export type PlaceStatus = 'wishlist' | 'visited'
 

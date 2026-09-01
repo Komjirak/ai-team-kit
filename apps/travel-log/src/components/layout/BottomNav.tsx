@@ -6,7 +6,7 @@ import { TABS } from './nav'
 export function BottomNav() {
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-surface-variant/60 bg-surface-warm/95 backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-surface-variant/60 bg-surface-warm/95 backdrop-blur lg:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="주요 탭"
     >

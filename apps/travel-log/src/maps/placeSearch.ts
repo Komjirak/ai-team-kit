@@ -18,8 +18,10 @@ function categoryFromTypes(types?: string[]): string | undefined {
   if (/cafe|coffee|bakery|tea/.test(t)) return '카페'
   if (/restaurant|food|meal|bar|diner/.test(t)) return '맛집'
   if (/lodging|hotel|motel|resort|guest/.test(t)) return '숙소'
+  if (/shopping|store|shop|market|mall|boutique|supermarket/.test(t)) return '쇼핑'
   if (/park|natural|beach|mountain|hiking|forest|garden|zoo|aquarium/.test(t)) return '자연'
-  if (/museum|tourist|art|temple|shrine|church|historic|landmark|theater/.test(t)) return '문화'
+  if (/museum|art|gallery|theater/.test(t)) return '문화'
+  if (/tourist|temple|shrine|church|historic|landmark|point_of_interest|attraction/.test(t)) return '관광'
   return '기타'
 }
 

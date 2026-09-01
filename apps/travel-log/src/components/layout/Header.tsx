@@ -21,10 +21,10 @@ export function Header() {
           <span className="font-display text-2xl font-extrabold tracking-tight text-primary">{BRAND}</span>
         </Link>
 
-        {/* active trip name + switch (여행 전환) */}
+        {/* active trip name + switch (여행 전환) — 넉넉한 폭에서만 노출 */}
         {activeTrip && (
           <button
-            className="dl-focus ml-1 hidden items-center gap-1 rounded-full bg-surface-container px-3 py-1.5 text-sm font-semibold text-ink hover:bg-primary-soft sm:flex"
+            className="dl-focus ml-1 hidden items-center gap-1 rounded-full bg-surface-container px-3 py-1.5 text-sm font-semibold text-ink hover:bg-primary-soft xl:flex"
             onClick={() => setActiveTrip(null)}
             title="여행 전환"
           >
@@ -34,8 +34,8 @@ export function Header() {
           </button>
         )}
 
-        {/* desktop top-nav (chips) */}
-        <nav className="ml-4 hidden flex-1 items-center gap-1 md:flex">
+        {/* desktop top-nav (chips) — lg 이상에서만. 그 아래는 하단 탭바 사용(겹침 방지) */}
+        <nav className="ml-4 hidden min-w-0 flex-1 items-center gap-1 lg:flex">
           {TABS.map((t) => (
             <NavLink
               key={t.to}
@@ -49,7 +49,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <NotificationBell />
           <div className="relative">
             <button
@@ -59,7 +59,7 @@ export function Header() {
               aria-expanded={menuOpen}
             >
               <Avatar user={user} />
-              <span className="hidden text-sm font-semibold text-ink sm:inline">
+              <span className="hidden whitespace-nowrap text-sm font-semibold text-ink xl:inline">
                 {user?.nickname ?? '나'}
               </span>
               <Icon name="expand_more" size={18} className="text-muted" />

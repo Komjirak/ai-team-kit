@@ -45,7 +45,7 @@ export function HomePage() {
           <h2 className="font-display text-2xl font-extrabold text-ink">
             {activeTrip?.title ?? '우리 여행'} ✨
           </h2>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/80">
+          <p className="mt-2 text-sm leading-relaxed text-ink/80">
             {user?.nickname ?? '친구'}님, 가고 싶은 곳을 담아볼까요? 함께 갈 곳도, 다녀온 곳도 모두 이 여행의 기록이 돼요.
           </p>
           <Button icon="photo_camera" className="mt-4" onClick={openAdd}>

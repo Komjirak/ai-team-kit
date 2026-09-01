@@ -40,8 +40,10 @@ export function Spinner({ size = 24, className = '' }: { size?: number; classNam
 
 // ── Category badge (gray pill) & wishlist badge ───────────────
 const catStyle: Partial<Record<PlaceCategory, string>> = {
-  카페: 'bg-primary-soft text-primary',
+  관광: 'bg-pastel-blue text-secondary',
   맛집: 'bg-tape-yellow/60 text-ink',
+  카페: 'bg-primary-soft text-primary',
+  쇼핑: 'bg-pastel-lavender text-secondary',
   자연: 'bg-pastel-mint text-tertiary',
   문화: 'bg-pastel-blue text-secondary',
   숙소: 'bg-pastel-lavender text-secondary',
