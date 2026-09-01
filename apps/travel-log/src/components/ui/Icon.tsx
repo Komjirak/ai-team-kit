@@ -127,7 +127,7 @@ const MAP: Record<string, LucideIcon> = {
   workspace_premium: Award,
 }
 
-/** A Datel.log icon. `fill` fills the glyph (used for the brand heart / active tabs). */
+/** A 간직.log icon. `fill` fills the glyph (used for the brand heart / active tabs). */
 export function Icon({
   name,
   className = '',
