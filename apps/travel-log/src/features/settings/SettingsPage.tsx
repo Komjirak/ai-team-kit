@@ -10,6 +10,7 @@ import { Washi } from '../../components/ui/deco'
 import { useToast } from '../../components/ui/Toast'
 import { BRAND } from '../../components/layout/nav'
 import { PushSettings } from './PushSettings'
+import { CalendarExport } from './CalendarExport'
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -155,6 +156,8 @@ export function SettingsPage() {
 
       {/* Push notifications (M4) */}
       <PushSettings />
+
+      <CalendarExport />
 
       {/* Trip info */}
       <section className="dl-card p-5">

@@ -168,3 +168,15 @@
   background-size: 800px 100%;
   animation: dl-shimmer 1.4s ease infinite;
 }
+
+/* 접근성 — 움직임 최소화 선호 시 장식 애니메이션을 끈다(M5). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

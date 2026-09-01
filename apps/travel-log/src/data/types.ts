@@ -97,6 +97,7 @@ export interface ScheduleItem {
   title: string
   placeId?: string   // 장소 연결 (③ 모듈)
   memo?: string
+  googleEventId?: string // 구글 캘린더 미러링 시 이벤트 id (중복 방지, M5 Should)
   createdBy: string
   createdAt: number
 }
