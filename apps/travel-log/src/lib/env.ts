@@ -16,8 +16,8 @@ export const hasFirebase = Boolean(
   firebase.apiKey && firebase.authDomain && firebase.projectId && firebase.appId,
 )
 
-export const kakaoMapKey = (import.meta.env.VITE_KAKAO_MAP_KEY as string | undefined) || ''
-export const hasKakao = Boolean(kakaoMapKey)
+export const googleMapsKey = (import.meta.env.VITE_GOOGLE_MAPS_KEY as string | undefined) || ''
+export const hasGoogleMaps = Boolean(googleMapsKey)
 
 // M4 — 웹푸시(FCM) VAPID 공개키. 없으면 옵트인 UI는 "설정 필요"로 비활성.
 export const vapidKey = (import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined) || ''

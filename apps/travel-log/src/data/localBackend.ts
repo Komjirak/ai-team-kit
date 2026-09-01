@@ -151,6 +151,7 @@ function seed() {
     { id: 'x6', tripId: trip.id, title: '둘째날 저녁 해산물', amount: 96000, paidBy: jihoon.id, participants: all, category: '식비', date: '2026-09-19', createdBy: jihoon.id, createdAt: now - 5 * day },
     { id: 'x7', tripId: trip.id, title: '기념품 (민지·수아)', amount: 34000, paidBy: minji.id, participants: [minji.id, suah.id], category: '기타', date: '2026-09-20', createdBy: minji.id, createdAt: now - 4 * day },
     { id: 'x8', tripId: trip.id, title: '주유비', amount: 55000, paidBy: suah.id, participants: all, category: '교통', date: '2026-09-20', createdBy: suah.id, createdAt: now - 4 * day },
+    { id: 'x9', tripId: trip.id, title: '둘째날 술자리 (은애 안 마심)', amount: 60000, paidBy: jihoon.id, participants: all, splitMode: 'custom', shares: { [me.id]: 0, [jihoon.id]: 20000, [minji.id]: 20000, [suah.id]: 20000 }, category: '식비', date: '2026-09-19', createdBy: jihoon.id, createdAt: now - 5 * day },
   ]
 
   write(K.user, me)

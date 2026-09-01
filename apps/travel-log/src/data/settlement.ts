@@ -55,6 +55,35 @@ export function splitEqual(amount: number, participantCount: number): number[] {
 }
 
 /**
+ * 한 비용의 참여자별 부담액(원)을 돌려준다.
+ *  - splitMode === 'custom' 이고 shares 합이 amount와 정확히 같으면 그 값을 쓴다(불균등).
+ *  - 그 외에는 participants 1/N 균등(splitEqual). custom인데 합이 안 맞는
+ *    비정상 레코드는 균등으로 폴백해 합계 불변식(owed 합 = amount)을 지킨다.
+ * 반환 맵의 합은 항상 정확히 amount와 같다.
+ */
+export function expenseOwed(e: Expense): Map<string, number> {
+  const amount = Math.max(0, Math.round(e.amount))
+  const parts = e.participants
+  const out = new Map<string, number>()
+  if (parts.length === 0) return out
+
+  if (e.splitMode === 'custom' && e.shares) {
+    let sum = 0
+    for (const p of parts) {
+      const v = Math.max(0, Math.round(e.shares[p] ?? 0))
+      out.set(p, v)
+      sum += v
+    }
+    if (sum === amount) return out
+    out.clear() // 합 불일치 → 균등 폴백
+  }
+
+  const eq = splitEqual(amount, parts.length)
+  parts.forEach((p, i) => out.set(p, eq[i]))
+  return out
+}
+
+/**
  * 비용 목록과 멤버 목록으로 정산 결과를 계산한다.
  * memberIds에 없더라도 비용에 등장하는 userId(나간 멤버 등)는 잔액에 포함해
  * 합계 불변식(sum net = 0)을 지킨다. perMember는 memberIds 우선으로 정렬한다.
@@ -76,8 +105,7 @@ export function computeSettlement(expenses: Expense[], memberIds: string[]): Set
     if (parts.length === 0) continue // 참여자 없는 비용은 정산에서 제외(합계 불변식 보존)
     totalSpent += amount
     bump(paid, e.paidBy, amount)
-    const shares = splitEqual(amount, parts.length)
-    parts.forEach((p, i) => bump(owed, p, shares[i]))
+    expenseOwed(e).forEach((v, p) => bump(owed, p, v))
   }
 
   // 결정적 순서: memberIds 우선(입력 순), 그 밖의 등장 유저는 정렬해 뒤에

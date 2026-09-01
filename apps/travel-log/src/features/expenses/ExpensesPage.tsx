@@ -211,7 +211,8 @@ export function ExpensesPage() {
                       )}
                     </div>
                     <p className="mt-0.5 text-xs text-muted">
-                      <b className="text-ink/80">{nameOf(e.paidBy)}</b>님이 결제 · {e.participants.length}명 나눔
+                      <b className="text-ink/80">{nameOf(e.paidBy)}</b>님이 결제 · {e.participants.length}명{' '}
+                      {e.splitMode === 'custom' ? '직접 분할' : '나눔'}
                       {e.date && ` · ${e.date.replace(/-/g, '.')}`}
                     </p>
                   </div>

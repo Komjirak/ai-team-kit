@@ -203,3 +203,56 @@ describe('minTransfers · transferKey', () => {
     expect(transferKey({ from: 'x', to: 'y' })).toBe('x>y')
   })
 })
+
+// ── 불균등 분할(custom shares) ─────────────────────────────
+function exCustom(amount: number, paidBy: string, shares: Record<string, number>): Expense {
+  seq++
+  return {
+    id: `e${seq}`, tripId: 't', title: `custom ${seq}`, amount, paidBy,
+    participants: Object.keys(shares), splitMode: 'custom', shares,
+    createdBy: paidBy, createdAt: seq,
+  }
+}
+
+describe('불균등 분할(custom shares)', () => {
+  it('지정한 인당 금액으로 정산된다', () => {
+    const r = computeSettlement([exCustom(30000, 'A', { A: 5000, B: 10000, C: 15000 })], ['A', 'B', 'C'])
+    const net = Object.fromEntries(r.perMember.map((m) => [m.userId, m.net]))
+    expect(net.A).toBe(25000) // 30000 결제 - 5000 부담
+    expect(net.B).toBe(-10000)
+    expect(net.C).toBe(-15000)
+    expect(r.perMember.reduce((s, m) => s + m.net, 0)).toBe(0)
+    assertTransfersZeroOut(r.perMember, r.transfers)
+  })
+
+  it('참여자 일부만 부담(0원 포함)해도 정확하다', () => {
+    const r = computeSettlement([exCustom(20000, 'B', { A: 0, B: 8000, C: 12000 })], ['A', 'B', 'C'])
+    const net = Object.fromEntries(r.perMember.map((m) => [m.userId, m.net]))
+    expect(net.A).toBe(0)
+    expect(net.B).toBe(12000)
+    expect(net.C).toBe(-12000)
+    assertTransfersZeroOut(r.perMember, r.transfers)
+  })
+
+  it('custom 합이 amount와 다르면 균등으로 폴백(합계 보존)', () => {
+    const r = computeSettlement([exCustom(10000, 'A', { A: 3000, B: 3000, C: 3000 })], ['A', 'B', 'C'])
+    expect(r.totalSpent).toBe(10000)
+    expect(r.perMember.reduce((s, m) => s + m.net, 0)).toBe(0)
+    const net = Object.fromEntries(r.perMember.map((m) => [m.userId, m.net]))
+    expect(net.A).toBe(6666) // 균등 폴백: A 부담 3334, 10000-3334
+    assertTransfersZeroOut(r.perMember, r.transfers)
+  })
+
+  it('균등+불균등 혼합 여행도 전원 0으로 수렴', () => {
+    const r = computeSettlement(
+      [
+        ex(30000, 'A', ['A', 'B', 'C']),
+        exCustom(20000, 'B', { A: 0, B: 8000, C: 12000 }),
+        ex(9000, 'C', ['A', 'B', 'C']),
+      ],
+      ['A', 'B', 'C'],
+    )
+    expect(r.perMember.reduce((s, m) => s + m.net, 0)).toBe(0)
+    assertTransfersZeroOut(r.perMember, r.transfers)
+  })
+})

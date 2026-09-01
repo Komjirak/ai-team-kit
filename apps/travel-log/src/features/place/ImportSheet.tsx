@@ -7,7 +7,7 @@ import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { PLACE_CATEGORIES, type PlaceCategory } from '../../data/types'
-import { searchPlaces } from '../../kakao/placeSearch'
+import { searchPlaces } from '../../maps/placeSearch'
 import { parseImport, type ImportItem } from './importParse'
 
 interface Row extends ImportItem {
@@ -18,7 +18,7 @@ interface Row extends ImportItem {
 
 type Phase = 'input' | 'working' | 'preview' | 'saving'
 
-/** 목록 가져오기 — 구글 Takeout(GeoJSON/CSV)·CSV·붙여넣기 → Kakao 좌표 보정 → 일괄 담기. */
+/** 목록 가져오기 — 구글 Takeout(GeoJSON/CSV)·CSV·붙여넣기 → 지도 좌표 보정 → 일괄 담기. */
 export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth()
   const { activeTrip } = useTrip()
@@ -47,7 +47,7 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
     for (let i = 0; i < items.length; i++) {
       const it = items[i]
       let row: Row = { ...it, category: '기타', selected: true, resolved: 'ok' }
-      // 좌표가 없으면 Kakao로 보정
+      // 좌표가 없으면 지도(Google)로 보정
       if (it.lat == null || it.lng == null) {
         try {
           const hit = (await searchPlaces(it.address || it.name))[0]

@@ -8,7 +8,7 @@ import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { tripDates, fmtDayLabel } from '../../data/schedule'
 import { PLACE_CATEGORIES, type PlaceCategory, type ScheduleItem } from '../../data/types'
-import { searchPlaces, type PlaceResult } from '../../kakao/placeSearch'
+import { searchPlaces, type PlaceResult } from '../../maps/placeSearch'
 
 interface Props {
   open: boolean

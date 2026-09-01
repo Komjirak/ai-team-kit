@@ -1,5 +1,5 @@
 // 가져오기 파서 — 구글 Takeout(GeoJSON/CSV) · 일반 CSV · 붙여넣기 텍스트를
-// 공통 형태(ImportItem)로 정규화한다. 좌표가 없으면 이후 Kakao로 보정한다.
+// 공통 형태(ImportItem)로 정규화한다. 좌표가 없으면 이후 지도(Google)로 보정한다.
 
 export interface ImportItem {
   name: string

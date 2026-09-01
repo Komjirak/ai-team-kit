@@ -68,7 +68,11 @@ export interface Expense {
   title: string
   amount: number         // 정수 KRW (v1 통화 고정)
   paidBy: string         // 결제자 userId
-  participants: string[] // 분담 대상 userId[] (1/N)
+  participants: string[] // 분담 대상 userId[]
+  // 분할 방식: 'equal' = 참여자 1/N 균등(기본), 'custom' = 인당 금액 직접 지정.
+  splitMode?: 'equal' | 'custom'
+  // custom일 때만: 참여자별 분담액(원). 합계 = amount 여야 한다.
+  shares?: Record<string, number>
   category?: string      // Could(통계)는 범위 밖. 라벨만 저장
   date?: string          // ISO yyyy-mm-dd (선택)
   createdBy: string

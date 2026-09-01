@@ -8,6 +8,7 @@ import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { tripDates, fmtDayLabel } from '../../data/schedule'
+import { splitEqual } from '../../data/settlement'
 import type { Expense } from '../../data/types'
 
 // 카테고리는 라벨만 저장(통계는 Could·범위 밖).
@@ -34,6 +35,8 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
   const [participants, setParticipants] = useState<string[]>([])
   const [category, setCategory] = useState<string>('식비')
   const [date, setDate] = useState('')
+  const [splitMode, setSplitMode] = useState<'equal' | 'custom'>('equal')
+  const [customShares, setCustomShares] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,14 +48,42 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
     setParticipants(editing?.participants ?? memberIds)
     setCategory(editing?.category ?? '식비')
     setDate(editing?.date ?? '')
+    setSplitMode(editing?.splitMode ?? 'equal')
+    setCustomShares(
+      editing?.shares
+        ? Object.fromEntries(Object.entries(editing.shares).map(([k, v]) => [k, String(v)]))
+        : {},
+    )
     setError(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing])
 
   const amountNum = Math.max(0, Math.floor(Number(amount.replace(/[^\d]/g, '')) || 0))
 
+  // 참여자 순서를 멤버 순서로 정규화(1원 나머지 배분의 결정성 보장)
+  const orderedParticipants = memberIds.filter((id) => participants.includes(id))
+
+  // 균등: 참여자별 정확한 분담액(원). 직접입력: 입력값(빈칸=0).
+  const equalShares = splitEqual(amountNum, orderedParticipants.length)
+  const shareOf = (id: string): number => {
+    if (splitMode === 'custom') return Math.max(0, Math.floor(Number(customShares[id] ?? 0)) || 0)
+    const i = orderedParticipants.indexOf(id)
+    return i >= 0 ? equalShares[i] : 0
+  }
+  const customSum = orderedParticipants.reduce((s, id) => s + shareOf(id), 0)
+  const customValid = splitMode !== 'custom' || customSum === amountNum
+  const canSave = title.trim() !== '' && amountNum > 0 && participants.length > 0 && customValid
+
   function toggleParticipant(id: string) {
     setParticipants((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+  }
+  function setShare(id: string, val: string) {
+    setCustomShares((s) => ({ ...s, [id]: val.replace(/[^\d]/g, '') }))
+  }
+  // 나머지를 참여자에게 균등 자동 배분(빈칸/미달분 채우기)
+  function autofillRemainder() {
+    const eq = splitEqual(amountNum, orderedParticipants.length)
+    setCustomShares(Object.fromEntries(orderedParticipants.map((id, i) => [id, String(eq[i])])))
   }
   function nameOf(id: string) {
     return members.find((m) => m.id === id)?.nickname ?? '친구'
@@ -60,36 +91,32 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
 
   async function save() {
     if (!user || !activeTrip) return
-    if (!title.trim() || amountNum <= 0 || participants.length === 0) {
+    if (!canSave) {
       setError('expense.save_failed')
       return
     }
-    // 참여자 순서를 멤버 순서로 정규화(1원 나머지 배분의 결정성 보장)
-    const orderedParticipants = memberIds.filter((id) => participants.includes(id))
+    const shares =
+      splitMode === 'custom'
+        ? Object.fromEntries(orderedParticipants.map((id) => [id, shareOf(id)]))
+        : undefined
+    const payload = {
+      title: title.trim(),
+      amount: amountNum,
+      paidBy,
+      participants: orderedParticipants,
+      splitMode,
+      shares,
+      category,
+      date: date || undefined,
+    }
     setSaving(true)
     setError(null)
     try {
       if (editing) {
-        await backend.updateExpense(editing.id, {
-          title: title.trim(),
-          amount: amountNum,
-          paidBy,
-          participants: orderedParticipants,
-          category,
-          date: date || undefined,
-        })
+        await backend.updateExpense(editing.id, payload)
         toast.show('비용을 수정했어요.')
       } else {
-        await backend.addExpense({
-          tripId: activeTrip.id,
-          title: title.trim(),
-          amount: amountNum,
-          paidBy,
-          participants: orderedParticipants,
-          category,
-          date: date || undefined,
-          createdBy: user.id,
-        })
+        await backend.addExpense({ ...payload, tripId: activeTrip.id, createdBy: user.id })
         toast.show('비용을 담았어요.')
       }
       onClose()
@@ -99,9 +126,6 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
       setSaving(false)
     }
   }
-
-  const perHead =
-    participants.length > 0 ? Math.floor(amountNum / participants.length) : 0
 
   return (
     <Sheet
@@ -117,7 +141,7 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
             className="flex-1"
             onClick={save}
             loading={saving}
-            disabled={!title.trim() || amountNum <= 0 || participants.length === 0}
+            disabled={!canSave}
             icon={editing ? 'save' : 'add'}
           >
             {editing ? '저장' : '담기'}
@@ -174,7 +198,7 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
         {/* 참여자 */}
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-xs font-semibold text-muted">누가 나눠 내요? (1/N)</label>
+            <label className="text-xs font-semibold text-muted">누가 나눠 내요?</label>
             <button
               type="button"
               className="text-xs font-bold text-primary"
@@ -202,13 +226,70 @@ export function AddExpenseSheet({ open, onClose, editing }: Props) {
               )
             })}
           </div>
-          {participants.length > 0 && amountNum > 0 && (
-            <p className="dl-mono mt-2 text-xs text-muted">
-              {participants.length}명이 1인당 약 {perHead.toLocaleString('ko-KR')}원
-            </p>
-          )}
           {participants.length === 0 && (
             <p className="mt-2 text-xs text-error">최소 한 명은 나눠 내야 해요.</p>
+          )}
+
+          {/* 분할 방식 — 자동 계산 */}
+          {participants.length > 0 && (
+            <div className="mt-3 rounded-2xl bg-surface-container/60 p-3">
+              <div className="mb-2 flex rounded-full bg-surface p-1 text-sm font-semibold">
+                {(['equal', 'custom'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setSplitMode(mode)}
+                    className={`flex-1 rounded-full py-1.5 transition-colors ${
+                      splitMode === mode ? 'bg-primary text-on-primary' : 'text-muted'
+                    }`}
+                  >
+                    {mode === 'equal' ? '균등 1/N' : '직접 입력'}
+                  </button>
+                ))}
+              </div>
+
+              {splitMode === 'equal' ? (
+                <ul className="space-y-1">
+                  {orderedParticipants.map((id) => (
+                    <li key={id} className="flex items-center justify-between text-sm">
+                      <span className="text-ink">{nameOf(id)}</span>
+                      <span className="dl-mono font-bold text-ink">
+                        {shareOf(id).toLocaleString('ko-KR')}원
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  <ul className="space-y-1.5">
+                    {orderedParticipants.map((id) => (
+                      <li key={id} className="flex items-center justify-between gap-2 text-sm">
+                        <span className="text-ink">{nameOf(id)}</span>
+                        <span className="flex items-center gap-1 rounded-xl bg-surface px-3 py-1.5">
+                          <input
+                            inputMode="numeric"
+                            value={shareOf(id) > 0 ? shareOf(id).toLocaleString('ko-KR') : ''}
+                            onChange={(e) => setShare(id, e.target.value)}
+                            placeholder="0"
+                            className="dl-mono w-24 bg-transparent text-right font-bold text-ink outline-none placeholder:text-muted-soft"
+                          />
+                          <span className="text-xs text-muted">원</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-2 flex items-center justify-between">
+                    <button type="button" className="text-xs font-bold text-primary" onClick={autofillRemainder}>
+                      균등하게 자동 배분
+                    </button>
+                    <span className={`dl-mono text-xs font-bold ${customValid ? 'text-tertiary' : 'text-error'}`}>
+                      합계 {customSum.toLocaleString('ko-KR')} / {amountNum.toLocaleString('ko-KR')}원
+                      {!customValid && ` (${(amountNum - customSum > 0 ? '+' : '') + (amountNum - customSum).toLocaleString('ko-KR')})`}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
 
