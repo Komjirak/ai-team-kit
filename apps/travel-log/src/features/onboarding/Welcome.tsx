@@ -65,13 +65,9 @@ export function Welcome() {
         <Button className="w-full py-4 text-lg" icon="edit_note" onClick={go} loading={busy}>
           Google로 시작하기
         </Button>
-        <button
-          className="dl-focus w-full rounded-full bg-surface-container py-3.5 font-semibold text-muted"
-          onClick={go}
-          disabled={busy}
-        >
-          기존 계정으로 로그인
-        </button>
+        <p className="text-center text-xs text-muted-soft">
+          처음이든 다시 오든 구글 계정으로 바로 이어져요.
+        </p>
         {isDemo && (
           <p className="pt-2 text-center text-xs text-muted-soft">
             데모 모드 · 키 없이 전체 흐름을 체험할 수 있어요
