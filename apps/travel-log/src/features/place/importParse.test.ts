@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest'
-import { parseMapsUrl, extractMapLinks, isShortMapLink, isMapLink } from './importParse'
+import { parseMapsUrl, extractMapLinks, isShortMapLink, isMapLink, parseImport } from './importParse'
+
+describe('parseImport — Takeout 목록 CSV (Title,Note,URL)', () => {
+  it('제목 + URL 좌표를 함께 읽는다', () => {
+    const csv = [
+      'Title,Note,URL',
+      '"센소지",,"https://www.google.com/maps/place/%EC%84%BC%EC%86%8C%EC%A7%80/@35.7148,139.7967,17z"',
+      '"시부야 스크램블",,"https://www.google.com/maps/place/x/@35.6595,139.7005,17z"',
+    ].join('\n')
+    const items = parseImport(csv)
+    expect(items).toHaveLength(2)
+    expect(items[0].name).toBe('센소지')
+    expect(items[0].lat).toBeCloseTo(35.7148, 3)
+    expect(items[1].name).toBe('시부야 스크램블')
+    expect(items[1].lng).toBeCloseTo(139.7005, 3)
+  })
+})
 
 describe('parseMapsUrl', () => {
   it('/maps/place/이름/@lat,lng 에서 이름·좌표', () => {

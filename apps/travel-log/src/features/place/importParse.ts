@@ -128,6 +128,7 @@ function parseDelimited(text: string): ImportItem[] {
 
   const nameIdx = firstIndex(header, ['title', 'name', '이름', '장소명', '장소'])
   const addrIdx = firstIndex(header, ['address', '주소'])
+  const urlIdx = firstIndex(header, ['url', '링크', 'link']) // 구글 Takeout '저장됨' 목록 CSV
 
   const rows = hasHeader ? lines.slice(1) : lines
   const out: ImportItem[] = []
@@ -144,8 +145,22 @@ function parseDelimited(text: string): ImportItem[] {
       address = cells.length > 1 ? cells.slice(1).join(', ') : undefined
     }
     name = name.trim()
-    if (!name || /^https?:\/\//i.test(name)) continue // URL만 있는 줄 건너뜀
-    out.push({ name, address: address?.trim() || undefined })
+
+    // URL 칸(Takeout 목록)에 구글 지도 링크가 있으면 좌표·이름을 보강한다.
+    let lat: number | undefined
+    let lng: number | undefined
+    const urlCell = urlIdx >= 0 ? cells[urlIdx] : cells.find((c) => isMapLink(c))
+    if (urlCell && isMapLink(urlCell) && !isShortMapLink(urlCell)) {
+      const parsed = parseMapsUrl(urlCell)
+      if (parsed) {
+        lat = parsed.lat
+        lng = parsed.lng
+        if (!name) name = parsed.name
+      }
+    }
+
+    if (!name || /^https?:\/\//i.test(name)) continue // 이름이 URL뿐인 줄은 건너뜀
+    out.push({ name, address: address?.trim() || undefined, lat, lng })
   }
   return dedupe(out)
 }
