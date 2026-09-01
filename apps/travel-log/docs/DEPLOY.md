@@ -52,3 +52,45 @@ npx firebase-tools deploy --only functions
 ```bash
 npm run build && npx firebase-tools deploy
 ```
+
+---
+
+# 대안: Vercel로 프론트 배포 (백엔드는 Firebase 유지)
+
+프론트(정적)는 Vercel, **Firestore 규칙·Storage·Functions는 그대로 Firebase(date-log-b1e52)**
+에 배포하는 하이브리드. 앱은 브라우저에서 Firebase에 붙으므로 정상 동작한다.
+
+### A. 먼저 백엔드(Firebase)만 배포
+```bash
+cd apps/travel-log
+npx firebase-tools deploy --only firestore:rules,storage    # (푸시 쓰면 ,functions)
+```
+
+### B. Vercel로 프론트 배포 — 방법 1: Git 연동(권장)
+1. https://vercel.com → **Add New… → Project** → GitHub의 `Komjirak/ai-team-kit` import.
+2. **Root Directory** = `apps/travel-log` 로 지정 (모노레포라 필수).
+   Framework: Vite 자동 감지 · Build `npm run build` · Output `dist` (vercel.json에 명시됨).
+3. **Environment Variables** 에 추가(빌드시 주입 — 전부 `VITE_` 접두):
+   `VITE_FIREBASE_API_KEY` · `VITE_FIREBASE_AUTH_DOMAIN` · `VITE_FIREBASE_PROJECT_ID` ·
+   `VITE_FIREBASE_STORAGE_BUCKET` · `VITE_FIREBASE_MESSAGING_SENDER_ID` · `VITE_FIREBASE_APP_ID` ·
+   `VITE_GOOGLE_MAPS_KEY` · (푸시) `VITE_FIREBASE_VAPID_KEY`.
+4. **Deploy** → `https://<프로젝트>.vercel.app` 발급.
+
+### B. 방법 2: CLI
+```bash
+npm i -g vercel
+cd apps/travel-log
+vercel                     # 최초 로그인 + 프로젝트 연결(Root=현재 폴더)
+vercel env add VITE_FIREBASE_API_KEY     # ... 위 8개 각각 (또는 대시보드에서 일괄)
+vercel --prod
+```
+
+### C. 배포 후 필수 허용목록 (안 하면 로그인·지도 막힘)
+- **Firebase 콘솔 → Authentication → 설정 → 승인된 도메인** 에 `*.vercel.app` 도메인
+  (예: `ganjik-log.vercel.app`) 추가 → 없으면 Google 로그인 팝업 차단.
+- **Google Cloud → Maps API 키 → HTTP 리퍼러 제한** 에 `https://<프로젝트>.vercel.app/*` 추가
+  → 없으면 지도·장소검색이 `search.failed`.
+- (푸시) FCM은 그대로 Firebase Functions에서 전송되므로 Vercel과 무관.
+
+> 커스텀 도메인(예: ganjik.log)을 Vercel에 붙이면, 그 도메인도 위 두 허용목록에 추가하고
+> `index.html`·`sitemap`·`robots`의 URL을 그 도메인으로 바꾼다.
