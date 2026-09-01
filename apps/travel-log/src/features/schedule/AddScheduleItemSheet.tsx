@@ -331,7 +331,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
                 <Icon name="flight_takeoff" size={15} /> 출발
               </p>
               <div className="flex gap-2">
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <label className="mb-1 block text-[11px] font-semibold text-muted">공항 코드 *</label>
                   <input
                     value={depIata}
@@ -342,7 +342,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
                     className="w-full rounded-xl bg-surface-container px-3 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
-                <div className="w-24">
+                <div className="w-32 shrink-0">
                   <label className="mb-1 block text-[11px] font-semibold text-muted">시각</label>
                   <input
                     type="time"
@@ -372,7 +372,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
                 <Icon name="flight_land" size={15} /> 도착
               </p>
               <div className="flex gap-2">
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <label className="mb-1 block text-[11px] font-semibold text-muted">공항 코드 *</label>
                   <input
                     value={arrIata}
@@ -383,7 +383,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
                     className="w-full rounded-xl bg-surface-container px-3 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
-                <div className="w-24">
+                <div className="w-32 shrink-0">
                   <label className="mb-1 block text-[11px] font-semibold text-muted">시각</label>
                   <input
                     type="time"
