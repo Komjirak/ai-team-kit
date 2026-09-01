@@ -5,6 +5,7 @@ import { CategoryBadge } from './ui/basics'
 import { Washi, Pin } from './ui/deco'
 import { PlacePhoto } from './PlacePhoto'
 import { cleanPlaceName } from '../data/placeText'
+import { useTrip } from '../trip/TripContext'
 
 const washiCycle = ['yellow', 'lavender', 'mint', 'blue'] as const
 
@@ -36,11 +37,13 @@ export function PlaceCard({
   onDelete?: (p: Place) => void
   onOpen?: (p: Place) => void
 }) {
+  const { members } = useTrip()
   const [menu, setMenu] = useState(false)
   const [imgBroken, setImgBroken] = useState(false)
   const visited = place.status === 'visited'
   const color = washiCycle[index % washiCycle.length]
   const showPhoto = place.thumbnail && !imgBroken
+  const author = members.find((m) => m.id === place.createdBy)
 
   return (
     <article className="dl-card overflow-visible p-3">
@@ -128,6 +131,15 @@ export function PlaceCard({
         </div>
         {place.memo && <p className="mt-0.5 line-clamp-1 text-sm text-muted">{place.memo}</p>}
         <p className="mt-1 line-clamp-1 text-xs text-muted-soft">{place.address}</p>
+
+        {author && (
+          <p className="mt-1.5 flex items-center gap-1 text-[11px] text-muted">
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-primary-container text-[9px] font-bold text-on-primary">
+              {(author.nickname ?? '?').slice(0, 1)}
+            </span>
+            {author.nickname}님이 담음
+          </p>
+        )}
 
         <div className="mt-3 flex items-center justify-between">
           <CategoryBadge category={place.category} />
