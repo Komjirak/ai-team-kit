@@ -8,7 +8,7 @@
 메모 같은 깊은 맥락은 담지 않는다 — 기능별 문서와 `git log`, 아래 "더 볼 것"을
 따라간다. 낡을 값(최신 커밋 해시 등)은 박아두지 않는다.
 
-## 지금 상태 — **간직.log(친구 여행 기억장) 피벗 진행 중** · Datel.log는 배포 완료 · 렉시오 보류
+## 지금 상태 — **간직.log v1.0.0 기능 완성(M1–M5)** · date-log-b1e52 배포 준비 · 렉시오 보류
 
 <!--
 여기가 이 문서의 심장이다. 세션이 끝날 때마다 갱신한다. 쓰는 법:
@@ -36,23 +36,29 @@
   ("A→B"）·"정산됨" 토글. **단위테스트 21케이스(vitest, `npm test`)로 정확도 고정**(K2 대비).
 - ✅ **M4 회고+푸시(주연)** — 회고 스크랩북 + 여행 요약 카드(재방문 훅, K1 대비) ·
   FCM 웹푸시 3종 옵트인 + 인앱 폴백 · `functions/`(Firestore 트리거→FCM, 배포문서).
-- **게이트 전부 통과:** app verify=0·build=0·test=0 · functions tsc=0. 데모 모드로 전체 흐름 검증.
+- ✅ **M5 굳히기** — 구글 캘린더 미러링(설정에서 일정 내보내기, calendar.events OAuth,
+  googleEventId 중복방지) · 접근성(prefers-reduced-motion) · 보안규칙 8컬렉션 스코프 확인 ·
+  배포 준비(아래).
+- ✅ **후속 PO 지시 2건 반영** — ⓐ 지도 **Kakao→Google Maps** 전환(Places New,
+  `VITE_GOOGLE_MAPS_KEY`, 데모 폴백 유지 · 오픈이슈 C 재결정) ⓑ 가계부 **불균등 분할**
+  (splitMode custom·shares, 실시간 자동계산, 정산엔진 일반화, 테스트 25/0).
+- **게이트 전부 통과:** app verify=0·build=0·test=25/0 · functions tsc=0. 데모로 전 흐름 검증.
 
-⚠️ **v1.0.0은 "기능 완성"이지 "배포 완료"가 아니다.** 실 배포 = **PO 승인 대기(비가역)**:
-① 새 Firebase 프로젝트(예 `ganjik-log`) 키 `.env.local` ② firestore/storage 규칙 게시
-(trips/schedules/expenses/settlements 멤버 스코프 — 규칙 전엔 실모드 막힘) ③ Kakao JS
-도메인 등록 ④ 푸시는 VAPID+**Blaze**+`functions` 배포 ⑤ Hosting 배포 ⑥ 정식 상표·도메인(대외).
+✅ **배포 대상 확정(PO):** 간직.log는 **기존 date.log 프로젝트 `date-log-b1e52`를 전용**한다
+(커플 앱 대체). `.firebaserc`(default=date-log-b1e52) + `docs/DEPLOY.md`로 원커맨드 배포.
+canonical/og/sitemap/robots URL을 `date-log-b1e52.web.app`로 복원함.
+
+⚠️ **아직 "기능 완성"이고 실 배포는 PO가 직접 실행(비가역)** — `docs/DEPLOY.md` 순서:
+① `.env.local`(date-log-b1e52 Firebase값 + `VITE_GOOGLE_MAPS_KEY` + VAPID) ② 규칙 게시
+③ 호스팅 배포 ④ (푸시) Blaze+functions ⑤ Google Maps 리퍼러·Calendar API 활성화.
+**주의:** 이 프로젝트에 배포하면 커플 앱(Datel.log) 호스팅·규칙이 교체된다(의도된 대체).
+옛 coupleId 문서는 새 규칙에서 접근 차단돼 무해하게 잠든다.
 
 **다음 세션이 챙길 것:**
-1. **간직.log는 Datel.log와 별개 배포 대상.** 실제 배포 시 **새 Firebase 프로젝트**
-   (예: `ganjik-log`)에 붙인다 — 커플 앱(`date-log-b1e52`)에 덮어쓰지 말 것.
-   `index.html`·`sitemap`·`robots`의 URL은 `ganjik-log.web.app` 플레이스홀더 → 실제
-   도메인으로 교체 필요.
-2. **BD kill 기준 K1** = "첫 여행 후 D30 재방문 <15%"가 이 제품 사활 → **M4 회고**에
-   특히 공들인다(재방문 훅).
-3. 실 배포 전: Firebase Storage(Blaze) + FCM(웹푸시 VAPID·Cloud Functions) 설정,
-   Kakao JS 도메인에 새 주소 등록, 정식 상표(KIPRIS)·도메인 확인(대외=PO 승인).
-4. QA 회귀(데모 E2E: 여행생성→합류→일정→장소→가계부→회고→멤버4명)·접근성.
+1. **BD kill 기준 K1** = "첫 여행 후 D30 재방문 <15%"가 이 제품 사활 → 회고·요약카드 계속 강화.
+2. QA 회귀 실기기 점검(로그인→여행→합류→일정→구글지도검색→가계부(균등/불균등)→회고→푸시),
+   접근성 정밀(스크린리더 라벨 커버리지·대비 AA) — M5는 targeted pass까지.
+3. 정식 상표(KIPRIS)·제품 도메인 확정(대외=PO). 필요 시 커스텀 도메인 연결 후 URL 재교체.
 
 ---
 
