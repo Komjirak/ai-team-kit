@@ -3,7 +3,7 @@ import type { Place, PlaceCategory } from '../data/types'
 import { Icon } from './ui/Icon'
 import { CategoryBadge } from './ui/basics'
 import { Washi, Pin } from './ui/deco'
-import { photoSrc } from '../lib/photo'
+import { PlacePhoto } from './PlacePhoto'
 
 const washiCycle = ['yellow', 'lavender', 'mint', 'blue'] as const
 
@@ -56,11 +56,9 @@ export function PlaceCard({
         aria-label={onOpen ? `${place.name} 상세` : undefined}
       >
         {showPhoto ? (
-          <img
-            src={photoSrc(place.thumbnail)}
-            alt=""
-            loading="lazy"
-            onError={() => setImgBroken(true)} // 실패 시 카테고리 플레이스홀더로
+          <PlacePhoto
+            url={place.thumbnail}
+            onFail={() => setImgBroken(true)} // 최종 실패 시 카테고리 플레이스홀더로
             className="aspect-[16/10] w-full object-cover"
           />
         ) : (

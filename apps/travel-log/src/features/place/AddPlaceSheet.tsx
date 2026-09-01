@@ -4,7 +4,7 @@ import { Button, Spinner } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { PLACE_CATEGORIES, type Place, type PlaceCategory } from '../../data/types'
 import { searchPlaces, type PlaceResult } from '../../maps/placeSearch'
-import { photoSrc } from '../../lib/photo'
+import { PlacePhoto } from '../../components/PlacePhoto'
 import { backend } from '../../data'
 import { useAuth } from '../../auth/AuthContext'
 import { useTrip } from '../../trip/TripContext'
@@ -203,13 +203,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
                   >
                     <span className="flex w-full items-center gap-2">
                       {r.photoUrl && (
-                        <img
-                          src={photoSrc(r.photoUrl)}
-                          alt=""
-                          className="h-10 w-10 shrink-0 rounded-lg object-cover"
-                          loading="lazy"
-                          onError={(e) => (e.currentTarget.style.display = 'none')}
-                        />
+                        <PlacePhoto url={r.photoUrl} className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                       )}
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-1.5">
@@ -278,11 +272,10 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
             <label className="mb-1.5 block text-xs font-semibold text-muted">사진 (선택)</label>
             {thumbnail ? (
               <div className="relative w-fit">
-                <img
-                  src={photoSrc(thumbnail)}
-                  alt=""
+                <PlacePhoto
+                  url={thumbnail}
                   className="h-28 w-40 rounded-2xl object-cover"
-                  onError={() => setThumbnail(undefined)}
+                  onFail={() => setThumbnail(undefined)}
                 />
                 <button
                   type="button"
