@@ -9,6 +9,7 @@ import { ImportSheet } from '../place/ImportSheet'
 import { RouteView } from './RouteView'
 import { enrichPlace, placeNeedsEnrich } from '../place/enrich'
 import { useToast } from '../../components/ui/Toast'
+import { backend } from '../../data'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
 
@@ -21,6 +22,7 @@ export function WishlistPage() {
   const [editing, setEditing] = useState<Place | null>(null)
   const [tab, setTab] = useState<'route' | 'wishlist'>('route')
   const [enriching, setEnriching] = useState<{ done: number; total: number } | null>(null)
+  const [deleting, setDeleting] = useState<{ done: number; total: number } | null>(null)
 
   const wishlist = places.filter((p) => p.status === 'wishlist')
   const needEnrich = wishlist.filter(placeNeedsEnrich)
@@ -55,6 +57,26 @@ export function WishlistPage() {
     }
     setEnriching(null)
     toast.show(`${updated}곳을 채웠어요.${miss ? ` (${miss}곳은 못 찾음)` : ''}`)
+  }
+
+  // 가고싶은 곳 전체 삭제 (일괄).
+  async function deleteAllWishlist() {
+    const targets = wishlist
+    if (targets.length === 0) return
+    if (!confirm(`가고싶은 곳 ${targets.length}곳을 모두 삭제할까요?\n되돌릴 수 없어요.`)) return
+    setDeleting({ done: 0, total: targets.length })
+    let done = 0
+    for (const p of targets) {
+      try {
+        await backend.deletePlace(p.id)
+      } catch {
+        /* 개별 실패는 건너뜀 */
+      }
+      done++
+      setDeleting({ done, total: targets.length })
+    }
+    setDeleting(null)
+    toast.show(`${done}곳을 삭제했어요.`)
   }
 
   return (
@@ -146,7 +168,19 @@ export function WishlistPage() {
         />
       ) : (
         <>
-          <p className="dl-mono mb-3 text-sm text-muted">위시리스트 {wishlist.length}곳</p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="dl-mono text-sm text-muted">위시리스트 {wishlist.length}곳</p>
+            {deleting ? (
+              <span className="dl-mono text-xs text-error">삭제 중 {deleting.done}/{deleting.total}…</span>
+            ) : (
+              <button
+                onClick={deleteAllWishlist}
+                className="dl-focus flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-error hover:bg-error-container/50"
+              >
+                <Icon name="delete" size={14} /> 전체 삭제
+              </button>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {wishlist.map((p, i) => (
               <PlaceCard
