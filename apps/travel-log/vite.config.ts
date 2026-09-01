@@ -31,7 +31,8 @@ export default defineConfig({
         background_color: '#FAF3EC',
         theme_color: '#984631',
         icons: [
-          { src: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
+          // 설치(홈 화면/앱) 아이콘 = 스케치 캐릭터. (파비콘=배낭은 브라우저 탭 전용)
+          { src: '/icon-maskable.svg', type: 'image/svg+xml', sizes: 'any' },
           { src: '/icon-192.png', type: 'image/png', sizes: '192x192', purpose: 'any maskable' },
           { src: '/icon-512.png', type: 'image/png', sizes: '512x512', purpose: 'any maskable' },
         ],

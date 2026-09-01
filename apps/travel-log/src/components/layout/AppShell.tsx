@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Header } from './Header'
 import { BottomNav } from './BottomNav'
+import { InstallPrompt } from './InstallPrompt'
 
 /** Page chrome shared by all authenticated, paired screens. */
 export function AppShell({ children }: { children: ReactNode }) {
@@ -9,6 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Header />
       <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-5 md:pb-12">{children}</main>
       <BottomNav />
+      <InstallPrompt />
     </div>
   )
 }

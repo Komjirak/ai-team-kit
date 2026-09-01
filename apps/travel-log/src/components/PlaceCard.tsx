@@ -32,8 +32,10 @@ export function PlaceCard({
   onOpen?: (p: Place) => void
 }) {
   const [menu, setMenu] = useState(false)
+  const [imgBroken, setImgBroken] = useState(false)
   const visited = place.status === 'visited'
   const color = washiCycle[index % washiCycle.length]
+  const showPhoto = place.thumbnail && !imgBroken
 
   return (
     <article className="dl-card overflow-visible p-3">
@@ -49,11 +51,14 @@ export function PlaceCard({
         role={onOpen ? 'button' : undefined}
         aria-label={onOpen ? `${place.name} 상세` : undefined}
       >
-        {place.thumbnail ? (
+        {showPhoto ? (
           <img
             src={place.thumbnail}
             alt=""
             loading="lazy"
+            // 구글 사진 CDN은 리퍼러가 붙으면 403 → no-referrer. 실패 시 플레이스홀더로.
+            referrerPolicy="no-referrer"
+            onError={() => setImgBroken(true)}
             className="aspect-[16/10] w-full object-cover"
           />
         ) : (

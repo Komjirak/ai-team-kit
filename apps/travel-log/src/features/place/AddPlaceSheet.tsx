@@ -207,6 +207,8 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
                           alt=""
                           className="h-10 w-10 shrink-0 rounded-lg object-cover"
                           loading="lazy"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => (e.currentTarget.style.display = 'none')}
                         />
                       )}
                       <span className="min-w-0 flex-1">
@@ -276,7 +278,7 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
             <label className="mb-1.5 block text-xs font-semibold text-muted">사진 (선택)</label>
             {thumbnail ? (
               <div className="relative w-fit">
-                <img src={thumbnail} alt="" className="h-28 w-40 rounded-2xl object-cover" />
+                <img src={thumbnail} alt="" className="h-28 w-40 rounded-2xl object-cover" referrerPolicy="no-referrer" />
                 <button
                   type="button"
                   className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-ink text-white"

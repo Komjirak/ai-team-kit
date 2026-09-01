@@ -163,6 +163,8 @@ export function RouteView() {
                     alt=""
                     className="h-20 w-20 shrink-0 rounded-xl object-cover"
                     loading="lazy"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
                   />
                 )}
               </div>
