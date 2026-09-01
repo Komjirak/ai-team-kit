@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTrip } from '../../trip/TripContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { PlaceCard, PlaceCardSkeleton } from '../../components/PlaceCard'
@@ -23,9 +24,21 @@ export function WishlistPage() {
   const [tab, setTab] = useState<'route' | 'wishlist'>('route')
   const [enriching, setEnriching] = useState<{ done: number; total: number } | null>(null)
   const [deleting, setDeleting] = useState<{ done: number; total: number } | null>(null)
+  const [placeFilter, setPlaceFilter] = useState<'wishlist' | 'visited'>('wishlist')
 
   const wishlist = places.filter((p) => p.status === 'wishlist')
-  const needEnrich = wishlist.filter(placeNeedsEnrich)
+  const visited = places.filter((p) => p.status === 'visited')
+  const shown = placeFilter === 'visited' ? visited : wishlist
+  const needEnrich = shown.filter(placeNeedsEnrich)
+
+  // 대시보드/홈의 "다녀온 곳" 통계에서 넘어오면 다녀온 곳 필터로 연다.
+  const [params] = useSearchParams()
+  useEffect(() => {
+    if (params.get('filter') === 'visited') {
+      setTab('wishlist')
+      setPlaceFilter('visited')
+    }
+  }, [params])
 
   function openAdd() {
     setEditing(null)
@@ -38,7 +51,7 @@ export function WishlistPage() {
 
   // 사진·위치가 빈 장소들을 이름으로 구글에서 찾아 일괄 보강.
   async function runEnrich() {
-    const targets = wishlist.filter(placeNeedsEnrich)
+    const targets = shown.filter(placeNeedsEnrich)
     if (targets.length === 0) return
     if (!confirm(`${targets.length}곳의 사진·위치를 구글에서 자동으로 채울까요?\n(구글 지도 API를 사용하며 잠시 걸려요.)`)) return
     setEnriching({ done: 0, total: targets.length })
@@ -59,11 +72,12 @@ export function WishlistPage() {
     toast.show(`${updated}곳을 채웠어요.${miss ? ` (${miss}곳은 못 찾음)` : ''}`)
   }
 
-  // 가고싶은 곳 전체 삭제 (일괄).
+  // 현재 보고 있는 목록(가고싶은 곳/다녀온 곳) 전체 삭제 (일괄).
   async function deleteAllWishlist() {
-    const targets = wishlist
+    const targets = shown
     if (targets.length === 0) return
-    if (!confirm(`가고싶은 곳 ${targets.length}곳을 모두 삭제할까요?\n되돌릴 수 없어요.`)) return
+    const label = placeFilter === 'visited' ? '다녀온 곳' : '가고싶은 곳'
+    if (!confirm(`${label} ${targets.length}곳을 모두 삭제할까요?\n되돌릴 수 없어요.`)) return
     setDeleting({ done: 0, total: targets.length })
     let done = 0
     for (const p of targets) {
@@ -155,7 +169,7 @@ export function WishlistPage() {
             <PlaceCardSkeleton key={i} />
           ))}
         </div>
-      ) : wishlist.length === 0 ? (
+      ) : places.length === 0 ? (
         <EmptyState
           icon="location_on"
           title="아직 담은 곳이 없어요."
@@ -168,35 +182,64 @@ export function WishlistPage() {
         />
       ) : (
         <>
-          <div className="mb-3 flex items-center justify-between">
-            <p className="dl-mono text-sm text-muted">위시리스트 {wishlist.length}곳</p>
-            {deleting ? (
-              <span className="dl-mono text-xs text-error">삭제 중 {deleting.done}/{deleting.total}…</span>
-            ) : (
+          {/* 상태 필터: 가고싶은 곳 / 다녀온 곳 */}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="flex gap-2">
               <button
-                onClick={deleteAllWishlist}
-                className="dl-focus flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-error hover:bg-error-container/50"
+                onClick={() => setPlaceFilter('wishlist')}
+                className={`dl-chip ${placeFilter === 'wishlist' ? 'dl-chip-on' : 'dl-chip-off border border-surface-variant'}`}
               >
-                <Icon name="delete" size={14} /> 전체 삭제
+                <Icon name="favorite" size={14} /> 가고싶은 곳 {wishlist.length}
               </button>
+              <button
+                onClick={() => setPlaceFilter('visited')}
+                className={`dl-chip ${placeFilter === 'visited' ? 'dl-chip-on' : 'dl-chip-off border border-surface-variant'}`}
+              >
+                <Icon name="check" size={14} /> 다녀온 곳 {visited.length}
+              </button>
+            </div>
+            {deleting ? (
+              <span className="dl-mono shrink-0 text-xs text-error">삭제 중 {deleting.done}/{deleting.total}…</span>
+            ) : (
+              shown.length > 0 && (
+                <button
+                  onClick={deleteAllWishlist}
+                  className="dl-focus flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-error hover:bg-error-container/50"
+                >
+                  <Icon name="delete" size={14} /> 전체 삭제
+                </button>
+              )
             )}
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {wishlist.map((p, i) => (
-              <PlaceCard
-                key={p.id}
-                place={p}
-                index={i}
-                onVisit={markVisited}
-                onEdit={openEdit}
-                onDelete={remove}
-                onOpen={openEdit}
-              />
-            ))}
-          </div>
-          <p className="mt-4 text-center text-xs text-muted">
-            다녀온 곳으로 넘긴 장소는 “여행”에서 다시 볼 수 있어요.
-          </p>
+
+          {shown.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-surface-variant py-10 text-center text-sm text-muted">
+              {placeFilter === 'visited'
+                ? '아직 다녀온 곳이 없어요. 장소 카드의 “다녀왔어요!”를 누르면 여기로 넘어와요.'
+                : '가고싶은 곳이 비어 있어요.'}
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {shown.map((p, i) => (
+                  <PlaceCard
+                    key={p.id}
+                    place={p}
+                    index={i}
+                    onVisit={placeFilter === 'wishlist' ? markVisited : undefined}
+                    onEdit={openEdit}
+                    onDelete={remove}
+                    onOpen={openEdit}
+                  />
+                ))}
+              </div>
+              {placeFilter === 'wishlist' && (
+                <p className="mt-4 text-center text-xs text-muted">
+                  “다녀왔어요!”로 넘긴 장소는 위 <b>다녀온 곳</b> 탭에서 다시 볼 수 있어요.
+                </p>
+              )}
+            </>
+          )}
         </>
       )}
 

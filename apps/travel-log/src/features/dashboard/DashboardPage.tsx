@@ -116,7 +116,7 @@ export function DashboardPage() {
 
       {/* stat tiles */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile icon="restaurant" color="lavender" value={stats.visitedCount} label="다녀온 곳" onClick={() => nav('/wishlist')} />
+        <StatTile icon="restaurant" color="lavender" value={stats.visitedCount} label="다녀온 곳" onClick={() => nav('/wishlist?filter=visited')} />
         <StatTile icon="location_on" color="mint" value={stats.wishlistCount} label="가고싶은 곳" onClick={() => nav('/wishlist')} />
         <StatTile icon="photo_camera" color="primary" value={stats.memoryCount} label="남긴 추억" onClick={() => nav('/memories')} />
         <StatTile icon="photo_library" color="yellow" value={stats.photoCount} label="사진" onClick={() => nav('/memories')} />

@@ -77,7 +77,7 @@ export function HomePage() {
               color="lavender"
               value={stats.visitedCount}
               label="다녀온 곳"
-              onClick={() => nav('/dashboard')}
+              onClick={() => nav('/wishlist?filter=visited')}
             />
             <StatTile
               icon="photo_camera"
