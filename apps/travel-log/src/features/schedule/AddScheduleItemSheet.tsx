@@ -7,8 +7,10 @@ import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { tripDates, fmtDayLabel } from '../../data/schedule'
-import { PLACE_CATEGORIES, type PlaceCategory, type ScheduleItem } from '../../data/types'
+import { PLACE_CATEGORIES, type PlaceCategory, type FlightInfo, type ScheduleItem } from '../../data/types'
 import { searchPlaces, type PlaceResult } from '../../maps/placeSearch'
+import { lookupFlight, flightTime } from '../../lib/flight'
+import { FlightRoute } from './FlightRoute'
 
 interface Props {
   open: boolean
@@ -25,6 +27,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
 
   const days = tripDates(activeTrip?.startDate, activeTrip?.endDate)
 
+  const [mode, setMode] = useState<'normal' | 'flight'>('normal')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [title, setTitle] = useState('')
@@ -32,6 +35,12 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
   const [placeId, setPlaceId] = useState<string | undefined>()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // 항공편
+  const [flightNo, setFlightNo] = useState('')
+  const [flightInfo, setFlightInfo] = useState<FlightInfo | null>(null)
+  const [flightLoading, setFlightLoading] = useState(false)
+  const [flightErr, setFlightErr] = useState<string | null>(null)
 
   // 장소 검색
   const [showPlacePicker, setShowPlacePicker] = useState(false)
@@ -43,6 +52,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
 
   useEffect(() => {
     if (!open) return
+    setMode(editing?.flight ? 'flight' : 'normal')
     setDate(editing?.date ?? defaultDate ?? days[0] ?? '')
     setTime(editing?.time ?? '')
     setTitle(editing?.title ?? '')
@@ -52,6 +62,10 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
     setShowPlacePicker(false)
     setKeyword('')
     setResults([])
+    setFlightNo(editing?.flight?.number ?? '')
+    setFlightInfo(editing?.flight ?? null)
+    setFlightErr(null)
+    setFlightLoading(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing, defaultDate])
 
@@ -104,22 +118,68 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
     }
   }
 
+  // 날짜+편명으로 항공편 조회 → 미리보기
+  async function runFlightLookup() {
+    if (!date) {
+      setFlightErr('flight.need_date')
+      return
+    }
+    setFlightLoading(true)
+    setFlightErr(null)
+    setFlightInfo(null)
+    try {
+      const info = await lookupFlight(flightNo, date)
+      setFlightInfo(info)
+    } catch (e) {
+      setFlightErr(e instanceof Error ? e.message : 'flight.lookup_failed')
+    } finally {
+      setFlightLoading(false)
+    }
+  }
+
+  const isFlight = mode === 'flight'
+  // 항공편 모드는 제목 대신 조회된 편명으로 저장 → 저장 가능 여부가 다르다.
+  const canSave = isFlight ? !!flightInfo && !!date : !!title.trim() && !!date
+
   async function save() {
-    if (!user || !activeTrip || !date || !title.trim()) {
+    if (!user || !activeTrip || !date) {
       setError('schedule.save_failed')
       return
     }
+    // 공통 필드 구성 (일반 vs 항공편)
+    let payload: Partial<ScheduleItem>
+    if (isFlight) {
+      if (!flightInfo) {
+        setError('schedule.save_failed')
+        return
+      }
+      const f = flightInfo
+      payload = {
+        time: flightTime(f.dep.at) || undefined,
+        title: `${f.number} · ${f.dep.iata}→${f.arr.iata}`,
+        memo: memo.trim() || undefined,
+        flight: f,
+        placeId: undefined,
+      }
+    } else {
+      if (!title.trim()) {
+        setError('schedule.save_failed')
+        return
+      }
+      payload = {
+        time: time || undefined,
+        title: title.trim(),
+        memo: memo.trim() || undefined,
+        placeId,
+        flight: undefined,
+      }
+    }
+
     setSaving(true)
     setError(null)
     try {
       if (editing) {
-        await backend.updateScheduleItem(editing.id, {
-          date,
-          time: time || undefined,
-          title: title.trim(),
-          memo: memo.trim() || undefined,
-          placeId,
-        })
+        await backend.updateScheduleItem(editing.id, { date, ...payload })
         toast.show('일정을 수정했어요.')
       } else {
         const sameDay = schedule.filter((s) => s.date === date)
@@ -128,12 +188,10 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
           tripId: activeTrip.id,
           date,
           order,
-          time: time || undefined,
-          title: title.trim(),
-          memo: memo.trim() || undefined,
-          placeId,
           createdBy: user.id,
-        })
+          title: '',
+          ...payload,
+        } as Omit<ScheduleItem, 'id' | 'createdAt'>)
         toast.show('일정을 추가했어요.')
       }
       onClose()
@@ -158,7 +216,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
             className="flex-1"
             onClick={save}
             loading={saving}
-            disabled={!title.trim() || !date}
+            disabled={!canSave}
             icon={editing ? 'save' : 'add'}
           >
             {editing ? '저장' : '추가'}
@@ -167,6 +225,30 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
       }
     >
       <div className="space-y-4">
+        {/* 모드 전환: 일반 일정 / 항공편 (수정 중에는 잠금) */}
+        {!editing && (
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1">
+            <button
+              type="button"
+              onClick={() => setMode('normal')}
+              className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-colors ${
+                mode === 'normal' ? 'bg-primary text-on-primary shadow-glow-primary' : 'text-muted'
+              }`}
+            >
+              <Icon name="event" size={16} /> 일반 일정
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('flight')}
+              className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-colors ${
+                mode === 'flight' ? 'bg-primary text-on-primary shadow-glow-primary' : 'text-muted'
+              }`}
+            >
+              <Icon name="flight" size={16} className="rotate-90" /> 항공편
+            </button>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <div className="flex-1">
             <label className="mb-1 block text-xs font-semibold text-muted">날짜 *</label>
@@ -191,29 +273,83 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
               />
             )}
           </div>
-          <div className="w-28">
-            <label className="mb-1 block text-xs font-semibold text-muted">시간 (선택)</label>
+          {!isFlight && (
+            <div className="w-28">
+              <label className="mb-1 block text-xs font-semibold text-muted">시간 (선택)</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full rounded-2xl bg-surface-container px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* 항공편 조회 */}
+        {isFlight && (
+          <div className="space-y-2">
+            <label className="mb-1 block text-xs font-semibold text-muted">편명 *</label>
+            <div className="flex gap-2">
+              <input
+                value={flightNo}
+                onChange={(e) => {
+                  setFlightNo(e.target.value)
+                  setFlightInfo(null)
+                  setFlightErr(null)
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && runFlightLookup()}
+                placeholder="예) KE1275, OZ8901, 7C101"
+                autoCapitalize="characters"
+                className="w-full rounded-2xl bg-surface-container px-4 py-3 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <Button
+                variant="soft"
+                onClick={runFlightLookup}
+                loading={flightLoading}
+                disabled={!flightNo.trim()}
+                icon="search"
+              >
+                조회
+              </Button>
+            </div>
+            {flightErr && (
+              <p className="text-sm text-error">
+                {flightErr === 'flight.bad_number'
+                  ? '편명 형식을 확인해 주세요. (예: KE1275)'
+                  : flightErr === 'flight.need_date'
+                    ? '먼저 날짜를 선택해 주세요.'
+                    : flightErr === 'flight.not_found'
+                      ? '해당 날짜에 그 편명을 찾지 못했어요. 날짜·편명을 확인해 주세요.'
+                      : '조회에 실패했어요. 잠시 후 다시 시도해 주세요.'}
+              </p>
+            )}
+            {flightInfo && (
+              <div className="rounded-2xl border border-surface-variant p-2">
+                <FlightRoute flight={flightInfo} />
+              </div>
+            )}
+            <p className="dl-mono text-[11px] text-muted-soft">
+              날짜 + 편명으로 출발·도착 공항과 시각을 불러와 저장해요.
+            </p>
+          </div>
+        )}
+
+        {!isFlight && (
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-muted">제목 *</label>
             <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-2xl bg-surface-container px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+              autoFocus
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="예) 한라산 등반"
+              className="w-full rounded-2xl bg-surface-container px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-muted">제목 *</label>
-          <input
-            autoFocus
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="예) 한라산 등반"
-            className="w-full rounded-2xl bg-surface-container px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
+        )}
 
         {/* 장소 연결 */}
+        {!isFlight && (
         <div>
           <label className="mb-1.5 block text-xs font-semibold text-muted">장소 연결 (선택)</label>
           {linkedPlace ? (
@@ -319,6 +455,7 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
             </div>
           )}
         </div>
+        )}
 
         <div>
           <label className="mb-1 block text-xs font-semibold text-muted">메모 (선택)</label>

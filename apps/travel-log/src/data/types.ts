@@ -86,6 +86,27 @@ export interface SettlementState {
   settledKeys: string[]
 }
 
+// 신규 — 항공편 구간(출발/도착 한쪽). 날짜+편명 조회로 채운다.
+export interface FlightLeg {
+  iata: string        // 공항 IATA 코드 (예: ICN)
+  airport?: string    // 공항 이름 (예: 인천국제공항)
+  city?: string       // 도시명 (예: 서울)
+  at?: string         // 현지 예정시각 ISO (예: 2026-09-18T09:05:00)
+  terminal?: string   // 터미널 (예: 2)
+  lat?: number        // 지도 경로용 좌표 (airports 사전에서 보강)
+  lng?: number
+}
+
+// 신규 — 항공편 정보. ScheduleItem에 얹혀 "✈️ 항공편" 카드로 표시된다.
+// 날짜+편명(예: KE001 / 2026-09-18)을 서버(Amadeus)로 조회해 출발/도착/경로를 저장.
+export interface FlightInfo {
+  number: string      // 정규화된 편명 (예: KE001)
+  carrier?: string    // 항공사 IATA (예: KE)
+  dep: FlightLeg      // 출발
+  arr: FlightLeg      // 도착
+  source?: 'amadeus' | 'demo' | 'manual' // 데이터 출처
+}
+
 // 신규(M2) — 일자별 일정 항목. 인앱이 source of truth (PRD §5, §6-3).
 // 구글캘린더 미러링(googleEventId)·그리드 뷰는 M5 이후. 여기선 리스트만.
 export interface ScheduleItem {
@@ -97,6 +118,7 @@ export interface ScheduleItem {
   title: string
   placeId?: string   // 장소 연결 (③ 모듈)
   memo?: string
+  flight?: FlightInfo // 항공편 일정일 때 (출발/도착/경로)
   googleEventId?: string // 구글 캘린더 미러링 시 이벤트 id (중복 방지, M5 Should)
   createdBy: string
   createdAt: number

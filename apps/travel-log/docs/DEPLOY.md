@@ -85,6 +85,15 @@ vercel env add VITE_FIREBASE_API_KEY     # ... 위 8개 각각 (또는 대시보
 vercel --prod
 ```
 
+### B-2. (선택) 항공편 조회 — Amadeus + Vercel 서버리스
+날짜+편명으로 출발/도착/경로를 불러오는 기능. **키는 서버(Vercel 함수)에만** 둔다.
+1. https://developers.amadeus.com → 앱 생성 → **API Key / Secret** 발급(무료 Test 티어).
+2. Vercel → Project → **Settings → Environment Variables** 에 추가(‼️ `VITE_` 접두 없이):
+   `AMADEUS_CLIENT_ID` · `AMADEUS_CLIENT_SECRET` (운영 데이터 전환 시에만 `AMADEUS_HOSTNAME=api.amadeus.com`).
+3. `api/flight.ts` 서버리스 함수가 자동 배포된다(Root Directory=apps/travel-log 기준 `api/`).
+- 키가 없으면 항공편 조회는 **데모 데이터로 폴백**(앱은 정상 동작, "데모" 배지 표시).
+- Test 티어는 커버리지가 제한적이라 일부 편명은 안 나올 수 있다(운영 티어로 전환 시 해소).
+
 ### C. 배포 후 필수 허용목록 (안 하면 로그인·지도 막힘)
 - **Firebase 콘솔 → Authentication → 설정 → 승인된 도메인** 에 `*.vercel.app` 도메인
   (예: `ganjik-log.vercel.app`) 추가 → 없으면 Google 로그인 팝업 차단.

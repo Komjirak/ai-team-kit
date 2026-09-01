@@ -9,6 +9,7 @@ import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { tripDates, sortDayItems, fmtDayLabel } from '../../data/schedule'
 import { AddScheduleItemSheet } from './AddScheduleItemSheet'
+import { FlightRoute } from './FlightRoute'
 import type { Place, ScheduleItem } from '../../data/types'
 
 export function SchedulePage() {
@@ -210,7 +211,9 @@ function ScheduleRow({
     <li className="dl-card relative flex items-start gap-3 p-3">
       <Washi color="mint" className="left-6 -top-2" rotate={-4} />
       <div className="dl-mono mt-0.5 w-12 shrink-0 text-center">
-        {item.time ? (
+        {item.flight ? (
+          <Icon name="flight" size={18} className="rotate-90 text-primary" />
+        ) : item.time ? (
           <span className="text-sm font-bold text-primary">{item.time}</span>
         ) : (
           <span className="text-xs text-muted-soft">종일</span>
@@ -219,6 +222,7 @@ function ScheduleRow({
       <div className="min-w-0 flex-1">
         <h3 className="font-display text-base font-bold leading-snug text-ink">{item.title}</h3>
         {showDate && <p className="dl-mono text-xs text-muted">{item.date.replace(/-/g, '.')}</p>}
+        {item.flight && <div className="mt-2"><FlightRoute flight={item.flight} /></div>}
         {place && (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted">
             <Icon name="location_on" size={14} className="text-primary" />

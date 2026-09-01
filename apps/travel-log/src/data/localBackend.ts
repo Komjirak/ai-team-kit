@@ -133,11 +133,29 @@ function seed() {
   ]
   // 3일치 일정 (장소 연결 포함) — 바로 보이도록 시드
   const schedule: ScheduleItem[] = [
-    { id: 's1', tripId: trip.id, date: '2026-09-18', order: 0, time: '15:00', title: '제주공항 도착 · 렌터카 픽업', createdBy: me.id, createdAt: now - 6 * day },
-    { id: 's2', tripId: trip.id, date: '2026-09-18', order: 1, time: '19:00', title: '첫날 저녁 회식', placeId: 'p3', memo: '근고기 예약 완료', createdBy: me.id, createdAt: now - 6 * day },
+    {
+      id: 's0', tripId: trip.id, date: '2026-09-18', order: 0, time: '13:20', title: 'KE1275 · ICN→CJU',
+      flight: {
+        number: 'KE1275', carrier: 'KE', source: 'demo',
+        dep: { iata: 'ICN', airport: '인천국제공항', city: '서울', at: '2026-09-18T13:20:00', terminal: '2', lat: 37.4602, lng: 126.4407 },
+        arr: { iata: 'CJU', airport: '제주국제공항', city: '제주', at: '2026-09-18T14:35:00', lat: 33.5113, lng: 126.493 },
+      },
+      createdBy: me.id, createdAt: now - 6 * day,
+    },
+    { id: 's1', tripId: trip.id, date: '2026-09-18', order: 1, time: '15:00', title: '제주공항 도착 · 렌터카 픽업', createdBy: me.id, createdAt: now - 6 * day },
+    { id: 's2', tripId: trip.id, date: '2026-09-18', order: 2, time: '19:00', title: '첫날 저녁 회식', placeId: 'p3', memo: '근고기 예약 완료', createdBy: me.id, createdAt: now - 6 * day },
     { id: 's3', tripId: trip.id, date: '2026-09-19', order: 0, time: '09:00', title: '바다 보며 모닝커피', placeId: 'p1', createdBy: jihoon.id, createdAt: now - 5 * day },
     { id: 's4', tripId: trip.id, date: '2026-09-19', order: 1, time: '13:00', title: '한라산 등반', placeId: 'p2', memo: '김밥·물 챙기기, 일찍 하산', createdBy: minji.id, createdAt: now - 5 * day },
     { id: 's5', tripId: trip.id, date: '2026-09-20', order: 0, title: '자유시간 · 각자 카페 투어', createdBy: suah.id, createdAt: now - 4 * day },
+    {
+      id: 's6', tripId: trip.id, date: '2026-09-20', order: 1, time: '18:40', title: 'OZ8952 · CJU→GMP',
+      flight: {
+        number: 'OZ8952', carrier: 'OZ', source: 'demo',
+        dep: { iata: 'CJU', airport: '제주국제공항', city: '제주', at: '2026-09-20T18:40:00', lat: 33.5113, lng: 126.493 },
+        arr: { iata: 'GMP', airport: '김포국제공항', city: '서울', at: '2026-09-20T19:50:00', lat: 37.5583, lng: 126.7906 },
+      },
+      createdBy: suah.id, createdAt: now - 4 * day,
+    },
   ]
 
   // 제주여행 비용 8건 (결제자·참여자 섞어서) — 정산 요약이 바로 보이도록 시드
