@@ -1,5 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties, type HTMLAttributes } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useTrip } from '../../trip/TripContext'
 import { PageTitle } from '../../components/layout/AppShell'
 import { Button, EmptyState, Skeleton } from '../../components/ui/basics'
@@ -33,6 +50,12 @@ export function SchedulePage() {
     [schedule, days],
   )
 
+  const sensors = useSensors(
+    // 6px 이상 움직여야 드래그 시작 → 카드 안 버튼 탭/스크롤과 충돌 방지
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
   function openAdd(date?: string) {
     setEditing(null)
     setAddDate(date)
@@ -44,16 +67,23 @@ export function SchedulePage() {
     setSheetOpen(true)
   }
 
-  async function move(item: ScheduleItem, dayItems: ScheduleItem[], dir: -1 | 1) {
-    const i = dayItems.findIndex((s) => s.id === item.id)
-    const j = i + dir
-    if (i < 0 || j < 0 || j >= dayItems.length) return
-    const other = dayItems[j]
-    // order 값을 맞바꿔 순서 이동
-    await Promise.all([
-      backend.updateScheduleItem(item.id, { order: other.order }),
-      backend.updateScheduleItem(other.id, { order: item.order }),
-    ])
+  // 같은 날 안에서 드래그로 순서 변경 → order를 0..n-1로 재부여(변경분만 저장)
+  async function onDragEnd(e: DragEndEvent, dayItems: ScheduleItem[]) {
+    const { active, over } = e
+    if (!over || active.id === over.id) return
+    const oldIndex = dayItems.findIndex((s) => s.id === active.id)
+    const newIndex = dayItems.findIndex((s) => s.id === over.id)
+    if (oldIndex < 0 || newIndex < 0) return
+    const reordered = arrayMove(dayItems, oldIndex, newIndex)
+    try {
+      await Promise.all(
+        reordered
+          .map((it, idx) => (it.order !== idx ? backend.updateScheduleItem(it.id, { order: idx }) : null))
+          .filter(Boolean) as Promise<void>[],
+      )
+    } catch {
+      toast.show('순서를 저장하지 못했어요.')
+    }
   }
 
   async function del(item: ScheduleItem) {
@@ -121,21 +151,25 @@ export function SchedulePage() {
                     <Icon name="add" size={18} /> 이 날의 첫 일정을 담아요
                   </button>
                 ) : (
-                  <ol className="space-y-2">
-                    {items.map((item, ii) => (
-                      <ScheduleRow
-                        key={item.id}
-                        item={item}
-                        place={item.placeId ? placeById.get(item.placeId) : undefined}
-                        isFirst={ii === 0}
-                        isLast={ii === items.length - 1}
-                        onUp={() => move(item, items, -1)}
-                        onDown={() => move(item, items, 1)}
-                        onEdit={() => openEdit(item)}
-                        onDelete={() => del(item)}
-                      />
-                    ))}
-                  </ol>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(e) => onDragEnd(e, items)}
+                  >
+                    <SortableContext items={items.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                      <ol className="space-y-2">
+                        {items.map((item) => (
+                          <SortableScheduleRow
+                            key={item.id}
+                            item={item}
+                            place={item.placeId ? placeById.get(item.placeId) : undefined}
+                            onEdit={() => openEdit(item)}
+                            onDelete={() => del(item)}
+                          />
+                        ))}
+                      </ol>
+                    </SortableContext>
+                  </DndContext>
                 )}
               </section>
             )
@@ -153,8 +187,6 @@ export function SchedulePage() {
                     key={item.id}
                     item={item}
                     place={item.placeId ? placeById.get(item.placeId) : undefined}
-                    isFirst
-                    isLast
                     showDate
                     onEdit={() => openEdit(item)}
                     onDelete={() => del(item)}
@@ -186,30 +218,64 @@ export function SchedulePage() {
   )
 }
 
-function ScheduleRow({
-  item,
-  place,
-  isFirst,
-  isLast,
-  showDate,
-  onUp,
-  onDown,
-  onEdit,
-  onDelete,
-}: {
+// 드래그로 순서를 바꿀 수 있는 일정 행 (같은 날 안에서).
+function SortableScheduleRow(props: {
   item: ScheduleItem
   place?: Place
-  isFirst: boolean
-  isLast: boolean
-  showDate?: boolean
-  onUp?: () => void
-  onDown?: () => void
   onEdit: () => void
   onDelete: () => void
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: props.item.id,
+  })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 30 : undefined,
+  }
   return (
-    <li className="dl-card relative flex items-start gap-3 p-3">
-      <Washi color="mint" className="left-6 -top-2" rotate={-4} />
+    <ScheduleRow
+      {...props}
+      dragRef={setNodeRef}
+      dragStyle={style}
+      isDragging={isDragging}
+      handleProps={{ ...attributes, ...listeners }}
+    />
+  )
+}
+
+function ScheduleRow({
+  item,
+  place,
+  showDate,
+  onEdit,
+  onDelete,
+  dragRef,
+  dragStyle,
+  isDragging,
+  handleProps,
+}: {
+  item: ScheduleItem
+  place?: Place
+  showDate?: boolean
+  onEdit: () => void
+  onDelete: () => void
+  dragRef?: (el: HTMLElement | null) => void
+  dragStyle?: CSSProperties
+  isDragging?: boolean
+  handleProps?: HTMLAttributes<HTMLButtonElement>
+}) {
+  return (
+    <li
+      ref={dragRef}
+      style={dragStyle}
+      className={`dl-card relative flex items-start gap-3 px-3 pb-3 pt-6 ${
+        isDragging ? 'shadow-glow-primary ring-2 ring-primary/30' : ''
+      }`}
+    >
+      {/* 워시테이프 — 상단 여백 띠(pt-6) 위에만 얹혀 글자를 가리지 않음 */}
+      <Washi color="mint" className="-top-2 left-5" rotate={-4} />
+
       <div className="dl-mono mt-0.5 w-12 shrink-0 text-center">
         {item.flight ? (
           <Icon name="flight" size={18} className="rotate-90 text-primary" />
@@ -222,7 +288,11 @@ function ScheduleRow({
       <div className="min-w-0 flex-1">
         <h3 className="font-display text-base font-bold leading-snug text-ink">{item.title}</h3>
         {showDate && <p className="dl-mono text-xs text-muted">{item.date.replace(/-/g, '.')}</p>}
-        {item.flight && <div className="mt-2"><FlightRoute flight={item.flight} /></div>}
+        {item.flight && (
+          <div className="mt-2">
+            <FlightRoute flight={item.flight} />
+          </div>
+        )}
         {place && (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted">
             <Icon name="location_on" size={14} className="text-primary" />
@@ -232,24 +302,14 @@ function ScheduleRow({
         {item.memo && <p className="mt-1 line-clamp-2 text-sm text-muted">{item.memo}</p>}
       </div>
       <div className="flex shrink-0 items-center gap-0.5">
-        {onUp && (
+        {handleProps && (
           <button
-            className="dl-focus grid h-7 w-7 place-items-center rounded-full text-muted hover:bg-surface-container disabled:opacity-30"
-            onClick={onUp}
-            disabled={isFirst}
-            aria-label="위로"
+            type="button"
+            className="dl-focus grid h-7 w-7 cursor-grab touch-none place-items-center rounded-full text-muted-soft hover:bg-surface-container hover:text-muted active:cursor-grabbing"
+            aria-label="드래그해서 순서 변경"
+            {...handleProps}
           >
-            <Icon name="keyboard_arrow_up" size={18} />
-          </button>
-        )}
-        {onDown && (
-          <button
-            className="dl-focus grid h-7 w-7 place-items-center rounded-full text-muted hover:bg-surface-container disabled:opacity-30"
-            onClick={onDown}
-            disabled={isLast}
-            aria-label="아래로"
-          >
-            <Icon name="keyboard_arrow_down" size={18} />
+            <Icon name="drag_indicator" size={18} />
           </button>
         )}
         <button
