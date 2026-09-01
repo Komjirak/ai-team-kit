@@ -123,8 +123,18 @@ export function Header() {
 }
 
 export function Avatar({ user }: { user: { nickname?: string; photoURL?: string } | null }) {
-  if (user?.photoURL) {
-    return <img src={user.photoURL} alt="" className="h-8 w-8 rounded-full object-cover" />
+  const [broken, setBroken] = useState(false)
+  if (user?.photoURL && !broken) {
+    return (
+      <img
+        src={user.photoURL}
+        alt=""
+        // 구글 프로필 CDN(lh3.googleusercontent.com)은 리퍼러가 붙으면 403 → 엑박.
+        referrerPolicy="no-referrer"
+        onError={() => setBroken(true)} // 실패하면 이니셜 아바타로 대체
+        className="h-8 w-8 rounded-full object-cover"
+      />
+    )
   }
   return (
     <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-container font-display text-sm font-bold text-on-primary">
