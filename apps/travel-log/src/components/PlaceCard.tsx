@@ -4,6 +4,7 @@ import { Icon } from './ui/Icon'
 import { CategoryBadge } from './ui/basics'
 import { Washi, Pin } from './ui/deco'
 import { PlacePhoto } from './PlacePhoto'
+import { cleanPlaceName } from '../data/placeText'
 
 const washiCycle = ['yellow', 'lavender', 'mint', 'blue'] as const
 
@@ -82,7 +83,7 @@ export function PlaceCard({
             className={`font-display text-lg font-bold leading-tight text-ink ${onOpen ? 'cursor-pointer' : ''}`}
             onClick={onOpen ? () => onOpen(place) : undefined}
           >
-            {place.name}
+            {cleanPlaceName(place.name) || place.name}
           </h3>
           {(onEdit || onDelete) && (
             <div className="relative">

@@ -1,6 +1,8 @@
 // 가져오기 파서 — 구글 Takeout(GeoJSON/CSV) · 일반 CSV · 붙여넣기 텍스트를
 // 공통 형태(ImportItem)로 정규화한다. 좌표가 없으면 이후 지도(Google)로 보정한다.
 
+import { cleanPlaceName, isValidPlaceName } from '../../data/placeText'
+
 export interface ImportItem {
   name: string
   address?: string
@@ -79,22 +81,66 @@ export async function resolveMapLink(url: string): Promise<ImportItem[]> {
   throw new Error(data.reason || 'unresolved')
 }
 
-/** 입력(파일 내용 or 붙여넣기 텍스트)을 ImportItem 목록으로 파싱. */
+/** 입력(파일 내용 or 붙여넣기 텍스트)을 ImportItem 목록으로 파싱 + 정합성 검증. */
 export function parseImport(text: string): ImportItem[] {
   const trimmed = text.trim()
   if (!trimmed) return []
 
+  let raw: ImportItem[]
   // 1) GeoJSON (구글 Takeout '저장된 장소')
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     try {
-      return parseGeoJson(JSON.parse(trimmed))
+      raw = parseGeoJson(JSON.parse(trimmed))
     } catch {
-      /* JSON 아님 → 아래로 */
+      raw = parseDelimited(trimmed) // JSON 아님 → CSV로
+    }
+  } else {
+    // 2) CSV / 붙여넣기 텍스트 (줄 단위)
+    raw = parseDelimited(trimmed)
+  }
+  return sanitizeItems(raw)
+}
+
+/** 파싱과 별개로, 파싱 원본 대비 몇 건이 걸러졌는지 알고 싶을 때. */
+export function parseImportWithSkipped(text: string): { items: ImportItem[]; skipped: number } {
+  const items = parseImport(text)
+  const rawCount = countRaw(text)
+  return { items, skipped: Math.max(0, rawCount - items.length) }
+}
+
+function countRaw(text: string): number {
+  const t = text.trim()
+  if (!t) return 0
+  if (t.startsWith('{') || t.startsWith('[')) {
+    try {
+      const j = JSON.parse(t)
+      const f = Array.isArray(j) ? j : j.features ?? []
+      return Array.isArray(f) ? f.length : 0
+    } catch {
+      /* CSV로 폴백 */
     }
   }
+  // 구분자 입력: 데이터 행 수(헤더 제외)를 원본 건수로 센다.
+  const lines = t.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+  if (lines.length === 0) return 0
+  const header = splitCsvLine(lines[0]).map((h) => h.toLowerCase())
+  const hasHeader =
+    header.some((h) => ['title', 'name', '이름', '장소', '장소명'].includes(h)) ||
+    header.some((h) => ['address', '주소', 'url'].includes(h))
+  return hasHeader ? lines.length - 1 : lines.length
+}
 
-  // 2) CSV / 붙여넣기 텍스트 (줄 단위)
-  return parseDelimited(trimmed)
+// 이름 정리(URL 제거) + 정합성 검증으로 이상 항목을 제외한다.
+function sanitizeItems(items: ImportItem[]): ImportItem[] {
+  const out: ImportItem[] = []
+  for (const it of items) {
+    const name = cleanPlaceName(it.name)
+    if (!isValidPlaceName(name)) continue // 빈값·URL·비정상 길이는 제외
+    let address = it.address
+    if (address && isMapLink(address)) address = undefined
+    out.push({ ...it, name, address })
+  }
+  return out
 }
 
 function parseGeoJson(json: any): ImportItem[] {

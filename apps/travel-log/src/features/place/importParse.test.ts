@@ -1,5 +1,30 @@
 import { describe, it, expect } from 'vitest'
-import { parseMapsUrl, extractMapLinks, isShortMapLink, isMapLink, parseImport } from './importParse'
+import {
+  parseMapsUrl,
+  extractMapLinks,
+  isShortMapLink,
+  isMapLink,
+  parseImport,
+  parseImportWithSkipped,
+} from './importParse'
+
+describe('parseImport — 정합성 검증(이상 데이터 제외/정리)', () => {
+  it('이름에 URL이 붙은 항목은 이름만 남긴다', () => {
+    const items = parseImport('"시부야 좋은 곳,https://www.google.com/maps/place/x"')
+    expect(items).toHaveLength(1)
+    expect(items[0].name).toBe('시부야 좋은 곳')
+  })
+  it('이름이 URL뿐인 항목은 제외', () => {
+    const items = parseImport('"https://www.google.com/maps/place/x"')
+    expect(items).toHaveLength(0)
+  })
+  it('제외된 건수를 셀 수 있다', () => {
+    const csv = ['정상 장소', '"https://maps.google.com/x"', '또 정상'].join('\n')
+    const { items, skipped } = parseImportWithSkipped(csv)
+    expect(items.map((i) => i.name)).toEqual(['정상 장소', '또 정상'])
+    expect(skipped).toBe(1)
+  })
+})
 
 describe('parseImport — GeoJSON(Saved Places.json)은 좌표를 파일에서 그대로', () => {
   it('geometry 좌표 + location 이름/주소', () => {

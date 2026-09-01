@@ -9,7 +9,7 @@ import { useToast } from '../../components/ui/Toast'
 import { PLACE_CATEGORIES, type PlaceCategory } from '../../data/types'
 import { searchPlaces } from '../../maps/placeSearch'
 import {
-  parseImport,
+  parseImportWithSkipped,
   extractMapLinks,
   isShortMapLink,
   parseMapsUrl,
@@ -90,7 +90,9 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
     const f = files?.[0]
     if (!f) return
     const text = await f.text()
-    begin(parseImport(text))
+    const { items, skipped } = parseImportWithSkipped(text)
+    if (skipped > 0) toast.show(`형식이 이상한 ${skipped}건은 제외했어요.`)
+    begin(items)
   }
 
   function onPaste() {
@@ -99,7 +101,9 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
       importLinks(links)
       return
     }
-    begin(parseImport(paste))
+    const { items, skipped } = parseImportWithSkipped(paste)
+    if (skipped > 0) toast.show(`형식이 이상한 ${skipped}건은 제외했어요.`)
+    begin(items)
   }
 
   // 구글 지도 링크(여러 개 가능)로 가져오기.

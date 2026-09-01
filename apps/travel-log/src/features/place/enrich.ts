@@ -1,5 +1,6 @@
 import { backend } from '../../data'
 import { searchPlaces } from '../../maps/placeSearch'
+import { cleanPlaceName } from '../../data/placeText'
 import { PLACE_CATEGORIES, type Place, type PlaceCategory } from '../../data/types'
 
 // 주소가 사실은 지도 링크/URL이면 "주소 없음"으로 취급(가져오기 때 새어든 것 정리).
@@ -10,7 +11,7 @@ export function addressIsJunk(addr?: string): boolean {
 
 /** 이름 뒤에 URL이 붙어 저장된 경우(옛 가져오기 버그) 이름만 남긴다. */
 export function cleanName(name: string): string {
-  return name.replace(/[,\t]?\s*https?:\/\/\S+.*$/i, '').trim() || name.trim()
+  return cleanPlaceName(name) || name.trim()
 }
 
 /** 이 장소가 사진·좌표·주소·이름 정리가 필요한가. */
