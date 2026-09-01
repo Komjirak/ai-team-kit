@@ -7,18 +7,23 @@ import { Icon } from '../../components/ui/Icon'
 import { AddPlaceSheet } from '../place/AddPlaceSheet'
 import { ImportSheet } from '../place/ImportSheet'
 import { RouteView } from './RouteView'
+import { enrichPlace, placeNeedsEnrich } from '../place/enrich'
+import { useToast } from '../../components/ui/Toast'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
 
 export function WishlistPage() {
   const { places, loading } = useTrip()
   const { markVisited, remove } = usePlaceActions()
+  const toast = useToast()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [editing, setEditing] = useState<Place | null>(null)
   const [tab, setTab] = useState<'route' | 'wishlist'>('route')
+  const [enriching, setEnriching] = useState<{ done: number; total: number } | null>(null)
 
   const wishlist = places.filter((p) => p.status === 'wishlist')
+  const needEnrich = wishlist.filter(placeNeedsEnrich)
 
   function openAdd() {
     setEditing(null)
@@ -27,6 +32,29 @@ export function WishlistPage() {
   function openEdit(p: Place) {
     setEditing(p)
     setSheetOpen(true)
+  }
+
+  // 사진·위치가 빈 장소들을 이름으로 구글에서 찾아 일괄 보강.
+  async function runEnrich() {
+    const targets = wishlist.filter(placeNeedsEnrich)
+    if (targets.length === 0) return
+    if (!confirm(`${targets.length}곳의 사진·위치를 구글에서 자동으로 채울까요?\n(구글 지도 API를 사용하며 잠시 걸려요.)`)) return
+    setEnriching({ done: 0, total: targets.length })
+    let updated = 0
+    let miss = 0
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        const r = await enrichPlace(targets[i])
+        if (r === 'updated') updated++
+        else if (r === 'nomatch') miss++
+      } catch {
+        miss++
+      }
+      setEnriching({ done: i + 1, total: targets.length })
+      await new Promise((res) => setTimeout(res, 120)) // 살짝 텀 — 쿼터 보호
+    }
+    setEnriching(null)
+    toast.show(`${updated}곳을 채웠어요.${miss ? ` (${miss}곳은 못 찾음)` : ''}`)
   }
 
   return (
@@ -42,6 +70,40 @@ export function WishlistPage() {
           </Button>
         </div>
       </div>
+
+      {/* 사진·위치 채우기 — 가져온 장소에 비어 있는 사진/좌표를 이름으로 보강 */}
+      {tab === 'wishlist' && (needEnrich.length > 0 || enriching) && (
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-dashed border-primary-fixed-dim bg-surface-bright px-4 py-3">
+          <Icon name="auto_awesome" size={18} className="shrink-0 text-primary" />
+          {enriching ? (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink">
+                  사진·위치 채우는 중 · {enriching.done}/{enriching.total}
+                </p>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.round((enriching.done / enriching.total) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="min-w-0 flex-1 text-sm text-ink">
+                <b>{needEnrich.length}곳</b>에 사진·위치가 비어 있어요. 이름으로 자동으로 채울 수 있어요.
+              </p>
+              <button
+                onClick={runEnrich}
+                className="dl-focus shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-bold text-on-primary active:scale-95"
+              >
+                채우기
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 동선(일정 기반) / 가고싶은 곳 전환 */}
       <div className="mb-4 grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1">

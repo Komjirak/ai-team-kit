@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { parseMapsUrl, extractMapLinks, isShortMapLink, isMapLink, parseImport } from './importParse'
 
+describe('parseImport — URL이 주소로 새지 않음', () => {
+  it('헤더 없는 줄에서도 URL은 주소에서 제외, 좌표만 추출', () => {
+    const items = parseImport('스타벅스 시부야,,"https://www.google.com/maps/place/x/@35.6595,139.7005,17z"')
+    expect(items).toHaveLength(1)
+    expect(items[0].name).toBe('스타벅스 시부야')
+    expect(items[0].address).toBeUndefined() // URL이 주소로 들어가지 않음
+    expect(items[0].lat).toBeCloseTo(35.6595, 3)
+    expect(items[0].lng).toBeCloseTo(139.7005, 3)
+  })
+})
+
 describe('parseImport — Takeout 목록 CSV (Title,Note,URL)', () => {
   it('제목 + URL 좌표를 함께 읽는다', () => {
     const csv = [

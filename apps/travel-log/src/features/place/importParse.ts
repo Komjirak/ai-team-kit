@@ -140,11 +140,14 @@ function parseDelimited(text: string): ImportItem[] {
       name = cells[nameIdx] ?? ''
       address = addrIdx >= 0 ? cells[addrIdx] : undefined
     } else {
-      // 헤더 없음: "이름, 주소" 또는 "이름" 한 줄
+      // 헤더 없음: "이름, 주소[, URL]" → URL 칸은 주소에서 제외(주소 오염 방지)
       name = cells[0] ?? ''
-      address = cells.length > 1 ? cells.slice(1).join(', ') : undefined
+      const rest = cells.slice(1).filter((c) => c && !isMapLink(c))
+      address = rest.length ? rest.join(', ') : undefined
     }
     name = name.trim()
+    // 주소가 지도 링크면 주소로 쓰지 않는다(위치는 아래 URL/이름으로 해결).
+    if (address && isMapLink(address)) address = undefined
 
     // URL 칸(Takeout 목록)에 구글 지도 링크가 있으면 좌표·이름을 보강한다.
     let lat: number | undefined

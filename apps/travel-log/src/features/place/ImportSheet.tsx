@@ -21,6 +21,8 @@ interface Row extends ImportItem {
   category: PlaceCategory
   selected: boolean
   resolved: 'pending' | 'ok' | 'none'
+  thumbnail?: string
+  memo?: string
 }
 
 type Phase = 'input' | 'working' | 'preview' | 'saving'
@@ -54,10 +56,10 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
     for (let i = 0; i < items.length; i++) {
       const it = items[i]
       let row: Row = { ...it, category: '기타', selected: true, resolved: 'ok' }
-      // 좌표가 없으면 지도(Google)로 보정
+      // 좌표가 없으면 이름으로 지도(Google) 검색 → 좌표·사진·설명·주소를 함께 채운다
       if (it.lat == null || it.lng == null) {
         try {
-          const hit = (await searchPlaces(it.address || it.name))[0]
+          const hit = (await searchPlaces(it.name))[0]
           if (hit) {
             row = {
               name: it.name,
@@ -65,6 +67,8 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
               lat: hit.lat,
               lng: hit.lng,
               category: PLACE_CATEGORIES.find((c) => hit.category?.includes(c)) ?? '기타',
+              thumbnail: hit.photoUrl,
+              memo: hit.description,
               selected: true,
               resolved: 'ok',
             }
@@ -158,6 +162,8 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
           category: r.category,
           status: 'wishlist',
           createdBy: user.id,
+          thumbnail: r.thumbnail,
+          memo: r.memo,
         })
       } catch {
         /* 개별 실패는 건너뜀 */
