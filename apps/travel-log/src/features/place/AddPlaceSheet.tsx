@@ -195,10 +195,30 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
                       setSelected(r)
                       const c = PLACE_CATEGORIES.find((x) => r.category?.includes(x))
                       if (c) setCategory(c)
+                      // 검색 결과의 사진·설명을 자동으로 채운다(비어 있을 때만).
+                      if (r.photoUrl) setThumbnail(r.photoUrl)
+                      if (r.description) setMemo((m) => (m.trim() ? m : r.description ?? ''))
                     }}
                   >
-                    <span className="text-sm font-semibold text-ink">{r.name}</span>
-                    <span className="text-xs text-muted">{r.address}</span>
+                    <span className="flex w-full items-center gap-2">
+                      {r.photoUrl && (
+                        <img
+                          src={r.photoUrl}
+                          alt=""
+                          className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="truncate text-sm font-semibold text-ink">{r.name}</span>
+                          {typeof r.rating === 'number' && (
+                            <span className="dl-mono shrink-0 text-[11px] text-primary">★ {r.rating.toFixed(1)}</span>
+                          )}
+                        </span>
+                        <span className="block truncate text-xs text-muted">{r.address}</span>
+                      </span>
+                    </span>
                   </button>
                 </li>
               ))}

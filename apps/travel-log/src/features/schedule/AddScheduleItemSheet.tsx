@@ -114,6 +114,8 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
         category,
         status: 'wishlist',
         createdBy: user.id,
+        thumbnail: r.photoUrl, // 검색 결과 사진 자동 저장
+        memo: r.description, // 검색 결과 설명 자동 저장
       })
       setPlaceId(place.id)
       setShowPlacePicker(false)

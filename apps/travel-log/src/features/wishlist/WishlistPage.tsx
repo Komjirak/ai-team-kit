@@ -6,6 +6,7 @@ import { Button, EmptyState } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { AddPlaceSheet } from '../place/AddPlaceSheet'
 import { ImportSheet } from '../place/ImportSheet'
+import { RouteView } from './RouteView'
 import { usePlaceActions } from '../../hooks/usePlaceActions'
 import type { Place } from '../../data/types'
 
@@ -15,6 +16,7 @@ export function WishlistPage() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [editing, setEditing] = useState<Place | null>(null)
+  const [tab, setTab] = useState<'route' | 'wishlist'>('route')
 
   const wishlist = places.filter((p) => p.status === 'wishlist')
 
@@ -41,7 +43,29 @@ export function WishlistPage() {
         </div>
       </div>
 
-      {loading ? (
+      {/* 동선(일정 기반) / 가고싶은 곳 전환 */}
+      <div className="mb-4 grid grid-cols-2 gap-1 rounded-full bg-surface-container p-1">
+        <button
+          onClick={() => setTab('route')}
+          className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-colors ${
+            tab === 'route' ? 'bg-primary text-on-primary shadow-glow-primary' : 'text-muted'
+          }`}
+        >
+          <Icon name="directions" size={16} /> 동선
+        </button>
+        <button
+          onClick={() => setTab('wishlist')}
+          className={`flex items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-colors ${
+            tab === 'wishlist' ? 'bg-primary text-on-primary shadow-glow-primary' : 'text-muted'
+          }`}
+        >
+          <Icon name="favorite" size={16} /> 가고싶은 곳
+        </button>
+      </div>
+
+      {tab === 'route' ? (
+        <RouteView />
+      ) : loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <PlaceCardSkeleton key={i} />
