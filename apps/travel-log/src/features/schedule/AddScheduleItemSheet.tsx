@@ -79,6 +79,16 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
 
   const linkedPlace = placeId ? places.find((p) => p.id === placeId) : undefined
 
+  // 담아둔 곳을 서제스트로: 키워드가 있으면 이름·주소로 필터, 없으면 최근 담은 곳 몇 개만.
+  const kw = keyword.trim().toLowerCase()
+  const savedSuggestions = (
+    kw
+      ? places.filter(
+          (p) => p.name.toLowerCase().includes(kw) || (p.address ?? '').toLowerCase().includes(kw),
+        )
+      : [...places].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+  ).slice(0, kw ? 8 : 6)
+
   function runSearch(q: string) {
     setKeyword(q)
     window.clearTimeout(debounce.current)
@@ -457,68 +467,89 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
             </button>
           ) : (
             <div className="space-y-2 rounded-2xl border border-surface-variant p-2">
-              {/* 담아둔 장소에서 */}
-              {places.length > 0 && (
-                <div>
-                  <p className="px-1 pb-1 text-xs font-semibold text-muted">담아둔 곳에서</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {places.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        className="dl-chip dl-chip-off border border-surface-variant"
-                        onClick={() => {
-                          setPlaceId(p.id)
-                          setShowPlacePicker(false)
-                        }}
-                      >
-                        <Icon name="location_on" size={14} /> {p.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* 검색으로 추가 */}
-              <div>
-                <p className="px-1 pb-1 text-xs font-semibold text-muted">장소 검색으로 추가</p>
-                <div className="flex items-center gap-2 rounded-full bg-surface-container px-3 py-2">
-                  <Icon name="search" size={18} className="text-muted" />
-                  <input
-                    value={keyword}
-                    onChange={(e) => runSearch(e.target.value)}
-                    placeholder="예) 성산일출봉"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-soft"
-                  />
-                  {searching && <Spinner size={14} className="text-primary" />}
-                </div>
-                {results.length > 0 && (
-                  <ul className="mt-1 max-h-40 overflow-y-auto rounded-xl border border-surface-variant">
-                    {results.map((r, i) => {
-                      const key = `${r.name}-${r.lat}-${r.lng}`
-                      return (
-                        <li key={i}>
+              {/* 검색 한 칸 — 담아둔 곳/구글을 함께 서제스트 */}
+              <div className="flex items-center gap-2 rounded-full bg-surface-container px-3 py-2">
+                <Icon name="search" size={18} className="text-muted" />
+                <input
+                  autoFocus
+                  value={keyword}
+                  onChange={(e) => runSearch(e.target.value)}
+                  placeholder="장소 이름으로 검색 (예: 성산일출봉)"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-muted-soft"
+                />
+                {searching && <Spinner size={14} className="text-primary" />}
+              </div>
+
+              <div className="max-h-64 space-y-2 overflow-y-auto">
+                {/* 담아둔 곳 서제스트 (키워드로 좁히거나, 없으면 최근 담은 곳) */}
+                {savedSuggestions.length > 0 && (
+                  <div>
+                    <p className="px-1 pb-1 text-[11px] font-semibold text-muted">
+                      {kw ? '담아둔 곳' : '최근 담은 곳'}
+                    </p>
+                    <ul className="space-y-0.5">
+                      {savedSuggestions.map((p) => (
+                        <li key={p.id}>
                           <button
                             type="button"
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface-container disabled:opacity-50"
-                            onClick={() => linkFromSearch(r)}
-                            disabled={addingKey === key}
+                            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-surface-container"
+                            onClick={() => {
+                              setPlaceId(p.id)
+                              setShowPlacePicker(false)
+                            }}
                           >
-                            {addingKey === key ? (
-                              <Spinner size={14} className="text-primary" />
-                            ) : (
-                              <Icon name="add" size={16} className="text-primary" />
-                            )}
+                            <Icon name="location_on" size={16} className="shrink-0 text-primary" />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-semibold text-ink">{r.name}</span>
-                              <span className="block truncate text-xs text-muted">{r.address}</span>
+                              <span className="block truncate text-sm font-semibold text-ink">{p.name}</span>
+                              {p.address && (
+                                <span className="block truncate text-xs text-muted">{p.address}</span>
+                              )}
                             </span>
                           </button>
                         </li>
-                      )
-                    })}
-                  </ul>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 구글 검색 결과 (담아둔 곳에 없을 때 새로 추가) */}
+                {kw && results.length > 0 && (
+                  <div>
+                    <p className="px-1 pb-1 text-[11px] font-semibold text-muted">검색 결과 (새로 담기)</p>
+                    <ul className="space-y-0.5">
+                      {results.map((r, i) => {
+                        const key = `${r.name}-${r.lat}-${r.lng}`
+                        return (
+                          <li key={i}>
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-surface-container disabled:opacity-50"
+                              onClick={() => linkFromSearch(r)}
+                              disabled={addingKey === key}
+                            >
+                              {addingKey === key ? (
+                                <Spinner size={14} className="shrink-0 text-primary" />
+                              ) : (
+                                <Icon name="add" size={16} className="shrink-0 text-primary" />
+                              )}
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-semibold text-ink">{r.name}</span>
+                                <span className="block truncate text-xs text-muted">{r.address}</span>
+                              </span>
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 빈 상태 */}
+                {kw && !searching && savedSuggestions.length === 0 && results.length === 0 && (
+                  <p className="px-1 py-3 text-center text-xs text-muted-soft">검색 결과가 없어요.</p>
                 )}
               </div>
+
               <button
                 type="button"
                 className="w-full py-1 text-xs text-muted"
