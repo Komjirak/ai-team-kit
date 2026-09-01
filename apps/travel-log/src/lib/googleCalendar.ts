@@ -1,5 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { fbAuth } from './firebase'
+import { toLocalYmd } from '../data/schedule'
 import type { ScheduleItem, Trip } from '../data/types'
 
 // ─────────────────────────────────────────────────────────────
@@ -43,10 +44,10 @@ function eventBody(trip: Trip, it: ScheduleItem) {
       end: { dateTime: endDT, timeZone: TZ },
     }
   }
-  // 종일 이벤트: end.date 는 배타적이라 +1일
+  // 종일 이벤트: end.date 는 배타적이라 +1일 (로컬 기준, TZ 밀림 방지)
   const next = new Date(it.date + 'T00:00:00')
   next.setDate(next.getDate() + 1)
-  const endDate = next.toISOString().slice(0, 10)
+  const endDate = toLocalYmd(next)
   return { summary, description, start: { date: it.date }, end: { date: endDate } }
 }
 

@@ -7,6 +7,7 @@ import { Washi, Pin } from '../../components/ui/deco'
 import { AddMemorySheet } from './AddMemorySheet'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
+import { todayYmd } from '../../data/schedule'
 import type { Trip } from '../../data/types'
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
@@ -115,7 +116,7 @@ export function MemoriesPage() {
 
 function isPast(trip: Trip): boolean {
   if (!trip.endDate) return false
-  return trip.endDate < new Date().toISOString().slice(0, 10)
+  return trip.endDate < todayYmd()
 }
 
 function TripRecap({

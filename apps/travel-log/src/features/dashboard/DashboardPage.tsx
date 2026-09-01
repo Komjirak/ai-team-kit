@@ -8,6 +8,7 @@ import { Icon } from '../../components/ui/Icon'
 import { Skeleton, Spinner } from '../../components/ui/basics'
 import { Washi, Pin } from '../../components/ui/deco'
 import { useToast } from '../../components/ui/Toast'
+import { toLocalYmd } from '../../data/schedule'
 import { RunnerRace } from './RunnerRace'
 
 function fmtRange(startDate?: string, endDate?: string): string | null {
@@ -143,7 +144,7 @@ export function DashboardPage() {
               <p className="mt-2 font-display text-xl font-bold text-ink">{stats.firstVisit.name}</p>
               <p className="dl-mono text-sm text-muted">
                 {stats.firstVisit.visitedAt
-                  ? new Date(stats.firstVisit.visitedAt).toISOString().slice(0, 10).replace(/-/g, '.')
+                  ? toLocalYmd(new Date(stats.firstVisit.visitedAt)).replace(/-/g, '.')
                   : ''}
               </p>
             </>

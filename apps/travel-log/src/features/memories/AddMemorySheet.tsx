@@ -6,8 +6,9 @@ import { useTrip } from '../../trip/TripContext'
 import { useAuth } from '../../auth/AuthContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
+import { todayYmd } from '../../data/schedule'
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = () => todayYmd()
 
 /** 추억 남기기: pick a place, write a note, attach photos. */
 export function AddMemorySheet({ open, onClose }: { open: boolean; onClose: () => void }) {

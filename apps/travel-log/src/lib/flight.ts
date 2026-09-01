@@ -85,9 +85,15 @@ export function buildFlight(input: FlightFormInput): FlightInfo {
 }
 
 function addDays(date: string, days: number): string {
-  const d = new Date(date + 'T00:00:00')
+  const m = date.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!m) return date
+  // 로컬 날짜 부품으로만 계산 → toISOString의 UTC 변환에 의한 하루 밀림 방지
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
   d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${y}-${mm}-${dd}`
 }
 
 /** ISO 시각에서 "HH:mm"만. 없으면 빈 문자열. */
