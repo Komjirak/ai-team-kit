@@ -8,6 +8,77 @@ export interface ImportItem {
   lng?: number
 }
 
+// ─── 구글 지도 링크 ─────────────────────────────────────────────
+// 전체 URL(google.com/maps/place/…)은 브라우저에서 바로 파싱하고,
+// 단축 링크(maps.app.goo.gl 등)는 서버(/api/resolve-place)로 리다이렉트를 따라 푼다.
+
+const MAP_LINK_RE = /(google\.[a-z.]+\/maps|maps\.google\.|maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)/i
+const SHORT_LINK_RE = /(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)/i
+
+export function isMapLink(u: string): boolean {
+  return MAP_LINK_RE.test(u)
+}
+export function isShortMapLink(u: string): boolean {
+  return SHORT_LINK_RE.test(u)
+}
+
+/** 텍스트에서 구글 지도 링크들만 뽑는다. */
+export function extractMapLinks(text: string): string[] {
+  const urls = text.match(/https?:\/\/[^\s)>\]]+/g) ?? []
+  return urls.filter(isMapLink)
+}
+
+/** 구글 지도 전체 URL에서 이름·좌표를 파싱한다(네트워크 불필요). 못 찾으면 null. */
+export function parseMapsUrl(url: string): ImportItem | null {
+  let u = url
+  try {
+    u = decodeURIComponent(url)
+  } catch {
+    /* 이미 디코드됨 */
+  }
+  let name = ''
+  const placeM = u.match(/\/maps\/place\/([^/@?]+)/)
+  if (placeM) name = placeM[1].replace(/\+/g, ' ').trim()
+
+  let lat: number | undefined
+  let lng: number | undefined
+  const dm = u.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)
+  if (dm) {
+    lat = Number(dm[1])
+    lng = Number(dm[2])
+  } else {
+    const at = u.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
+    if (at) {
+      lat = Number(at[1])
+      lng = Number(at[2])
+    }
+  }
+  // q=lat,lng 또는 q=이름
+  const q = u.match(/[?&]q=([^&]+)/)
+  if (q) {
+    const qv = q[1].replace(/\+/g, ' ').trim()
+    const ll = qv.match(/^(-?\d+\.\d+),\s*(-?\d+\.\d+)$/)
+    if (ll) {
+      lat = lat ?? Number(ll[1])
+      lng = lng ?? Number(ll[2])
+    } else if (!name) {
+      name = qv
+    }
+  }
+  if (!name && lat != null) name = `핀 (${lat.toFixed(4)}, ${lng!.toFixed(4)})`
+  if (!name) return null
+  return { name, lat, lng }
+}
+
+/** 단축 링크를 서버(/api/resolve-place)로 풀어 ImportItem들을 받는다. */
+export async function resolveMapLink(url: string): Promise<ImportItem[]> {
+  const res = await fetch(`/api/resolve-place?url=${encodeURIComponent(url)}`)
+  if (!res.ok) throw new Error('resolve_failed')
+  const data = (await res.json()) as { ok: boolean; items?: ImportItem[]; reason?: string }
+  if (data.ok && Array.isArray(data.items) && data.items.length) return data.items
+  throw new Error(data.reason || 'unresolved')
+}
+
 /** 입력(파일 내용 or 붙여넣기 텍스트)을 ImportItem 목록으로 파싱. */
 export function parseImport(text: string): ImportItem[] {
   const trimmed = text.trim()

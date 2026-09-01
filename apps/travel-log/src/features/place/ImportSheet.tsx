@@ -8,7 +8,14 @@ import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { PLACE_CATEGORIES, type PlaceCategory } from '../../data/types'
 import { searchPlaces } from '../../maps/placeSearch'
-import { parseImport, type ImportItem } from './importParse'
+import {
+  parseImport,
+  extractMapLinks,
+  isShortMapLink,
+  parseMapsUrl,
+  resolveMapLink,
+  type ImportItem,
+} from './importParse'
 
 interface Row extends ImportItem {
   category: PlaceCategory
@@ -83,7 +90,47 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
   }
 
   function onPaste() {
+    const links = extractMapLinks(paste)
+    if (links.length > 0) {
+      importLinks(links)
+      return
+    }
     begin(parseImport(paste))
+  }
+
+  // 구글 지도 링크(여러 개 가능)로 가져오기.
+  // 전체 URL은 브라우저에서 바로 파싱, 단축 링크는 서버(/api/resolve-place)로 해석.
+  async function importLinks(links: string[]) {
+    setPhase('working')
+    setProgress(0)
+    const items: ImportItem[] = []
+    let listBlocked = false
+    for (let i = 0; i < links.length; i++) {
+      const l = links[i]
+      try {
+        if (isShortMapLink(l)) {
+          items.push(...(await resolveMapLink(l)))
+        } else {
+          const it = parseMapsUrl(l)
+          if (it) items.push(it)
+          else listBlocked = true
+        }
+      } catch (e) {
+        if (e instanceof Error && e.message === 'list_unsupported') listBlocked = true
+        // resolve_failed(로컬 dev·미배포) 등은 조용히 건너뜀
+      }
+      setProgress(Math.round(((i + 1) / links.length) * 100))
+    }
+    if (items.length === 0) {
+      toast.show(
+        listBlocked
+          ? '공유 “목록” 링크는 통째로 가져올 수 없어요. 장소별 링크를 붙여넣거나 Takeout을 써주세요.'
+          : '링크에서 장소를 찾지 못했어요. 전체 주소(google.com/maps/…) 링크로 다시 시도해 주세요.',
+      )
+      setPhase('input')
+      return
+    }
+    await begin(items)
   }
 
   function toggle(i: number) {
@@ -149,18 +196,33 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
       {phase === 'input' && (
         <div className="space-y-5">
           <div className="rounded-2xl bg-primary-soft/60 px-4 py-3 text-sm text-ink">
-            <p className="font-semibold">구글 지도에 저장한 장소를 가져올 수 있어요.</p>
+            <p className="font-semibold">구글 지도 링크를 붙여넣으면 담아드려요.</p>
             <p className="mt-1 text-muted">
-              <a
-                href="https://takeout.google.com/settings/takeout"
-                target="_blank"
-                rel="noreferrer"
-                className="font-bold text-primary underline"
-              >
-                Google 다내보내기
-              </a>
-              에서 <b>지도(내 장소)</b>를 <b>GeoJSON</b> 또는 <b>CSV</b>로 내려받아 아래에 올리세요.
+              장소 공유 링크(<span className="dl-mono">maps.app.goo.gl/…</span> 또는 전체 주소)를 아래에
+              붙여넣으세요. <b>여러 개를 한 번에</b> 넣어도 됩니다. 파일(GeoJSON·CSV)도 가능해요.
             </p>
+          </div>
+
+          <div>
+            <p className="mb-1.5 text-xs font-semibold text-muted">구글 지도 링크 붙여넣기 (여러 개는 줄바꿈)</p>
+            <textarea
+              value={paste}
+              onChange={(e) => setPaste(e.target.value)}
+              rows={4}
+              placeholder={'예)\nhttps://maps.app.goo.gl/…\nhttps://www.google.com/maps/place/성수연방/@37.5,127.0\n\n또는 "이름, 주소" 한 줄씩'}
+              className="w-full resize-none rounded-2xl bg-surface-container px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <Button className="mt-2 w-full" variant="soft" onClick={onPaste} disabled={!paste.trim()}>
+              불러오기
+            </Button>
+            <p className="mt-1.5 text-[11px] text-muted-soft">
+              · 단축 링크는 <b>배포된 사이트(Vercel)</b>에서 동작해요(로컬 개발 서버에선 전체 주소만).
+              <br />· 여러 장소가 담긴 <b>공유 “목록”</b>은 통째로는 못 가져와요 — 장소별 링크나 Takeout을 써주세요.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-muted-soft">
+            <span className="h-px flex-1 bg-surface-variant" /> 또는 파일로 <span className="h-px flex-1 bg-surface-variant" />
           </div>
 
           <button
@@ -179,22 +241,8 @@ export function ImportSheet({ open, onClose }: { open: boolean; onClose: () => v
             onChange={(e) => onFile(e.target.files)}
           />
 
-          <div>
-            <p className="mb-1.5 text-xs font-semibold text-muted">또는 직접 붙여넣기 (한 줄에 하나: 이름, 주소)</p>
-            <textarea
-              value={paste}
-              onChange={(e) => setPaste(e.target.value)}
-              rows={4}
-              placeholder={'예)\n한남작업실, 서울 용산구 이태원로55나길 7\n성수연방'}
-              className="w-full resize-none rounded-2xl bg-surface-container px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <Button className="mt-2 w-full" variant="soft" onClick={onPaste} disabled={!paste.trim()}>
-              불러오기
-            </Button>
-          </div>
-
           <p className="text-center text-xs text-muted-soft">
-            네이버 지도 즐겨찾기는 공식 내보내기가 없어, 위 붙여넣기로 옮겨주세요.
+            네이버 지도 즐겨찾기는 공식 내보내기가 없어, 위 붙여넣기(이름, 주소)로 옮겨주세요.
           </p>
         </div>
       )}
