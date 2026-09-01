@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { loadGoogleMaps, hasGoogleMaps } from './loader'
+import { loadGoogleMaps, hasGoogleMaps, mapsAuthFailed } from './loader'
 import { Icon } from '../components/ui/Icon'
 
 export interface RouteStop {
@@ -12,14 +12,26 @@ export interface RouteStop {
 // 키가 없거나(데모) 좌표가 없으면 스크랩북 톤의 폴백 카드를 보여준다.
 export function RouteMap({ stops, className = '' }: { stops: RouteStop[]; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'nokey' | 'failed'>('loading')
+  const [status, setStatus] = useState<'loading' | 'ready' | 'nokey' | 'failed' | 'auth'>('loading')
 
   const withCoords = stops.filter(
     (s): s is Required<RouteStop> => typeof s.lat === 'number' && typeof s.lng === 'number',
   )
   const key = withCoords.map((s) => `${s.lat},${s.lng}`).join('|')
 
+  // 구글 지도 인증 실패(키/리퍼러/결제) → 브랜드 폴백
   useEffect(() => {
+    const onAuthFail = () => setStatus('auth')
+    if (mapsAuthFailed()) setStatus('auth')
+    window.addEventListener('ganjik:maps-auth-failed', onAuthFail)
+    return () => window.removeEventListener('ganjik:maps-auth-failed', onAuthFail)
+  }, [])
+
+  useEffect(() => {
+    if (mapsAuthFailed()) {
+      setStatus('auth')
+      return
+    }
     if (!hasGoogleMaps) {
       setStatus('nokey')
       return
@@ -94,7 +106,7 @@ export function RouteMap({ stops, className = '' }: { stops: RouteStop[]; classN
 
   const base = `relative overflow-hidden rounded-2xl border-2 border-outline-variant/60 ${className}`
 
-  if (status === 'nokey' || status === 'failed') {
+  if (status === 'nokey' || status === 'failed' || status === 'auth') {
     return (
       <div className={`${base} grid place-items-center bg-surface-container-low p-6 text-center`}>
         {/* 데코 테이프 */}
@@ -102,8 +114,17 @@ export function RouteMap({ stops, className = '' }: { stops: RouteStop[]; classN
         <div className="flex flex-col items-center gap-2 text-muted">
           <Icon name="map" size={30} className="text-primary/70" />
           <p className="text-sm font-semibold text-ink">
-            {status === 'nokey' ? '지도 미리보기 (데모)' : '지도를 불러오지 못했어요'}
+            {status === 'nokey'
+              ? '지도 미리보기 (데모)'
+              : status === 'auth'
+                ? '지도 키 설정을 확인해 주세요'
+                : '지도를 불러오지 못했어요'}
           </p>
+          {status === 'auth' && (
+            <p className="text-xs text-muted">
+              지도 API 키의 <b>도메인(리퍼러) 허용목록</b>에 이 사이트 주소를 추가해야 지도가 떠요.
+            </p>
+          )}
           <p className="dl-mono text-xs text-muted">
             {withCoords.length > 0
               ? `${withCoords.length}개 지점의 동선`

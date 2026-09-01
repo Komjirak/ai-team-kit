@@ -8,7 +8,22 @@ declare global {
   interface Window {
     google?: any
     __ganjikInitGMaps?: () => void
+    __ganjikMapsAuthFailed?: boolean
+    gm_authFailure?: () => void
   }
+}
+
+// 키·리퍼러·결제 문제로 인증 실패 시 구글이 호출하는 전역 콜백.
+// 회색 오류 박스 대신 우리 폴백을 띄우도록 플래그/이벤트로 알린다.
+if (typeof window !== 'undefined' && !window.gm_authFailure) {
+  window.gm_authFailure = () => {
+    window.__ganjikMapsAuthFailed = true
+    window.dispatchEvent(new Event('ganjik:maps-auth-failed'))
+  }
+}
+
+export function mapsAuthFailed(): boolean {
+  return typeof window !== 'undefined' && !!window.__ganjikMapsAuthFailed
 }
 
 let promise: Promise<any> | null = null
