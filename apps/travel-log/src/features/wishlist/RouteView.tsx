@@ -4,6 +4,7 @@ import { useTrip } from '../../trip/TripContext'
 import { Button, EmptyState } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { RouteMap } from '../../maps/RouteMap'
+import { photoSrc } from '../../lib/photo'
 import { tripDates, sortDayItems, fmtDayLabel } from '../../data/schedule'
 import type { Place, ScheduleItem } from '../../data/types'
 
@@ -159,11 +160,10 @@ export function RouteView() {
                 </div>
                 {s.place.thumbnail && (
                   <img
-                    src={s.place.thumbnail}
+                    src={photoSrc(s.place.thumbnail)}
                     alt=""
                     className="h-20 w-20 shrink-0 rounded-xl object-cover"
                     loading="lazy"
-                    referrerPolicy="no-referrer"
                     onError={(e) => (e.currentTarget.style.display = 'none')}
                   />
                 )}

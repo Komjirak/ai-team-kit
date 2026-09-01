@@ -3,6 +3,7 @@ import type { Place, PlaceCategory } from '../data/types'
 import { Icon } from './ui/Icon'
 import { CategoryBadge } from './ui/basics'
 import { Washi, Pin } from './ui/deco'
+import { photoSrc } from '../lib/photo'
 
 const washiCycle = ['yellow', 'lavender', 'mint', 'blue'] as const
 
@@ -53,12 +54,10 @@ export function PlaceCard({
       >
         {showPhoto ? (
           <img
-            src={place.thumbnail}
+            src={photoSrc(place.thumbnail)}
             alt=""
             loading="lazy"
-            // 구글 사진 CDN은 리퍼러가 붙으면 403 → no-referrer. 실패 시 플레이스홀더로.
-            referrerPolicy="no-referrer"
-            onError={() => setImgBroken(true)}
+            onError={() => setImgBroken(true)} // 실패 시 카테고리 플레이스홀더로
             className="aspect-[16/10] w-full object-cover"
           />
         ) : (

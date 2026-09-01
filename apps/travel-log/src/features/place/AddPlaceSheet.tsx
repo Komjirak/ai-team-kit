@@ -4,6 +4,7 @@ import { Button, Spinner } from '../../components/ui/basics'
 import { Icon } from '../../components/ui/Icon'
 import { PLACE_CATEGORIES, type Place, type PlaceCategory } from '../../data/types'
 import { searchPlaces, type PlaceResult } from '../../maps/placeSearch'
+import { photoSrc } from '../../lib/photo'
 import { backend } from '../../data'
 import { useAuth } from '../../auth/AuthContext'
 import { useTrip } from '../../trip/TripContext'
@@ -203,11 +204,10 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
                     <span className="flex w-full items-center gap-2">
                       {r.photoUrl && (
                         <img
-                          src={r.photoUrl}
+                          src={photoSrc(r.photoUrl)}
                           alt=""
                           className="h-10 w-10 shrink-0 rounded-lg object-cover"
                           loading="lazy"
-                          referrerPolicy="no-referrer"
                           onError={(e) => (e.currentTarget.style.display = 'none')}
                         />
                       )}
@@ -278,7 +278,12 @@ export function AddPlaceSheet({ open, onClose, editing }: Props) {
             <label className="mb-1.5 block text-xs font-semibold text-muted">사진 (선택)</label>
             {thumbnail ? (
               <div className="relative w-fit">
-                <img src={thumbnail} alt="" className="h-28 w-40 rounded-2xl object-cover" referrerPolicy="no-referrer" />
+                <img
+                  src={photoSrc(thumbnail)}
+                  alt=""
+                  className="h-28 w-40 rounded-2xl object-cover"
+                  onError={() => setThumbnail(undefined)}
+                />
                 <button
                   type="button"
                   className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-ink text-white"
