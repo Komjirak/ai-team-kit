@@ -136,7 +136,7 @@ function seed() {
     {
       id: 's0', tripId: trip.id, date: '2026-09-18', order: 0, time: '13:20', title: 'KE1275 · ICN→CJU',
       flight: {
-        number: 'KE1275', carrier: 'KE', source: 'demo',
+        number: 'KE1275', carrier: 'KE', source: 'manual',
         dep: { iata: 'ICN', airport: '인천국제공항', city: '서울', at: '2026-09-18T13:20:00', terminal: '2', lat: 37.4602, lng: 126.4407 },
         arr: { iata: 'CJU', airport: '제주국제공항', city: '제주', at: '2026-09-18T14:35:00', lat: 33.5113, lng: 126.493 },
       },
@@ -150,7 +150,7 @@ function seed() {
     {
       id: 's6', tripId: trip.id, date: '2026-09-20', order: 1, time: '18:40', title: 'OZ8952 · CJU→GMP',
       flight: {
-        number: 'OZ8952', carrier: 'OZ', source: 'demo',
+        number: 'OZ8952', carrier: 'OZ', source: 'manual',
         dep: { iata: 'CJU', airport: '제주국제공항', city: '제주', at: '2026-09-20T18:40:00', lat: 33.5113, lng: 126.493 },
         arr: { iata: 'GMP', airport: '김포국제공항', city: '서울', at: '2026-09-20T19:50:00', lat: 37.5583, lng: 126.7906 },
       },

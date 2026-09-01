@@ -85,3 +85,8 @@ export function airport(iata?: string): AirportInfo | undefined {
   const a = AIRPORTS[code]
   return a ? { iata: code, ...a } : undefined
 }
+
+/** 자동완성용 전체 공항 목록(코드순). */
+export const AIRPORT_LIST: AirportInfo[] = Object.entries(AIRPORTS)
+  .map(([iata, v]) => ({ iata, ...v }))
+  .sort((a, b) => a.iata.localeCompare(b.iata))

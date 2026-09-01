@@ -7,9 +7,9 @@ import { useTrip } from '../../trip/TripContext'
 import { backend } from '../../data'
 import { useToast } from '../../components/ui/Toast'
 import { tripDates, fmtDayLabel } from '../../data/schedule'
-import { PLACE_CATEGORIES, type PlaceCategory, type FlightInfo, type ScheduleItem } from '../../data/types'
+import { PLACE_CATEGORIES, type PlaceCategory, type ScheduleItem } from '../../data/types'
 import { searchPlaces, type PlaceResult } from '../../maps/placeSearch'
-import { lookupFlight, flightTime } from '../../lib/flight'
+import { buildFlight, flightTime, isIata, airportOptions } from '../../lib/flight'
 import { FlightRoute } from './FlightRoute'
 
 interface Props {
@@ -36,11 +36,14 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 항공편
+  // 항공편 (직접 입력)
   const [flightNo, setFlightNo] = useState('')
-  const [flightInfo, setFlightInfo] = useState<FlightInfo | null>(null)
-  const [flightLoading, setFlightLoading] = useState(false)
-  const [flightErr, setFlightErr] = useState<string | null>(null)
+  const [depIata, setDepIata] = useState('')
+  const [depTime, setDepTime] = useState('')
+  const [depTerminal, setDepTerminal] = useState('')
+  const [arrIata, setArrIata] = useState('')
+  const [arrTime, setArrTime] = useState('')
+  const [overnight, setOvernight] = useState(false)
 
   // 장소 검색
   const [showPlacePicker, setShowPlacePicker] = useState(false)
@@ -62,10 +65,15 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
     setShowPlacePicker(false)
     setKeyword('')
     setResults([])
-    setFlightNo(editing?.flight?.number ?? '')
-    setFlightInfo(editing?.flight ?? null)
-    setFlightErr(null)
-    setFlightLoading(false)
+    const f = editing?.flight
+    setFlightNo(f?.number ?? '')
+    setDepIata(f?.dep.iata ?? '')
+    setDepTime(flightTime(f?.dep.at))
+    setDepTerminal(f?.dep.terminal ?? '')
+    setArrIata(f?.arr.iata ?? '')
+    setArrTime(flightTime(f?.arr.at))
+    // 도착이 출발 다음날이면 +1 유지
+    setOvernight(!!f?.dep.at && !!f?.arr.at && f.dep.at.slice(0, 10) !== f.arr.at.slice(0, 10))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing, defaultDate])
 
@@ -118,28 +126,24 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
     }
   }
 
-  // 날짜+편명으로 항공편 조회 → 미리보기
-  async function runFlightLookup() {
-    if (!date) {
-      setFlightErr('flight.need_date')
-      return
-    }
-    setFlightLoading(true)
-    setFlightErr(null)
-    setFlightInfo(null)
-    try {
-      const info = await lookupFlight(flightNo, date)
-      setFlightInfo(info)
-    } catch (e) {
-      setFlightErr(e instanceof Error ? e.message : 'flight.lookup_failed')
-    } finally {
-      setFlightLoading(false)
-    }
-  }
-
   const isFlight = mode === 'flight'
-  // 항공편 모드는 제목 대신 조회된 편명으로 저장 → 저장 가능 여부가 다르다.
-  const canSave = isFlight ? !!flightInfo && !!date : !!title.trim() && !!date
+  // 직접 입력값이 유효하면 라이브 미리보기(카드)로 보여준다.
+  const flightReady = isFlight && !!flightNo.trim() && isIata(depIata) && isIata(arrIata) && !!date
+  const flightPreview =
+    flightReady
+      ? buildFlight({
+          number: flightNo,
+          depIata,
+          depTime: depTime || undefined,
+          depTerminal: depTerminal || undefined,
+          arrIata,
+          arrTime: arrTime || undefined,
+          date,
+          overnight,
+        })
+      : null
+
+  const canSave = isFlight ? flightReady : !!title.trim() && !!date
 
   async function save() {
     if (!user || !activeTrip || !date) {
@@ -149,11 +153,11 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
     // 공통 필드 구성 (일반 vs 항공편)
     let payload: Partial<ScheduleItem>
     if (isFlight) {
-      if (!flightInfo) {
+      if (!flightPreview) {
         setError('schedule.save_failed')
         return
       }
-      const f = flightInfo
+      const f = flightPreview
       payload = {
         time: flightTime(f.dep.at) || undefined,
         title: `${f.number} · ${f.dep.iata}→${f.arr.iata}`,
@@ -286,51 +290,119 @@ export function AddScheduleItemSheet({ open, onClose, editing, defaultDate }: Pr
           )}
         </div>
 
-        {/* 항공편 조회 */}
+        {/* 항공편 직접 입력 */}
         {isFlight && (
-          <div className="space-y-2">
-            <label className="mb-1 block text-xs font-semibold text-muted">편명 *</label>
-            <div className="flex gap-2">
+          <div className="space-y-3">
+            {/* 공항 코드 자동완성 목록 */}
+            <datalist id="airport-codes">
+              {airportOptions.map((a) => (
+                <option key={a.iata} value={a.iata}>
+                  {a.name} · {a.city}
+                </option>
+              ))}
+            </datalist>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted">편명 *</label>
               <input
                 value={flightNo}
-                onChange={(e) => {
-                  setFlightNo(e.target.value)
-                  setFlightInfo(null)
-                  setFlightErr(null)
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && runFlightLookup()}
-                placeholder="예) KE1275, OZ8901, 7C101"
+                onChange={(e) => setFlightNo(e.target.value)}
+                placeholder="예) KE1275"
                 autoCapitalize="characters"
                 className="w-full rounded-2xl bg-surface-container px-4 py-3 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
               />
-              <Button
-                variant="soft"
-                onClick={runFlightLookup}
-                loading={flightLoading}
-                disabled={!flightNo.trim()}
-                icon="search"
-              >
-                조회
-              </Button>
             </div>
-            {flightErr && (
-              <p className="text-sm text-error">
-                {flightErr === 'flight.bad_number'
-                  ? '편명 형식을 확인해 주세요. (예: KE1275)'
-                  : flightErr === 'flight.need_date'
-                    ? '먼저 날짜를 선택해 주세요.'
-                    : flightErr === 'flight.not_found'
-                      ? '해당 날짜에 그 편명을 찾지 못했어요. 날짜·편명을 확인해 주세요.'
-                      : '조회에 실패했어요. 잠시 후 다시 시도해 주세요.'}
+
+            {/* 출발 */}
+            <div className="rounded-2xl border border-surface-variant p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-primary">
+                <Icon name="flight_takeoff" size={15} /> 출발
               </p>
-            )}
-            {flightInfo && (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="mb-1 block text-[11px] font-semibold text-muted">공항 코드 *</label>
+                  <input
+                    value={depIata}
+                    onChange={(e) => setDepIata(e.target.value.toUpperCase().slice(0, 3))}
+                    list="airport-codes"
+                    placeholder="ICN"
+                    maxLength={3}
+                    className="w-full rounded-xl bg-surface-container px-3 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="w-24">
+                  <label className="mb-1 block text-[11px] font-semibold text-muted">시각</label>
+                  <input
+                    type="time"
+                    value={depTime}
+                    onChange={(e) => setDepTime(e.target.value)}
+                    className="w-full rounded-xl bg-surface-container px-2 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="w-16">
+                  <label className="mb-1 block text-[11px] font-semibold text-muted">터미널</label>
+                  <input
+                    value={depTerminal}
+                    onChange={(e) => setDepTerminal(e.target.value.slice(0, 3))}
+                    placeholder="2"
+                    className="w-full rounded-xl bg-surface-container px-2 py-2.5 text-center text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+              {depIata && !isIata(depIata) && (
+                <p className="mt-1 text-[11px] text-error">공항 코드는 영문 3자예요. (예: ICN)</p>
+              )}
+            </div>
+
+            {/* 도착 */}
+            <div className="rounded-2xl border border-surface-variant p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-primary">
+                <Icon name="flight_land" size={15} /> 도착
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="mb-1 block text-[11px] font-semibold text-muted">공항 코드 *</label>
+                  <input
+                    value={arrIata}
+                    onChange={(e) => setArrIata(e.target.value.toUpperCase().slice(0, 3))}
+                    list="airport-codes"
+                    placeholder="CJU"
+                    maxLength={3}
+                    className="w-full rounded-xl bg-surface-container px-3 py-2.5 text-sm uppercase outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="w-24">
+                  <label className="mb-1 block text-[11px] font-semibold text-muted">시각</label>
+                  <input
+                    type="time"
+                    value={arrTime}
+                    onChange={(e) => setArrTime(e.target.value)}
+                    className="w-full rounded-xl bg-surface-container px-2 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+              {arrIata && !isIata(arrIata) && (
+                <p className="mt-1 text-[11px] text-error">공항 코드는 영문 3자예요. (예: CJU)</p>
+              )}
+              <label className="mt-2 flex items-center gap-2 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  checked={overnight}
+                  onChange={(e) => setOvernight(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                도착이 다음날이에요 (+1)
+              </label>
+            </div>
+
+            {/* 라이브 미리보기 */}
+            {flightPreview && (
               <div className="rounded-2xl border border-surface-variant p-2">
-                <FlightRoute flight={flightInfo} />
+                <FlightRoute flight={flightPreview} />
               </div>
             )}
             <p className="dl-mono text-[11px] text-muted-soft">
-              날짜 + 편명으로 출발·도착 공항과 시각을 불러와 저장해요.
+              공항 코드(IATA)를 넣으면 공항 이름·도시가 자동으로 채워져요.
             </p>
           </div>
         )}

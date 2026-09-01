@@ -104,7 +104,7 @@ export interface FlightInfo {
   carrier?: string    // 항공사 IATA (예: KE)
   dep: FlightLeg      // 출발
   arr: FlightLeg      // 도착
-  source?: 'amadeus' | 'demo' | 'manual' // 데이터 출처
+  source?: 'manual'   // 입력 방식(현재는 직접 입력만)
 }
 
 // 신규(M2) — 일자별 일정 항목. 인앱이 source of truth (PRD §5, §6-3).

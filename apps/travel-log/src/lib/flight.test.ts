@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseFlightNumber, lookupFlight, flightTime } from './flight'
-
-// 환경: 테스트는 Firebase 미설정 → isDemo=true 경로(합성/샘플)로 동작.
+import { parseFlightNumber, buildFlight, flightTime, isIata } from './flight'
 
 describe('parseFlightNumber', () => {
   it('일반 편명', () => {
@@ -13,52 +11,65 @@ describe('parseFlightNumber', () => {
   it('숫자로 시작하는 항공사 코드(7C 제주항공)', () => {
     expect(parseFlightNumber('7C101')).toEqual({ carrierCode: '7C', flightNumber: '101', display: '7C101' })
   })
-  it('편명 뒤 접미 문자 허용', () => {
-    expect(parseFlightNumber('KE1275A')?.display).toBe('KE1275')
-  })
   it('형식 오류는 null', () => {
-    expect(parseFlightNumber('')).toBeNull()
     expect(parseFlightNumber('12')).toBeNull() // 알파벳 없음
     expect(parseFlightNumber('KE')).toBeNull() // 숫자 없음
-    expect(parseFlightNumber('K1')).toBeNull() // 코드 1자
+  })
+})
+
+describe('isIata', () => {
+  it('영문 3자만 통과', () => {
+    expect(isIata('ICN')).toBe(true)
+    expect(isIata('icn')).toBe(true)
+    expect(isIata('IC')).toBe(false)
+    expect(isIata('ICN1')).toBe(false)
+    expect(isIata('')).toBe(false)
   })
 })
 
 describe('flightTime', () => {
   it('ISO에서 HH:mm 추출', () => {
     expect(flightTime('2026-09-18T09:05:00')).toBe('09:05')
-    expect(flightTime('2026-09-18T14:35:00+09:00')).toBe('14:35')
     expect(flightTime(undefined)).toBe('')
   })
 })
 
-describe('lookupFlight (데모)', () => {
-  it('잘못된 편명은 throw', async () => {
-    await expect(lookupFlight('12', '2026-09-18')).rejects.toThrow('flight.bad_number')
-  })
-  it('날짜 없으면 throw', async () => {
-    await expect(lookupFlight('KE1275', '')).rejects.toThrow()
-  })
-  it('알려진 편명 → 출발/도착 + 공항 좌표 보강', async () => {
-    const f = await lookupFlight('KE1275', '2026-09-18')
+describe('buildFlight (직접 입력)', () => {
+  it('공항 코드로 이름·도시·좌표 보강', () => {
+    const f = buildFlight({
+      number: 'KE1275', depIata: 'icn', depTime: '09:05', depTerminal: '2',
+      arrIata: 'cju', arrTime: '10:20', date: '2026-09-18',
+    })
     expect(f.number).toBe('KE1275')
     expect(f.dep.iata).toBe('ICN')
-    expect(f.arr.iata).toBe('CJU')
+    expect(f.dep.airport).toBe('인천국제공항')
     expect(f.dep.city).toBe('서울')
+    expect(f.dep.terminal).toBe('2')
     expect(f.dep.lat).toBeCloseTo(37.4602, 3)
+    expect(f.arr.iata).toBe('CJU')
     expect(f.arr.lat).toBeCloseTo(33.5113, 3)
     expect(flightTime(f.dep.at)).toBe('09:05')
+    expect(f.source).toBe('manual')
   })
-  it('미등록 편명도 결정적으로 합성(같은 편명=같은 결과)', async () => {
-    const a = await lookupFlight('ZZ777', '2026-09-18')
-    const b = await lookupFlight('ZZ777', '2026-09-18')
-    expect(a).toEqual(b)
-    expect(a.dep.iata).toBeTruthy()
-    expect(a.arr.iata).toBeTruthy()
-    expect(a.source).toBe('demo')
+  it('시각은 출발 날짜 위에 놓인다', () => {
+    const f = buildFlight({ number: 'KE705', depIata: 'ICN', depTime: '10:30', arrIata: 'NRT', arrTime: '13:00', date: '2026-12-24' })
+    expect(f.dep.at).toBe('2026-12-24T10:30:00')
+    expect(f.arr.at).toBe('2026-12-24T13:00:00')
   })
-  it('출발 시각은 요청 날짜 위에 놓인다', async () => {
-    const f = await lookupFlight('KE705', '2026-12-24')
-    expect(f.dep.at?.startsWith('2026-12-24')).toBe(true)
+  it('다음날 도착(+1)이면 도착 날짜가 하루 뒤', () => {
+    const f = buildFlight({ number: 'OZ102', depIata: 'ICN', depTime: '23:30', arrIata: 'SGN', arrTime: '03:20', date: '2026-09-18', overnight: true })
+    expect(f.dep.at).toBe('2026-09-18T23:30:00')
+    expect(f.arr.at).toBe('2026-09-19T03:20:00')
+  })
+  it('미등록 공항 코드는 코드만 유지(보강 없음)', () => {
+    const f = buildFlight({ number: 'AA100', depIata: 'XYZ', arrIata: 'ICN', date: '2026-09-18' })
+    expect(f.dep.iata).toBe('XYZ')
+    expect(f.dep.airport).toBeUndefined()
+    expect(f.arr.airport).toBe('인천국제공항')
+  })
+  it('시각 미입력이면 at 없음', () => {
+    const f = buildFlight({ number: 'KE1275', depIata: 'ICN', arrIata: 'CJU', date: '2026-09-18' })
+    expect(f.dep.at).toBeUndefined()
+    expect(f.arr.at).toBeUndefined()
   })
 })

@@ -45,11 +45,6 @@ export function FlightRoute({ flight, compact }: { flight: FlightInfo; compact?:
           nextDay={overnight ? '+1' : undefined}
         />
       </div>
-      {flight.source === 'demo' && (
-        <p className="dl-mono mt-2 text-center text-[10px] text-muted-soft">
-          데모 데이터 · 실제 시각 아님
-        </p>
-      )}
     </div>
   )
 }
