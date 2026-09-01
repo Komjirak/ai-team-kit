@@ -105,12 +105,30 @@ function parseGeoJson(json: any): ImportItem[] {
     const loc = p.location ?? {}
     const name = loc.name || p.Title || p.title || p.name || loc.address || ''
     if (!name) continue
+
+    // 좌표: GeoJSON geometry([lng,lat])가 정본. 없으면 google_maps_url에서 보강.
     const coords = f?.geometry?.coordinates
+    let lng = Array.isArray(coords) ? Number(coords[0]) : undefined
+    let lat = Array.isArray(coords) ? Number(coords[1]) : undefined
+    const mapUrl: string | undefined =
+      p['Google Maps URL'] || p.google_maps_url || p.googleMapsUrl || p.url || loc.url
+    if ((lat == null || Number.isNaN(lat)) && mapUrl) {
+      const parsed = parseMapsUrl(String(mapUrl))
+      if (parsed?.lat != null) {
+        lat = parsed.lat
+        lng = parsed.lng
+      }
+    }
+
+    // 주소가 비었거나 URL이면 주소로 쓰지 않는다.
+    let address = (loc.address || p.address || '').toString().trim()
+    if (!address || isMapLink(address)) address = ''
+
     out.push({
       name: String(name).trim(),
-      address: (loc.address || p.address || '').toString().trim() || undefined,
-      lng: Array.isArray(coords) ? Number(coords[0]) : undefined,
-      lat: Array.isArray(coords) ? Number(coords[1]) : undefined,
+      address: address || undefined,
+      lng: lng != null && !Number.isNaN(lng) ? lng : undefined,
+      lat: lat != null && !Number.isNaN(lat) ? lat : undefined,
     })
   }
   return dedupe(out)

@@ -1,6 +1,45 @@
 import { describe, it, expect } from 'vitest'
 import { parseMapsUrl, extractMapLinks, isShortMapLink, isMapLink, parseImport } from './importParse'
 
+describe('parseImport — GeoJSON(Saved Places.json)은 좌표를 파일에서 그대로', () => {
+  it('geometry 좌표 + location 이름/주소', () => {
+    const geo = JSON.stringify({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [139.767, 35.6812] },
+          properties: {
+            google_maps_url: 'https://www.google.com/maps/place/x',
+            location: { name: '도쿄역', address: '일본 도쿄도 지요다구' },
+          },
+        },
+      ],
+    })
+    const items = parseImport(geo)
+    expect(items).toHaveLength(1)
+    expect(items[0].name).toBe('도쿄역')
+    expect(items[0].address).toBe('일본 도쿄도 지요다구')
+    expect(items[0].lat).toBeCloseTo(35.6812, 3)
+    expect(items[0].lng).toBeCloseTo(139.767, 3)
+  })
+  it('geometry가 없으면 google_maps_url에서 좌표 보강', () => {
+    const geo = JSON.stringify({
+      features: [
+        {
+          properties: {
+            google_maps_url: 'https://www.google.com/maps/place/y/@35.6595,139.7005,17z',
+            location: { name: '시부야' },
+          },
+        },
+      ],
+    })
+    const items = parseImport(geo)
+    expect(items[0].lat).toBeCloseTo(35.6595, 3)
+    expect(items[0].lng).toBeCloseTo(139.7005, 3)
+  })
+})
+
 describe('parseImport — URL이 주소로 새지 않음', () => {
   it('헤더 없는 줄에서도 URL은 주소에서 제외, 좌표만 추출', () => {
     const items = parseImport('스타벅스 시부야,,"https://www.google.com/maps/place/x/@35.6595,139.7005,17z"')
