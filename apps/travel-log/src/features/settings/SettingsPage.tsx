@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/basics'
 import { Avatar } from '../../components/layout/Header'
 import { Washi } from '../../components/ui/deco'
 import { useToast } from '../../components/ui/Toast'
-import { BRAND } from '../../components/layout/nav'
+import { BRAND, SLOGAN, joinUrl } from '../../components/layout/nav'
 import { PushSettings } from './PushSettings'
 import { CalendarExport } from './CalendarExport'
 
@@ -53,11 +53,42 @@ export function SettingsPage() {
       toast.show('코드를 길게 눌러 복사해 주세요.')
     }
   }
-  function shareCode() {
+
+  // 친구가 그대로 따라오면 되는 초대 메시지 — 링크·코드·순서를 한눈에.
+  function inviteMessage(): string {
+    if (!activeTrip) return ''
+    const link = joinUrl(activeTrip.inviteCode)
+    return [
+      `✈️ ‘${activeTrip.title}’ 여행에 초대할게!`,
+      `${BRAND} — ${SLOGAN}`,
+      '일정·장소·가계부·추억을 같이 기록해요.',
+      '',
+      '👇 이렇게 들어오면 돼',
+      '1. 아래 링크 열기',
+      '2. 구글로 로그인',
+      `3. 초대코드 ${activeTrip.inviteCode} (링크로 열면 자동 입력) → 합류!`,
+      '',
+      link,
+    ].join('\n')
+  }
+
+  async function shareCode() {
     if (!activeTrip) return
-    const text = `${BRAND} — ‘${activeTrip.title}’ 여행 초대코드: ${activeTrip.inviteCode}`
-    if (navigator.share) navigator.share({ text }).catch(() => {})
-    else copyCode()
+    const text = inviteMessage()
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${BRAND} 여행 초대`, text })
+        return
+      } catch {
+        /* 사용자가 취소했거나 미지원 → 복사로 폴백 */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.show('초대 메시지를 복사했어요. 붙여넣어 보내주세요.')
+    } catch {
+      toast.show('메시지를 길게 눌러 복사해 주세요.')
+    }
   }
 
   const dateInvalid = !!startDate && !!endDate && endDate < startDate
@@ -114,7 +145,10 @@ export function SettingsPage() {
       <section className="dl-card relative p-5">
         <Washi color="yellow" className="left-6 -top-2" rotate={-3} />
         <p className="dl-mono text-xs font-bold tracking-wider text-muted">여행 초대코드</p>
-        <p className="mt-1 text-sm text-muted">이 코드를 친구에게 보내면 여행에 합류할 수 있어요.</p>
+        <p className="mt-1 text-sm text-muted">
+          <b className="text-ink">공유</b>를 누르면 링크·코드·따라오는 순서가 담긴 초대 메시지를 보낼 수 있어요.
+          친구는 링크만 열면 코드가 자동으로 채워져요.
+        </p>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <span className="dl-mono select-all rounded-2xl bg-primary-soft px-5 py-3 text-2xl font-bold tracking-[0.2em] text-primary">
             {activeTrip.inviteCode}

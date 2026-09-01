@@ -1,6 +1,8 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import { TripProvider, useTrip } from './trip/TripContext'
+import { CreateTripSheet } from './features/trips/CreateTripSheet'
 import { AppShell } from './components/layout/AppShell'
 import { Spinner } from './components/ui/basics'
 import { Icon } from './components/ui/Icon'
@@ -28,25 +30,68 @@ function Splash({ label }: { label?: string }) {
   )
 }
 
+/**
+ * 초대 딥링크(?join=CODE) 처리 — 로그인 후 어디에 있든 코드가 채워진 합류 창을 띄운다.
+ * 활성 여행 유무와 상관없이 동작하고, 처리 후 URL에서 join 파라미터를 지운다.
+ */
+function JoinIntent() {
+  const [params, setParams] = useSearchParams()
+  const { setActiveTrip } = useTrip()
+  const code = (params.get('join') ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (code.length >= 4) setOpen(true)
+  }, [code])
+
+  if (!code) return null
+
+  function clear() {
+    setOpen(false)
+    const next = new URLSearchParams(params)
+    next.delete('join')
+    setParams(next, { replace: true })
+  }
+
+  return (
+    <CreateTripSheet
+      open={open}
+      onClose={clear}
+      onDone={(id) => {
+        setActiveTrip(id)
+        clear()
+      }}
+      initialMode="join"
+      initialCode={code}
+    />
+  )
+}
+
 /** Routes available once signed in AND an active trip is chosen. */
 function TripRoutes() {
   const { tripsLoading, activeTrip } = useTrip()
   if (tripsLoading) return <Splash label="여행을 불러오는 중" />
-  if (!activeTrip) return <TripPicker />
 
   return (
-    <AppShell>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/schedule" element={<SchedulePage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/expenses" element={<ExpensesPage />} />
-        <Route path="/memories" element={<MemoriesPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppShell>
+    <>
+      <JoinIntent />
+      {!activeTrip ? (
+        <TripPicker />
+      ) : (
+        <AppShell>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/expenses" element={<ExpensesPage />} />
+            <Route path="/memories" element={<MemoriesPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppShell>
+      )}
+    </>
   )
 }
 

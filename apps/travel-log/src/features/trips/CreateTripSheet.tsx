@@ -20,11 +20,13 @@ export function CreateTripSheet({
   onClose,
   onDone,
   initialMode = 'create',
+  initialCode = '',
 }: {
   open: boolean
   onClose: () => void
   onDone: (tripId: string) => void
   initialMode?: 'create' | 'join'
+  initialCode?: string
 }) {
   const { user } = useAuth()
   const [mode, setMode] = useState<'create' | 'join'>(initialMode)
@@ -43,10 +45,10 @@ export function CreateTripSheet({
       setDestination('')
       setStartDate('')
       setEndDate('')
-      setCode('')
+      setCode(initialCode.toUpperCase().slice(0, 6))
       setError(null)
     }
-  }, [open, initialMode])
+  }, [open, initialMode, initialCode])
 
   async function create() {
     if (!user || !title.trim()) return

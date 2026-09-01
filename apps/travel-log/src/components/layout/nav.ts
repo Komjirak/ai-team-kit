@@ -17,3 +17,8 @@ export const TABS: Tab[] = [
 // 확정 이름(BRAND.md · PO 확정 2026-08-31): 간직.log
 export const BRAND = '간직.log'
 export const SLOGAN = '친구와 함께 남기는 여행'
+
+// 공유용 정식 도메인 — 미리보기/로컬에서 공유해도 친구는 항상 배포 사이트로 온다.
+export const SITE_URL = 'https://ganjik-log.komjirak.studio'
+/** 초대 딥링크: 열면 코드가 자동 입력된 합류 창이 뜬다(?join=CODE). */
+export const joinUrl = (code: string) => `${SITE_URL}/?join=${encodeURIComponent(code)}`
