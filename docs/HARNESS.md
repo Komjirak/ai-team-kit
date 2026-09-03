@@ -33,11 +33,19 @@ PRD·브랜딩·디자인·기술구조)을 **0→1 기능 사이클**(BD→PM/B
 | `BRAND.md` | BRAND | 9.1 | 이름·톤·인터뷰어·컬러 |
 | `DESIGN_STRATEGY.md` | PD | 9.x | 토큰·컴포넌트·접근성 |
 | `QA_REVIEW.md` | QA | — | **조건부 통과** → F1~F5 이 세션에서 닫음 |
+| `GTM_STRATEGY.md` | GROWTH | 9.3 | 감성 마케팅 + **개발 그린라이트 트리거**(랜딩 전환→G1) |
 
 **⚠️ 봉합한 전제 하나 — 부모 답변 채널.** BD는 "앱=V2, 웹 우선"인데 TL/PM/PD는
 **부모 네이티브 앱을 V1 작업 가정**(권고 B′)으로 잡았다. 카톡 인앱 브라우저 녹음이
 막혀 웹 마이크 신뢰도가 **V0 실측 전**이기 때문. **PRD §10-A의 PO 결정 1순위**이고,
 영향받는 절에 `〔가정: 채널〕` 태그가 달려 있다 — 뒤집히면 그 절만 고친다.
+
+✅ **2026-09-03 — GROWTH 감성 마케팅 전략 추가(`GTM_STRATEGY.md`).** PO가 감정 레버를
+정정했다: 척추는 "뒤늦은 후회 예방"이 **아니라** **"오늘의 따뜻함·자녀↔부모 상호 감동·
+마음 쏟을 소통 장치"**(감동으로 당긴다, 후회로 밀지 않는다). BRAND 안티무드 A3(죄책감)·
+A5(눈물)와 정합. **설득 포인트를 개발 트리거로**: 가짜 문 랜딩 2주 → 사전예약 **≥3%면
+개발 GO(BD G1) · <1.5%면 STOP(K1)**. 단 감동이 먹혀도 부모 지속(G2)·산출물(G3)이
+함께 서야 착수 — 랜딩 게이트는 G1 한 축이다. **랜딩 발행은 PO 승인**(대외, 미발송).
 
 **다음 세션이 챙길 것 (하루담)**
 ① **PO 판정 대기** — BUSINESS_CASE §9 + PRD §10: 착수 Go/보류 · 부모 답변 채널(앱/웹/전화) ·
@@ -184,7 +192,7 @@ PO 결정의 요약표. 전문은 `docs/DECISIONS.md`.
 - `docs/DECISIONS.md` — PO 결정 로그
 - `docs/PLAYBOOKS/` — 심사 대응 · OTA/빌드 · 결제 · 디버깅 원칙
 - `apps/harudam/docs/` — **하루담 기획 7종**: BUSINESS_CASE·WTP_INTERVIEW·TECH_SPIKE·
-  ARCHITECTURE·PRD·BRAND·DESIGN_STRATEGY·QA_REVIEW (이 세션, PO 판정 대기)
+  ARCHITECTURE·PRD·BRAND·DESIGN_STRATEGY·GTM_STRATEGY·QA_REVIEW (이 세션, PO 판정 대기)
 - `apps/lectio/docs/BUSINESS_CASE.md` — 착수 판정·시장·경쟁·리스크 (오케스트레이터)
 - `apps/lectio/docs/PRD.md` — 렉시오 V1의 **단일 기준** 문서 (PD). 결정·구현 결과·
   확인 경로가 앞으로 전부 여기 쌓인다
